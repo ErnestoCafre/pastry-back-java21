@@ -40,4 +40,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Productos eliminados (papelera)
     @EntityGraph(attributePaths = { "category" })
     Page<Product> findByDeletedAtIsNotNull(Pageable pageable);
+
+    // ========== Queries para API pública (vitrina) ==========
+
+    // Productos visibles
+    @EntityGraph(attributePaths = { "category" })
+    Page<Product> findByVisibleTrueAndDeletedAtIsNull(Pageable pageable);
+
+    // Productos visibles por categoría
+    @EntityGraph(attributePaths = { "category" })
+    Page<Product> findByVisibleTrueAndCategoryIdAndDeletedAtIsNull(Long categoryId, Pageable pageable);
+
+    // Búsqueda por nombre en productos visibles
+    @EntityGraph(attributePaths = { "category" })
+    Page<Product> findByVisibleTrueAndNameContainingIgnoreCaseAndDeletedAtIsNull(String name, Pageable pageable);
+
+    // Producto visible por ID
+    @EntityGraph(attributePaths = { "category" })
+    Optional<Product> findByIdAndVisibleTrueAndDeletedAtIsNull(Long id);
 }
