@@ -38,7 +38,7 @@ Sistema backend para la gestión de una pastelería artesanal. Este proyecto es 
 │                     MALVA PASTRY SHOP                           │
 ├────────────────────────────┬────────────────────────────────────┤
 │   PANEL ADMIN              │   API PÚBLICA                      │
-│   (Thymeleaf + Sesión)     │   (REST + JWT + OAuth Google)      │
+│   (Thymeleaf + Sesión)     │   (REST)                           │
 │   /login, /dashboard       │   /api/public/**                   │
 │   /products, /categories   │   Consumida por React              │
 ├────────────────────────────┴────────────────────────────────────┤
@@ -127,7 +127,7 @@ spring.datasource.password=tu_password
 
 ## Documentación
 
-📚 **Documentación Completa del Sistema:**
+**Documentación Completa del Sistema:**
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitectura del sistema, patrones de diseño, DDD
 
@@ -213,14 +213,18 @@ El sistema organiza entidades en contextos delimitados:
 
 ### ✅ Implementadas
 
-- ✅ Panel de administración completo (SSR con Thymeleaf)
-- ✅ CRUD de Productos, Categorías, Tags, Ingredientes
-- ✅ Sistema de etiquetas con slugs
-- ✅ Soft-delete con capacidad de restauración
-- ✅ Gestión de recetas (Product-Ingredient)
-- ✅ Autenticación basada en roles (ADMIN, EMPLOYEE)
-- ✅ Arquitectura DDD con separación de contextos
-- ✅ Entidades base con timestamps y auditoría
+- Panel de administración completo (SSR con Thymeleaf)
+- CRUD de Productos, Categorías, Tags, Ingredientes
+- Sistema de etiquetas con slugs
+- Soft-delete con capacidad de restauración
+- Soft-delete con capacidad de restauración
+- Gestión de recetas (Product-Ingredient)
+- Gestión de Ventas (Registro y Snapshot de precios)
+- API Pública para Catálogo (Productos, Secciones, Categorías)
+- Autenticación híbrida (Form Login + Google OAuth2 Support)
+- Autenticación basada en roles (ADMIN, EMPLOYEE)
+- Arquitectura DDD con separación de contextos
+- Entidades base con timestamps y auditoría
 
 
 ---
@@ -233,8 +237,6 @@ El sistema organiza entidades en contextos delimitados:
 - Roles: `ADMIN`, `EMPLOYEE`
 
 ### API Pública (REST)
-- Autenticación JWT
-- OAuth 2.0 con Google
-- Endpoints públicos y protegidos
+- Endpoints públicos
 
 ---

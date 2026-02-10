@@ -1,4 +1,4 @@
-package com.malva_pastry_shop.backend.domain.storefront;
+package com.malva_pastry_shop.backend.domain.inventory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.common.SoftDeletableEntity;
-import com.malva_pastry_shop.backend.domain.inventory.Category;
-import com.malva_pastry_shop.backend.domain.inventory.ProductIngredient;
+import com.malva_pastry_shop.backend.domain.storefront.ProductTag;
+import com.malva_pastry_shop.backend.domain.storefront.StorefrontSectionProduct;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

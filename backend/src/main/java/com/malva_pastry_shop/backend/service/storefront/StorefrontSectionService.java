@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.malva_pastry_shop.backend.domain.auth.User;
-import com.malva_pastry_shop.backend.domain.storefront.Product;
+import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSection;
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSectionProduct;
 import com.malva_pastry_shop.backend.dto.request.StorefrontSectionRequest;

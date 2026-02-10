@@ -1,7 +1,7 @@
 package com.malva_pastry_shop.backend.domain.publicuser;
 
 import com.malva_pastry_shop.backend.domain.common.TimestampedEntity;
-import com.malva_pastry_shop.backend.domain.storefront.Product;
+import com.malva_pastry_shop.backend.domain.inventory.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;

@@ -13,7 +13,7 @@ import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.ProductIngredient;
 import com.malva_pastry_shop.backend.domain.sales.Sale;
 import com.malva_pastry_shop.backend.domain.sales.SaleIngredient;
-import com.malva_pastry_shop.backend.domain.storefront.Product;
+import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.dto.request.SaleRequest;
 import com.malva_pastry_shop.backend.repository.SaleIngredientRepository;
 import com.malva_pastry_shop.backend.repository.SaleRepository;
@@ -176,7 +176,8 @@ public class SaleService {
 
     // ========== Filtros Combinados ==========
 
-    public Page<Sale> findByProductNameAndDateRange(String productName, LocalDateTime start, LocalDateTime end, Pageable pageable) {
+    public Page<Sale> findByProductNameAndDateRange(String productName, LocalDateTime start, LocalDateTime end,
+            Pageable pageable) {
         return saleRepository.findByProductNameAndDateRange(productName, start, end, pageable);
     }
 
@@ -211,7 +212,8 @@ public class SaleService {
         return saleRepository.sumTotalAmountByProductNameContaining(productName);
     }
 
-    public BigDecimal sumTotalAmountByProductNameAndDateRange(String productName, LocalDateTime start, LocalDateTime end) {
+    public BigDecimal sumTotalAmountByProductNameAndDateRange(String productName, LocalDateTime start,
+            LocalDateTime end) {
         return saleRepository.sumTotalAmountByProductNameAndDateRange(productName, start, end);
     }
 }

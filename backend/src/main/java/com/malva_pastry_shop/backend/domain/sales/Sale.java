@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.common.TimestampedEntity;
-import com.malva_pastry_shop.backend.domain.storefront.Product;
+import com.malva_pastry_shop.backend.domain.inventory.Product;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

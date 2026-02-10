@@ -5,7 +5,7 @@ import com.malva_pastry_shop.backend.domain.auth.RoleType;
 import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.Category;
 import com.malva_pastry_shop.backend.domain.inventory.Ingredient;
-import com.malva_pastry_shop.backend.domain.storefront.Product;
+import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.domain.storefront.ProductTag;
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSection;
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSectionProduct;

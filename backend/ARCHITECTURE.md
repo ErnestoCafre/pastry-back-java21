@@ -5,7 +5,7 @@ This document describes the system architecture, design patterns, and architectu
 
 **Architecture Style:** Layered + Domain-Driven Design (DDD)  
 **Deployment:** Monolithic Spring Boot application  
-**Future:** Dual-channel (Admin SSR + Public REST API)
+**Strategy:** Dual-channel (Admin SSR + Public REST API)
 
 ---
 
@@ -31,11 +31,12 @@ graph TB
     
     subgraph "Backend - Spring Boot"
         B1[Admin Controllers<br/>@Controller]
-        B2[API Controllers<br/>@RestController<br/>Future]
+        B2[API Controllers<br/>@RestController]
         
         C1[Storefront Services]
         C2[Inventory Services]
-        C3[User Service]
+        C3[Sales Services]
+        C4[User Service]
         
         D1[JPA Repositories]
         
@@ -52,12 +53,14 @@ graph TB
     B1 --> C1
     B1 --> C2
     B1 --> C3
+    B1 --> C4
     B2 --> C1
-    B2 --> C3
+    B2 --> C2
     
     C1 --> D1
     C2 --> D1
     C3 --> D1
+    C4 --> D1
     
     D1 --> E1
     E1 -.JPA/Hibernate.-> F1
@@ -77,65 +80,81 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "Storefront Context (Public)"
-        ST1[Product]
-        ST2[Category]
+    subgraph "Inventory Context (Core)"
+        IN1[Product]
+        IN2[Category]
+        IN3[Ingredient]
+        IN4[ProductIngredient]
+        IN5[UnitOfMeasure]
+    end
+
+    subgraph "Storefront Context (Public Display)"
+        ST1[StorefrontSection]
+        ST2[StorefrontSectionProduct]
         ST3[Tag]
         ST4[ProductTag]
-    end
-    
-    subgraph "Inventory Context (Internal)"
-        IN1[Ingredient]
-        IN2[ProductIngredient]
-        IN3[UnitOfMeasure]
     end
     
     subgraph "Auth Context (Shared)"
         AU1[User]
         AU2[Role]
     end
+
+    subgraph "Sales Context (Transactions)"
+        SA1[Sale]
+        SA2[SaleIngredient]
+    end
     
-    ST1 -.recipe.-> IN2
-    IN2 --> IN1
-    ST1 --> ST4
+    IN1 -.recipe.-> IN4
+    IN4 --> IN3
+    IN1 --> IN2
+    ST2 --> IN1
+    ST2 --> ST1
+    ST4 --> IN1
     ST4 --> ST3
-    ST1 -.created by.-> AU1
+    SA1 --> IN1
+    IN1 -.created by.-> AU1
     
+    style IN1 fill:#f8d7da
+    style IN2 fill:#f8d7da
+    style IN3 fill:#f8d7da
+    style IN4 fill:#f8d7da
+    style IN5 fill:#f8d7da
     style ST1 fill:#d1ecf1
     style ST2 fill:#d1ecf1
     style ST3 fill:#d1ecf1
     style ST4 fill:#d1ecf1
-    style IN1 fill:#f8d7da
-    style IN2 fill:#f8d7da
-    style IN3 fill:#f8d7da
     style AU1 fill:#fff3cd
     style AU2 fill:#fff3cd
+    style SA1 fill:#e2e3e5
+    style SA2 fill:#e2e3e5
 ```
 
 ### Bounded Contexts
 
-#### 1. Storefront Context (Public-Facing)
-**Purpose:** Customer-facing product catalog  
-**Entities:** Product, Category, Tag, ProductTag  
-**Services:** ProductService, CategoryService, TagService  
-**Exposure:** Will be exposed via REST API to React frontend
+#### 1. Inventory Context (Core)
+**Purpose:** Product catalog, recipes, and cost management  
+**Entities:** Product, Category, Ingredient, ProductIngredient, UnitOfMeasure  
+**Services:** ProductService, CategoryService, IngredientService  
+**Exposure:** Admin panel + selected data exposed via REST API
 
 **Business Rules:**
-- Products have categories and tags for organization/filtering
+- Products have categories for internal organization
 - Products implement soft-delete (can be restored)
-- Tags have URL-friendly slugs
-- Cannot delete tag if in use by products
-
-#### 2. Inventory Context (Internal Operations)
-**Purpose:** Internal production, recipes, and cost management  
-**Entities:** Ingredient, ProductIngredient, UnitOfMeasure  
-**Services:** IngredientService  
-**Exposure:** Internal only, not exposed to public API
-
-**Business Rules:**
 - Ingredients track unit costs for profit analysis
 - ProductIngredient defines recipes (quantity of each ingredient)
-- Soft-delete prevents accidental data loss
+
+#### 2. Storefront Context (Public Display)
+**Purpose:** Controls which products and content are displayed on the public frontend  
+**Entities:** StorefrontSection, StorefrontSectionProduct, Tag, ProductTag  
+**Services:** StorefrontSectionService, TagService  
+**Exposure:** Exposed via REST API to React frontend
+
+**Business Rules:**
+- StorefrontSections group products for public display
+- StorefrontSectionProduct links products to sections with display ordering
+- Tags have URL-friendly slugs for filtering
+- Cannot delete tag if in use by products
 
 #### 3. Auth Context (Shared)
 **Purpose:** Authentication and authorization  
@@ -147,20 +166,37 @@ graph LR
 - Role-based access control (ADMIN, EMPLOYEE)
 - BCrypt password hashing
 - Session-based authentication for admin panel
-- Future: JWT for public API
+
+#### 4. Sales Context (Transactions)
+**Purpose:** Record taking and sales history  
+**Entities:** Sale, SaleIngredient  
+**Services:** SaleService  
+**Exposure:** Admin/Employee internal use
+
+**Business Rules:**
+- Sales snapshot product data (name, price) at moment of sale
+- Tracks ingredients used per sale
 
 ### Cross-Context Relationships
 
 ```mermaid
 graph LR
-    A[Product<br/>Storefront] -->|has recipe| B[ProductIngredient<br/>Inventory]
+    A[Product<br/>Inventory] -->|has recipe| B[ProductIngredient<br/>Inventory]
     B --> C[Ingredient<br/>Inventory]
+    A -->|displayed in| E[StorefrontSectionProduct<br/>Storefront]
+    E --> F[StorefrontSection<br/>Storefront]
+    A -->|tagged via| G[ProductTag<br/>Storefront]
+    G --> H[Tag<br/>Storefront]
     A -->|created by| D[User<br/>Auth]
     
-    style A fill:#d1ecf1
+    style A fill:#f8d7da
     style B fill:#f8d7da
     style C fill:#f8d7da
     style D fill:#fff3cd
+    style E fill:#d1ecf1
+    style F fill:#d1ecf1
+    style G fill:#d1ecf1
+    style H fill:#d1ecf1
 ```
 
 ---
@@ -254,10 +290,11 @@ com.malva_pastry_shop.backend/
 │       └── admin/              # Internal reports
 │
 ├── domain/                     # Domain
-│   ├── storefront/             # Public entities
-│   ├── inventory/              # Internal entities
-│   ├── auth/                   # User/Role
-│   └── common/                 # Base classes
+│   ├── inventory/              # Product, Category, Ingredient, ProductIngredient, UnitOfMeasure
+│   ├── storefront/             # StorefrontSection, StorefrontSectionProduct, Tag, ProductTag
+│   ├── sales/                  # Sale, SaleIngredient
+│   ├── auth/                   # User, Role, RoleType
+│   └── common/                 # Base classes (TimestampedEntity, SoftDeletableEntity)
 │
 ├── repository/                 # Infrastructure
 ├── config/                     # Configuration
@@ -308,17 +345,17 @@ graph LR
 
 ## API Strategy
 
-### Current: Server-Side Rendering (SSR)
+### Admin Panel (SSR)
 - **Technology:** Thymeleaf
-- **Audience:** Admin users
-- **Authentication:** Session-based
-- **URL Pattern:** `/products`, `/categories`, etc.
+- **Audience:** Admin/Employee users
+- **Authentication:** Session-based (Spring Security)
+- **URL Pattern:** `/products`, `/categories`, `/sales`, `/sections`, etc.
 
-### Future: REST API
+### Public API (REST)
 - **Technology:** Spring REST + JSON
 - **Audience:** React frontend (customers)
-- **Authentication:** JWT (planned)
-- **URL Pattern:** `/api/products`, `/api/categories`
+- **Authentication:** None (public read-only)
+- **URL Pattern:** `/api/v1/products`, `/api/v1/sections`, `/api/v1/categories`, `/api/v1/tags`
 
 
 ## Technology Stack Alignment
@@ -352,16 +389,17 @@ graph TB
 erDiagram
     users ||--o{ products : "creates"
     users }o--|| roles : "has"
-    users ||--o{ products_deleted : "soft_deletes"
-    users ||--o{ tags_deleted : "soft_deletes"
-    users ||--o{ categories_deleted : "soft_deletes"
-    users ||--o{ ingredients_deleted : "soft_deletes"
     
     categories ||--o{ products : "categorizes"
     products ||--o{ product_ingredients : "contains"
     products ||--o{ product_tags : "tagged_with"
+    products ||--o{ storefront_section_products : "displayed_in"
+    products ||--o{ sales : "sold_as"
     ingredients ||--o{ product_ingredients : "used_in"
     tags ||--o{ product_tags : "applies_to"
+    storefront_sections ||--o{ storefront_section_products : "contains"
+    sales ||--o{ sale_ingredients : "uses"
+    ingredients ||--o{ sale_ingredients : "consumed_in"
     
     users {
         bigint id PK "Auto-increment"
@@ -399,7 +437,9 @@ erDiagram
         varchar_100 name "NOT NULL"
         text description
         integer preparation_days "≥ 0"
-        numeric_10_2 base_price "≥ 0.00"
+        varchar_500 image_url
+        numeric_12_2 base_price "≥ 0.00"
+        boolean visible "DEFAULT false"
         bigint user_id FK "→ users.id (creator)"
         bigint category_id FK "→ categories.id"
         timestamp inserted_at "DEFAULT now()"
@@ -447,5 +487,50 @@ erDiagram
         timestamp inserted_at "DEFAULT now()"
         timestamp updated_at "DEFAULT now()"
     }
-```
 
+    storefront_sections {
+        bigint id PK "Auto-increment"
+        varchar_100 name "NOT NULL"
+        text description
+        integer display_order
+        boolean visible "DEFAULT false"
+        timestamp inserted_at "DEFAULT now()"
+        timestamp updated_at "DEFAULT now()"
+        timestamp deleted_at "NULL = active"
+        bigint deleted_by_id FK "→ users.id"
+    }
+
+    storefront_section_products {
+        bigint id PK "Auto-increment"
+        bigint storefront_section_id FK "→ storefront_sections.id, NOT NULL"
+        bigint product_id FK "→ products.id, NOT NULL"
+        integer display_order
+        timestamp inserted_at "DEFAULT now()"
+        timestamp updated_at "DEFAULT now()"
+    }
+
+    sales {
+        bigint id PK "Auto-increment"
+        timestamp sale_date "NOT NULL"
+        bigint registered_by_id FK "→ users.id"
+        bigint product_id FK "→ products.id (nullable)"
+        varchar_100 product_name "Snapshot"
+        integer quantity "NOT NULL"
+        numeric_12_2 unit_price "Snapshot"
+        numeric_12_2 total_amount "Snapshot"
+        timestamp inserted_at "DEFAULT now()"
+        timestamp updated_at "DEFAULT now()"
+    }
+
+    sale_ingredients {
+        bigint id PK "Auto-increment"
+        bigint sale_id FK "→ sales.id, NOT NULL"
+        bigint ingredient_id FK "→ ingredients.id (nullable)"
+        varchar_100 ingredient_name "Snapshot"
+        numeric_14_4 quantity "NOT NULL"
+        numeric_12_2 unit_cost "Snapshot"
+        varchar_50 unit_of_measure "Snapshot"
+        timestamp inserted_at "DEFAULT now()"
+        timestamp updated_at "DEFAULT now()"
+    }
+```

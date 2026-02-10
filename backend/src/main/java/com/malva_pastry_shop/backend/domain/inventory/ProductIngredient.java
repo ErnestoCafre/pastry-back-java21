@@ -3,7 +3,6 @@ package com.malva_pastry_shop.backend.domain.inventory;
 import java.math.BigDecimal;
 
 import com.malva_pastry_shop.backend.domain.common.TimestampedEntity;
-import com.malva_pastry_shop.backend.domain.storefront.Product;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

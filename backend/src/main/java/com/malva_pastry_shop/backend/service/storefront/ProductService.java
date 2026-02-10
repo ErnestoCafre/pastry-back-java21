@@ -13,7 +13,7 @@ import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.Ingredient;
 import com.malva_pastry_shop.backend.domain.inventory.ProductIngredient;
 import com.malva_pastry_shop.backend.domain.inventory.Category;
-import com.malva_pastry_shop.backend.domain.storefront.Product;
+import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.domain.storefront.ProductTag;
 import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.dto.request.ProductRequest;
@@ -396,7 +396,8 @@ public class ProductService {
         // Verificar que el producto existe
         findById(productId);
 
-        ProductIngredient productIngredient = productIngredientRepository.findByProductIdAndIngredientId(productId, ingredientId)
+        ProductIngredient productIngredient = productIngredientRepository
+                .findByProductIdAndIngredientId(productId, ingredientId)
                 .orElseThrow(() -> new EntityNotFoundException("El producto no tiene este ingrediente en su receta"));
 
         productIngredientRepository.delete(productIngredient);
@@ -414,7 +415,8 @@ public class ProductService {
             throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
         }
 
-        ProductIngredient productIngredient = productIngredientRepository.findByProductIdAndIngredientId(productId, ingredientId)
+        ProductIngredient productIngredient = productIngredientRepository
+                .findByProductIdAndIngredientId(productId, ingredientId)
                 .orElseThrow(() -> new EntityNotFoundException("El producto no tiene este ingrediente en su receta"));
 
         productIngredient.setQuantity(quantity);
