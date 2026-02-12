@@ -26,7 +26,7 @@ import com.malva_pastry_shop.backend.domain.sales.Sale;
 import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.dto.request.SaleRequest;
 import com.malva_pastry_shop.backend.service.sales.SaleService;
-import com.malva_pastry_shop.backend.service.storefront.ProductService;
+import com.malva_pastry_shop.backend.service.inventory.ProductService;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;

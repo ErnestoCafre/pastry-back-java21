@@ -18,7 +18,7 @@ import com.malva_pastry_shop.backend.dto.response.api.ApiPageResponse;
 import com.malva_pastry_shop.backend.dto.response.api.CategoryApiDTO;
 import com.malva_pastry_shop.backend.dto.response.api.ProductApiDTO;
 import com.malva_pastry_shop.backend.dto.response.api.TagApiDTO;
-import com.malva_pastry_shop.backend.service.storefront.ProductService;
+import com.malva_pastry_shop.backend.service.inventory.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
 

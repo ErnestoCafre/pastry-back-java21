@@ -18,7 +18,7 @@ import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.dto.request.ProductRequest;
 import com.malva_pastry_shop.backend.service.inventory.CategoryService;
-import com.malva_pastry_shop.backend.service.storefront.ProductService;
+import com.malva_pastry_shop.backend.service.inventory.ProductService;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -90,6 +90,7 @@ public class ProductController {
         try {
             Product product = productService.findById(id);
             model.addAttribute("product", product);
+            model.addAttribute("productTags", productService.getProductTags(id));
             model.addAttribute("pageTitle", product.getName());
             return "products/show";
         } catch (EntityNotFoundException e) {

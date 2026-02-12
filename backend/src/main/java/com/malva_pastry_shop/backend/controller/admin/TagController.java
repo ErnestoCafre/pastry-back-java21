@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.dto.request.TagRequest;
-import com.malva_pastry_shop.backend.service.storefront.ProductService;
+import com.malva_pastry_shop.backend.service.inventory.ProductService;
 import com.malva_pastry_shop.backend.service.storefront.TagService;
 
 import jakarta.persistence.EntityNotFoundException;

@@ -8,7 +8,7 @@ import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.service.inventory.IngredientService;
 import com.malva_pastry_shop.backend.service.sales.SaleService;
 import com.malva_pastry_shop.backend.service.inventory.CategoryService;
-import com.malva_pastry_shop.backend.service.storefront.ProductService;
+import com.malva_pastry_shop.backend.service.inventory.ProductService;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
