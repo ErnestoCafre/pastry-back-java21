@@ -55,6 +55,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @EntityGraph(attributePaths = { "category" })
     Page<Product> findByVisibleTrueAndNameContainingIgnoreCaseAndDeletedAtIsNull(String name, Pageable pageable);
 
+    // Búsqueda por nombre y categoría en productos visibles
+    @EntityGraph(attributePaths = { "category" })
+    Page<Product> findByVisibleTrueAndNameContainingIgnoreCaseAndCategoryIdAndDeletedAtIsNull(
+            String name, Long categoryId, Pageable pageable);
+
     // Producto visible por ID
     @EntityGraph(attributePaths = { "category" })
     Optional<Product> findByIdAndVisibleTrueAndDeletedAtIsNull(Long id);
