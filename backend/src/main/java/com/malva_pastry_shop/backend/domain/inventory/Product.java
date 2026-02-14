@@ -102,9 +102,10 @@ public class Product extends SoftDeletableEntity {
 
     /**
      * Relacion con Secciones de la Vitrina.
-     * Cascade ALL + orphanRemoval para gestion automatica del ciclo de vida.
+     * Solo cascade REMOVE para limpiar registros al eliminar producto.
+     * La gestion de asociaciones se hace via StorefrontSectionProductRepository.
      */
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     @OrderBy("displayOrder ASC")
     private List<StorefrontSectionProduct> sectionProducts = new ArrayList<>();
 

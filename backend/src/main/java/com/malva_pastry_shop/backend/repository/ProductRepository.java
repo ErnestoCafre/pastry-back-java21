@@ -24,8 +24,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @EntityGraph(attributePaths = { "category" })
     Page<Product> findByNameContainingIgnoreCaseAndDeletedAtIsNull(String name, Pageable pageable);
 
-    // Producto activo por ID
-    @EntityGraph(attributePaths = { "category" })
+    // Producto activo por ID (incluye category y createdBy para vista de detalle)
+    @EntityGraph(attributePaths = { "category", "createdBy" })
     Optional<Product> findByIdAndDeletedAtIsNull(Long id);
 
     // Contar productos por categoria
