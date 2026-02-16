@@ -11,6 +11,7 @@ import com.malva_pastry_shop.backend.dto.response.api.TagApiDTO;
 import com.malva_pastry_shop.backend.service.storefront.TagService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -19,7 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @RestController
 @RequestMapping("/api/v1/tags")
-@Tag(name = "Tags", description = "Tags de productos")
+@Tag(name = "Tags", description = "Etiquetas de productos")
 public class TagApiController {
 
     private final TagService tagService;
@@ -28,12 +29,9 @@ public class TagApiController {
         this.tagService = tagService;
     }
 
-    /**
-     * Lista todos los tags activos.
-     * No usa paginación ya que normalmente hay pocos tags.
-     */
     @GetMapping
     @Operation(summary = "Listar tags", description = "Obtiene todos los tags activos ordenados por nombre")
+    @ApiResponse(responseCode = "200", description = "Lista de tags")
     public ResponseEntity<List<TagApiDTO>> listTags() {
         List<TagApiDTO> tags = tagService.findAllForSelect().stream()
                 .map(t -> new TagApiDTO(t.getId(), t.getName(), t.getSlug(), t.getDescription()))

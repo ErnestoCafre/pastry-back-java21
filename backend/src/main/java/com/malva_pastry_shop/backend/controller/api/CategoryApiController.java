@@ -13,9 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.malva_pastry_shop.backend.domain.inventory.Category;
 import com.malva_pastry_shop.backend.dto.response.api.ApiPageResponse;
 import com.malva_pastry_shop.backend.dto.response.api.CategoryApiDTO;
+import com.malva_pastry_shop.backend.dto.response.api.ErrorResponse;
 import com.malva_pastry_shop.backend.service.inventory.CategoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -33,11 +38,9 @@ public class CategoryApiController {
         this.categoryService = categoryService;
     }
 
-    /**
-     * Lista categorías activas con paginación.
-     */
     @GetMapping
     @Operation(summary = "Listar categorías", description = "Obtiene categorías activas con paginación")
+    @ApiResponse(responseCode = "200", description = "Lista paginada de categorías")
     public ResponseEntity<ApiPageResponse<CategoryApiDTO>> listCategories(
             @PageableDefault(size = 20, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
 
@@ -47,12 +50,14 @@ public class CategoryApiController {
         return ResponseEntity.ok(ApiPageResponse.from(page));
     }
 
-    /**
-     * Obtiene el detalle de una categoría por ID.
-     */
     @GetMapping("/{id}")
-    @Operation(summary = "Detalle de categoría", description = "Obtiene una categoría por su ID")
-    public ResponseEntity<CategoryApiDTO> getCategory(@PathVariable Long id) {
+    @Operation(summary = "Detalle de categoría", description = "Obtiene una categoría activa por su ID")
+    @ApiResponse(responseCode = "200", description = "Categoría encontrada")
+    @ApiResponse(responseCode = "404", description = "Categoría no encontrada",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    public ResponseEntity<CategoryApiDTO> getCategory(
+            @Parameter(description = "ID de la categoría", example = "1")
+            @PathVariable Long id) {
         Category category = categoryService.findById(id);
         return ResponseEntity.ok(new CategoryApiDTO(
                 category.getId(),

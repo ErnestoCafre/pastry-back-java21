@@ -16,11 +16,16 @@ import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.dto.response.api.ApiPageResponse;
 import com.malva_pastry_shop.backend.dto.response.api.CategoryApiDTO;
+import com.malva_pastry_shop.backend.dto.response.api.ErrorResponse;
 import com.malva_pastry_shop.backend.dto.response.api.ProductApiDTO;
 import com.malva_pastry_shop.backend.dto.response.api.TagApiDTO;
 import com.malva_pastry_shop.backend.service.inventory.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 /**
  * API REST pública para consultar productos visibles en la vitrina.
@@ -37,14 +42,13 @@ public class ProductApiController {
                 this.productService = productService;
         }
 
-        /**
-         * Lista productos visibles con paginación.
-         * Ordenados por displayOrder (nulls last) y luego por nombre.
-         */
         @GetMapping
-        @Operation(summary = "Listar productos", description = "Obtiene productos visibles ordenados por prioridad")
+        @Operation(summary = "Listar productos", description = "Obtiene productos visibles con paginación y filtros opcionales por nombre y/o categoría")
+        @ApiResponse(responseCode = "200", description = "Lista paginada de productos")
         public ResponseEntity<ApiPageResponse<ProductApiDTO.Simple>> listProducts(
+                        @Parameter(description = "Filtrar por nombre (búsqueda parcial, case-insensitive)", example = "chocolate")
                         @RequestParam(required = false) String name,
+                        @Parameter(description = "Filtrar por ID de categoría", example = "1")
                         @RequestParam(required = false) Long categoryId,
                         @PageableDefault(size = 12, sort = "name") Pageable pageable) {
 
@@ -60,12 +64,14 @@ public class ProductApiController {
                 return ResponseEntity.ok(ApiPageResponse.from(dtoPage));
         }
 
-        /**
-         * Obtiene el detalle de un producto visible por ID.
-         */
         @GetMapping("/{id}")
         @Operation(summary = "Detalle de producto", description = "Obtiene un producto visible con su categoría y tags")
-        public ResponseEntity<ProductApiDTO> getProduct(@PathVariable Long id) {
+        @ApiResponse(responseCode = "200", description = "Producto encontrado")
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        public ResponseEntity<ProductApiDTO> getProduct(
+                        @Parameter(description = "ID del producto", example = "1")
+                        @PathVariable Long id) {
                 Product product = productService.findVisibleById(id);
                 List<Tag> tags = productService.getProductTags(id);
 
