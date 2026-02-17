@@ -1,5 +1,7 @@
 package com.malva_pastry_shop.backend.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,12 +22,21 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Malva Pastry Shop API")
                         .version("1.0.0")
-                        .description("API pública para consultar productos, categorías y tags de la pastelería")
+                        .description("API pública para consultar productos, categorías, tags y secciones de la pastelería")
                         .contact(new Contact()
                                 .name("Malva Pastry Shop")
                                 .email("contacto@malva.com")))
                 .addServersItem(new Server()
                         .url("/")
-                        .description("Servidor local"));
+                        .description("Servidor local"))
+                .tags(List.of(
+                        new io.swagger.v3.oas.models.tags.Tag()
+                                .name("Sections").description("Secciones de la vitrina"),
+                        new io.swagger.v3.oas.models.tags.Tag()
+                                .name("Products").description("Catálogo de productos"),
+                        new io.swagger.v3.oas.models.tags.Tag()
+                                .name("Categories").description("Categorías de productos"),
+                        new io.swagger.v3.oas.models.tags.Tag()
+                                .name("Tags").description("Etiquetas de productos")));
     }
 }
