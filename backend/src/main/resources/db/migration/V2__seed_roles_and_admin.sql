@@ -11,17 +11,13 @@ VALUES
     ('USER',     'Usuario básico del sistema',                          NOW(), NOW())
 ON CONFLICT (name) DO NOTHING;
 
--- Usuario administrador del sistema
--- IMPORTANTE: Reemplazar el password_hash antes del primer deploy.
--- Generar con BCryptPasswordEncoder (strength 12):
---   spring security: new BCryptPasswordEncoder(12).encode("TU_PASSWORD_SEGURO")
--- O con htpasswd: htpasswd -nbBC 12 "" TU_PASSWORD | tr -d ':\n' | sed 's/$2y/$2a/'
+-- Usuario administrador del sistema (demo: sysadmin123)
 INSERT INTO users (name, last_name, email, password_hash, enabled, system_admin, role_id, inserted_at, updated_at)
 SELECT
     'Administrador',
     'Sistema',
     'sysadmin@malva.com',
-    '$2a$12$REEMPLAZAR_CON_HASH_BCRYPT_REAL',
+    '$2a$10$98ow5cuvjd/mahLwVDL4hejQmnfBwZs4NTQDS6aJVBp8cD7J02ey.',
     TRUE,
     TRUE,
     r.id,
