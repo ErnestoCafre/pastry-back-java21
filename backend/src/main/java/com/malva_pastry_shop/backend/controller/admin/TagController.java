@@ -1,5 +1,8 @@
 package com.malva_pastry_shop.backend.controller.admin;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +61,13 @@ public class TagController {
         }
 
         model.addAttribute("tags", tags);
+
+        Map<Long, Long> productCounts = new HashMap<>();
+        for (Tag tag : tags.getContent()) {
+            productCounts.put(tag.getId(), productService.countProductsByTag(tag.getId()));
+        }
+        model.addAttribute("productCounts", productCounts);
+
         model.addAttribute("pageTitle", "Tags");
         return "tags/list";
     }
