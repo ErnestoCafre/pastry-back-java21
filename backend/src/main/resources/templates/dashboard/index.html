@@ -80,59 +80,113 @@
             </div>
         </div>
 
-        <!-- Navigation Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Card: Productos -->
-            <a th:href="@{/products}"
-               class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
-                <div class="text-4xl flex-shrink-0">🍰</div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Productos</h3>
-                    <p class="text-sm text-gray-500">Gestiona el catálogo de productos</p>
-                </div>
-                <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
-                    →
-                </div>
-            </a>
+        <!-- Sección: Inventario -->
+        <div class="mb-8">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Inventario</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card: Productos -->
+                <a th:href="@{/products}"
+                   class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
+                    <div class="text-4xl flex-shrink-0">🍰</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Productos</h3>
+                        <p class="text-sm text-gray-500">Gestiona el catálogo de productos</p>
+                    </div>
+                    <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
+                        →
+                    </div>
+                </a>
 
-            <!-- Card: Categorías -->
-            <a th:href="@{/categories}"
-               class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
-                <div class="text-4xl flex-shrink-0">📁</div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Categorías</h3>
-                    <p class="text-sm text-gray-500">Organiza tus productos por categorías</p>
-                </div>
-                <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
-                    →
-                </div>
-            </a>
+                <!-- Card: Categorías -->
+                <a th:href="@{/categories}"
+                   class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
+                    <div class="text-4xl flex-shrink-0">📁</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Categorías</h3>
+                        <p class="text-sm text-gray-500">Organiza tus productos por categorías</p>
+                    </div>
+                    <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
+                        →
+                    </div>
+                </a>
 
-            <!-- Card: Ventas -->
-            <a th:href="@{/sales}"
-               class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
-                <div class="text-4xl flex-shrink-0">💰</div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Ventas</h3>
-                    <p class="text-sm text-gray-500">Registra y consulta ventas</p>
-                </div>
-                <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
-                    →
-                </div>
-            </a>
+                <!-- Card: Ingredientes -->
+                <a th:href="@{/ingredients}"
+                   class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
+                    <div class="text-4xl flex-shrink-0">🧪</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Ingredientes</h3>
+                        <p class="text-sm text-gray-500">Administra los ingredientes disponibles</p>
+                    </div>
+                    <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
+                        →
+                    </div>
+                </a>
 
-            <!-- Card: Usuarios (solo ADMIN) -->
-            <a sec:authorize="hasRole('ADMIN')" th:href="@{/users}"
-               class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
-                <div class="text-4xl flex-shrink-0">👥</div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Usuarios</h3>
-                    <p class="text-sm text-gray-500">Administra usuarios del sistema</p>
-                </div>
-                <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
-                    →
-                </div>
-            </a>
+                <!-- Card: Ventas -->
+                <a th:href="@{/sales}"
+                   class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
+                    <div class="text-4xl flex-shrink-0">💰</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Ventas</h3>
+                        <p class="text-sm text-gray-500">Registra y consulta ventas</p>
+                    </div>
+                    <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
+                        →
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sección: Storefront -->
+        <div class="mb-8">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Storefront</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card: Tags -->
+                <a th:href="@{/tags}"
+                   class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
+                    <div class="text-4xl flex-shrink-0">🏷️</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Tags</h3>
+                        <p class="text-sm text-gray-500">Etiqueta y clasifica productos</p>
+                    </div>
+                    <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
+                        →
+                    </div>
+                </a>
+
+                <!-- Card: Secciones -->
+                <a th:href="@{/sections}"
+                   class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
+                    <div class="text-4xl flex-shrink-0">📋</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Secciones</h3>
+                        <p class="text-sm text-gray-500">Organiza la vitrina pública</p>
+                    </div>
+                    <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
+                        →
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sección: Sistema (solo ADMIN) -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Sistema</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card: Usuarios -->
+                <a th:href="@{/users}"
+                   class="group flex items-center gap-4 p-6 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-primary-200">
+                    <div class="text-4xl flex-shrink-0">👥</div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">Usuarios</h3>
+                        <p class="text-sm text-gray-500">Administra usuarios del sistema</p>
+                    </div>
+                    <div class="text-xl text-gray-400 transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary-500">
+                        →
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 </body>
