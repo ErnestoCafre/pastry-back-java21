@@ -7,77 +7,110 @@
   <img src="https://img.shields.io/badge/Thymeleaf-3.x-green?style=for-the-badge&logo=thymeleaf" alt="Thymeleaf">
 </p>
 
-## Descripción
+## Descripcion
 
-Sistema backend para la gestión de una pastelería artesanal. Este proyecto es una **refactorización completa y actualización** de un sistema anterior, modernizando la arquitectura y actualizando todas las dependencias a sus versiones más recientes.
+Sistema backend para la gestion de una pasteleria artesanal. Incluye un **panel de administracion** (Thymeleaf SSR) y una **API REST publica** para un futuro frontend React.
 
-🔗 **Deploy en Render:** [https://malva-pastry-backend.onrender.com](https://malva-pastry-backend.onrender.com)
+Este proyecto es una **refactorizacion completa** de un sistema anterior, modernizando la arquitectura y actualizando todas las dependencias a sus versiones mas recientes.
 
-### Cambios Principales en la Refactorización
+---
 
-| Aspecto             | Versión Anterior | Versión Actual |
+## Demo en Vivo
+
+El sistema esta deployado en Render y disponible para visualizacion inmediata:
+
+| | URL |
+|---|-----|
+| **Panel Admin** | [https://malva-pastry-backend.onrender.com/login](https://malva-pastry-backend.onrender.com/login) |
+| **API REST** | [https://malva-pastry-backend.onrender.com/api/v1/products](https://malva-pastry-backend.onrender.com/api/v1/products) |
+
+### Credenciales de acceso (demo)
+
+| Email | Password | Rol |
+|-------|----------|-----|
+| `admin@malva.com` | `sysadmin123` | Admin |
+| `employee@malva.com` | `sysadmin123` | Employee |
+
+> **Nota:** Render Free Tier puede tardar ~30 segundos en el primer request si el servicio esta inactivo.
+
+### Endpoints publicos de la API
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| GET | `/api/v1/products` | Productos visibles (paginado, filtros por nombre y categoria) |
+| GET | `/api/v1/products/{id}` | Detalle de producto con categoria y tags |
+| GET | `/api/v1/categories` | Categorias activas (paginado) |
+| GET | `/api/v1/categories/{id}` | Detalle de categoria |
+| GET | `/api/v1/tags` | Tags activos |
+| GET | `/api/v1/sections` | Secciones de vitrina con productos |
+| GET | `/api/v1/sections/{slug}` | Seccion por slug con productos |
+
+---
+
+## Cambios Principales en la Refactorizacion
+
+| Aspecto             | Version Anterior | Version Actual |
 | ------------------- | ---------------- | -------------- |
 | **Java**            | 17               | **21** (LTS)   |
 | **Spring Boot**     | 3.x              | **4.0.1**      |
 | **Spring Security** | 6.x              | **7.x**        |
 | **Hibernate**       | 6.x              | **7.2**        |
 | **Jakarta EE**      | 9                | **11**         |
+| **Migraciones**     | Solo Hibernate   | **Flyway**     |
 
 ### Mejoras Implementadas
 
-- Migración a Spring Boot 4.0 con las últimas mejoras de rendimiento
-- Actualización a Java 21 con soporte para Virtual Threads y Pattern Matching
-- Nuevo sistema de autenticación con Spring Security 7
-- Arquitectura modular preparada para microservicios
-- Soporte para API pública (React) y panel admin (Thymeleaf)
+- Migracion a Spring Boot 4.0 con las ultimas mejoras de rendimiento
+- Actualizacion a Java 21 con soporte para Virtual Threads y Pattern Matching
+- Nuevo sistema de autenticacion con Spring Security 7
+- Migraciones de base de datos con Flyway (produccion)
+- API REST publica con documentacion OpenAPI/Swagger
+- Soporte dual: panel admin (Thymeleaf) + API publica (REST JSON)
 
 ---
 
 ## Arquitectura del Sistema
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     MALVA PASTRY SHOP                           │
-├────────────────────────────┬────────────────────────────────────┤
-│   PANEL ADMIN              │   API PÚBLICA                      │
-│   (Thymeleaf + Sesión)     │   (REST + JWT + OAuth Google)      │
-│   /login, /dashboard       │   /api/public/**                   │
-│   /products, /categories   │   Consumida por React              │
-├────────────────────────────┴────────────────────────────────────┤
-│                 Spring Boot 4.0 + Spring Security               │
-├─────────────────────────────────────────────────────────────────┤
-│                     PostgreSQL Database                         │
-└─────────────────────────────────────────────────────────────────┘
++---------------------------------------------------------------+
+|                     MALVA PASTRY SHOP                         |
++-----------------------------+---------------------------------+
+|   PANEL ADMIN               |   API PUBLICA                   |
+|   (Thymeleaf + Sesion)      |   (REST JSON, solo lectura)     |
+|   /login, /dashboard        |   /api/v1/products              |
+|   /products, /categories    |   /api/v1/categories            |
+|   /ingredients, /sales      |   /api/v1/tags                  |
+|   /tags, /sections, /users  |   /api/v1/sections              |
++-----------------------------+---------------------------------+
+|            Spring Boot 4.0 + Spring Security 7                |
++---------------------------------------------------------------+
+|   PostgreSQL  |  Flyway (prod)  |  Hibernate ddl-auto (dev)   |
++---------------------------------------------------------------+
 ```
 
 ---
 
-## Stack Tecnológico
+## Stack Tecnologico
 
 ### Backend
 - **Framework:** Spring Boot 4.0.1
 - **Lenguaje:** Java 21
 - **Seguridad:** Spring Security 7
 - **ORM:** Hibernate 7.2 / Spring Data JPA
-- **Validación:** Jakarta Validation
+- **Validacion:** Jakarta Validation
+- **Migraciones:** Flyway (produccion)
 
 ### Frontend (Panel Admin)
 - **Motor de plantillas:** Thymeleaf 3.x
 - **Layout:** Thymeleaf Layout Dialect 3.3
-- **Estilos:** CSS3 con Variables CSS
+- **Estilos:** Tailwind CSS (CDN) + Flowbite
 
 ### Base de Datos
 - **RDBMS:** PostgreSQL 13+
 
-### Integraciones
-- **Storage:** AWS S3 / MinIO (SDK 2.25.11)
-- **OAuth:** Google API Client 2.2.0
-- **JWT:** JJWT 0.11.5
-- **Documentación:** SpringDoc OpenAPI 2.3.0
-
 ---
 
-## Inicio Rápido
+## Inicio Rapido
 
 ### Prerrequisitos
 
@@ -88,8 +121,8 @@ Sistema backend para la gestión de una pastelería artesanal. Este proyecto es 
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/malva-pastry-shop.git
-cd malva-pastry-shop/backend
+git clone https://github.com/c97Ernesto/pastry-back-java21.git
+cd pastry-back-java21/backend
 ```
 
 ### 2. Configurar Base de Datos
@@ -108,7 +141,7 @@ spring.datasource.username=tu_usuario
 spring.datasource.password=tu_password
 ```
 
-### 4. Ejecutar la Aplicación
+### 4. Ejecutar la Aplicacion
 
 ```bash
 # Windows
@@ -121,17 +154,13 @@ spring.datasource.password=tu_password
 ### 5. Acceder al Sistema
 
 - **Panel Admin:** http://localhost:8080/login
-- **Credenciales por defecto:**
-  - Email: `admin@malva.com`
-  - Password: `admin123`
+- **API REST:** http://localhost:8080/api/v1/products
 
 ---
 
-## Documentación
+## Documentacion
 
-📚 **Documentación Completa del Sistema:**
-
-- **[ARCHITECTURE.md](backend/ARCHITECTURE.md)** - Arquitectura del sistema, patrones de diseño, DDD
+- **[ARCHITECTURE.md](backend/ARCHITECTURE.md)** - Arquitectura del sistema, patrones de diseno, diagramas ER
 
 ---
 
@@ -139,104 +168,92 @@ spring.datasource.password=tu_password
 
 ```
 src/main/java/com/malva_pastry_shop/backend/
-├── config/                     # Configuración
-│   ├── SecurityConfig.java     # Spring Security 7
-│   └── DataSeeder.java         # Datos iniciales
-│
-├── controller/                 # Capa de Presentación
-│   ├── admin/                  # Controladores MVC (Thymeleaf)
-│   │   ├── ProductController
-│   │   ├── CategoryController
-│   │   ├── TagController
-│   │   ├── IngredientController
-│   │   └── UserController
-│   └── api/                    # Controladores REST (Futuro React)
-│       └── README.md           # Diseño de API planificado
-│
-├── domain/                     # Capa de Dominio (DDD)
-│   ├── storefront/             # Contexto Público
-│   │   ├── Product.java        # Productos del catálogo
-│   │   ├── Category.java       # Categorías
-│   │   ├── Tag.java            # Etiquetas (con slug)
-│   │   └── ProductTag.java     # M2M Product-Tag
-│   ├── inventory/              # Contexto Interno
-│   │   ├── Ingredient.java     # Ingredientes
-│   │   ├── ProductIngredient   # Recetas
-│   │   └── UnitOfMeasure.java  # Unidades de medida
-│   ├── auth/                   # Contexto de Autenticación
-│   │   ├── User.java
-│   │   └── Role.java
-│   └── common/                 # Entidades Base
-│       ├── TimestampedEntity
-│       └── SoftDeletableEntity
-│
-├── dto/                        # DTOs (Data Transfer Objects)
-│   ├── request/                # Entrada (compartidos)
-│   │   ├── ProductRequest
-│   │   ├── CategoryRequest
-│   │   └── TagRequest
-│   └── response/               # Salida
-│       ├── public/             # Para API REST pública
-│       │   ├── ProductPublicDTO
-│       │   ├── CategoryPublicDTO
-│       │   └── TagPublicDTO
-│       └── admin/              # Para reportes internos (futuro)
-│
-├── repository/                 # Capa de Acceso a Datos
-│   ├── ProductRepository
-│   ├── CategoryRepository
-│   ├── TagRepository
-│   └── IngredientRepository
-│
-├── service/                    # Capa de Lógica de Negocio
-│   ├── storefront/             # Servicios de catálogo público
-│   │   ├── ProductService
-│   │   ├── CategoryService
-│   │   └── TagService
-│   ├── inventory/              # Servicios internos
-│   │   └── IngredientService
-│   └── UserService
-│
-└── util/                       # Utilidades
-    └── SlugUtil.java           # Generación de slugs SEO
++-- config/                     # Configuracion
+|   +-- SecurityConfig.java     # Spring Security 7 (dual chain)
+|   +-- CorsConfig.java         # CORS para API
+|   +-- OpenApiConfig.java      # Swagger/OpenAPI
+|   +-- DataSeeder.java         # Datos iniciales (solo dev)
+|
++-- controller/                 # Capa de Presentacion
+|   +-- admin/                  # Controladores MVC (Thymeleaf)
+|   +-- api/                    # Controladores REST (JSON)
+|
++-- domain/                     # Capa de Dominio (DDD)
+|   +-- inventory/              # Contexto: Catalogo interno
+|   +-- storefront/             # Contexto: Vitrina publica
+|   +-- sales/                  # Contexto: Ventas
+|   +-- publicuser/             # Contexto: Usuarios publicos
+|   +-- auth/                   # Contexto: Autenticacion
+|   +-- common/                 # Entidades Base
+|
++-- dto/
+|   +-- request/                # DTOs de entrada (Lombok classes)
+|   +-- response/
+|       +-- api/                # DTOs de salida para API (Java records)
+|
++-- repository/                 # Spring Data JPA Repositories
++-- service/
+|   +-- inventory/              # ProductService, CategoryService, IngredientService
+|   +-- storefront/             # StorefrontSectionService, TagService
+|   +-- sales/                  # SaleService
+|   +-- UserService
+|
++-- security/                   # JWT y Google OAuth
+|
++-- util/
+
+src/main/resources/
++-- application.properties          # Config dev (ddl-auto=create, Flyway off)
++-- application-prod.properties     # Config prod (ddl-auto=none, Flyway on)
++-- db/migration/
+|   +-- V1__create_schema.sql       # Schema completo (15 tablas)
+|   +-- V2__seed_roles_and_admin.sql # Roles + admin para produccion
+|   +-- R__seed_demo_data.sql       # Datos de demo (repeatable migration)
++-- templates/                      # Vistas Thymeleaf
++-- static/                         # CSS, JS, imagenes
 ```
 
 ### Bounded Contexts (DDD)
 
-El sistema organiza entidades en contextos delimitados:
-
-- **Storefront** (`domain/storefront/`): Catálogo público (Product, Category, Tag)
-- **Inventory** (`domain/inventory/`): Operaciones internas (Ingredient, recipes)
-- **Auth** (`domain/auth/`): Autenticación y autorización (User, Role)
+| Contexto | Paquete | Entidades | Descripcion |
+|----------|---------|-----------|-------------|
+| **Inventory** | `domain/inventory/` | Product, Category, Ingredient, ProductIngredient, UnitOfMeasure | Catalogo interno, recetas y costos |
+| **Storefront** | `domain/storefront/` | StorefrontSection, StorefrontSectionProduct, Tag, ProductTag | Vitrina publica, secciones y etiquetas |
+| **Sales** | `domain/sales/` | Sale, SaleIngredient | Registro de ventas con snapshots |
+| **Public User** | `domain/publicuser/` | PublicUser, Favorite, ProductReview, ReviewStatus | Usuarios Google, favoritos y resenas |
+| **Auth** | `domain/auth/` | User, Role, RoleType | Autenticacion y autorizacion interna |
 
 ---
 
-## Características Principales
+## Caracteristicas Principales
 
-### ✅ Implementadas
-
-- ✅ Panel de administración completo (SSR con Thymeleaf)
-- ✅ CRUD de Productos, Categorías, Tags, Ingredientes
-- ✅ Sistema de etiquetas con slugs
-- ✅ Soft-delete con capacidad de restauración
-- ✅ Gestión de recetas (Product-Ingredient)
-- ✅ Autenticación basada en roles (ADMIN, EMPLOYEE)
-- ✅ Arquitectura DDD con separación de contextos
-- ✅ Entidades base con timestamps y auditoría
-
+- Panel de administracion completo (SSR con Thymeleaf)
+- CRUD de Productos, Categorias, Tags, Ingredientes
+- Gestion de Secciones de Vitrina con ordenamiento
+- Sistema de etiquetas con slugs URL-friendly
+- Soft-delete con papelera y capacidad de restauracion
+- Gestion de recetas (Product-Ingredient con costos)
+- Registro de Ventas con snapshot de precios e ingredientes
+- API REST publica para catalogo (Productos, Secciones, Categorias, Tags)
+- Autenticacion basada en roles (ADMIN, EMPLOYEE)
+- Migraciones de base de datos con Flyway (produccion)
+- Documentacion OpenAPI/Swagger
+- Entidades base con timestamps y auditoria
 
 ---
 
 ## Seguridad
 
-### Panel de Administración (Thymeleaf)
-- Autenticación basada en sesión
-- Formulario de login con CSRF protection
-- Roles: `ADMIN`, `EMPLOYEE`
+### Panel de Administracion (Thymeleaf)
+- Autenticacion basada en sesion con formulario de login
+- CSRF protection habilitado
+- Roles: `ADMIN` (acceso completo), `EMPLOYEE` (acceso limitado)
+- Gestion de usuarios restringida a ADMIN
 
-### API Pública (REST)
-- Autenticación JWT
-- OAuth 2.0 con Google
-- Endpoints públicos y protegidos
+### API Publica (REST)
+- Endpoints de solo lectura, sin autenticacion requerida
+- Solo permite metodo GET
+- CORS configurado para frontend
+- Cualquier otro metodo HTTP es denegado
 
 ---

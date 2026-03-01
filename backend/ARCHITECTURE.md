@@ -286,8 +286,7 @@ com.malva_pastry_shop.backend/
 ├── dto/                        # Data Transfer
 │   ├── request/                # Input validation
 │   └── response/
-│       ├── public/             # API responses
-│       └── admin/              # Internal reports
+│       └── api/                # API responses (Java records)
 │
 ├── domain/                     # Domain
 │   ├── inventory/              # Product, Category, Ingredient, ProductIngredient, UnitOfMeasure
@@ -403,8 +402,8 @@ erDiagram
     
     users {
         bigint id PK "Auto-increment"
-        varchar_100 name "NOT NULL"
-        varchar_100 last_name "NOT NULL"
+        varchar_255 name "NOT NULL"
+        varchar_255 last_name
         varchar_255 email "UNIQUE, NOT NULL"
         varchar_255 password_hash "NOT NULL"
         boolean enabled "DEFAULT true"
@@ -416,8 +415,8 @@ erDiagram
     
     roles {
         bigint id PK "Auto-increment"
-        varchar_50 name "UNIQUE, NOT NULL (ADMIN/EMPLOYEE)"
-        varchar_255 description
+        varchar_255 name "UNIQUE, NOT NULL (ADMIN/EMPLOYEE/USER)"
+        text description
         timestamp inserted_at "DEFAULT now()"
         timestamp updated_at "DEFAULT now()"
     }
@@ -491,9 +490,10 @@ erDiagram
     storefront_sections {
         bigint id PK "Auto-increment"
         varchar_100 name "NOT NULL"
+        varchar_100 slug "UNIQUE, NOT NULL (URL-friendly)"
         text description
         integer display_order
-        boolean visible "DEFAULT false"
+        boolean visible "DEFAULT true"
         timestamp inserted_at "DEFAULT now()"
         timestamp updated_at "DEFAULT now()"
         timestamp deleted_at "NULL = active"
@@ -518,6 +518,10 @@ erDiagram
         integer quantity "NOT NULL"
         numeric_12_2 unit_price "Snapshot"
         numeric_12_2 total_amount "Snapshot"
+        text notes
+        varchar_150 customer_name
+        varchar_20 customer_dni
+        varchar_20 customer_phone
         timestamp inserted_at "DEFAULT now()"
         timestamp updated_at "DEFAULT now()"
     }
@@ -527,9 +531,10 @@ erDiagram
         bigint sale_id FK "→ sales.id, NOT NULL"
         bigint ingredient_id FK "→ ingredients.id (nullable)"
         varchar_100 ingredient_name "Snapshot"
-        numeric_14_4 quantity "NOT NULL"
+        numeric_14_4 quantity_used "NOT NULL"
         numeric_12_2 unit_cost "Snapshot"
         varchar_50 unit_of_measure "Snapshot"
+        numeric_12_2 total_cost "Snapshot"
         timestamp inserted_at "DEFAULT now()"
         timestamp updated_at "DEFAULT now()"
     }
