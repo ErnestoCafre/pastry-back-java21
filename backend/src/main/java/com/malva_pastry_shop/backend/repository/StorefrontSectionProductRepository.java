@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSectionProduct;
@@ -27,4 +29,7 @@ public interface StorefrontSectionProductRepository extends JpaRepository<Storef
     Optional<StorefrontSectionProduct> findByStorefrontSectionIdAndProductId(Long storefrontSectionId, Long productId);
 
     long countByStorefrontSectionIdAndProductDeletedAtIsNull(Long storefrontSectionId);
+
+    @Query("SELECT COALESCE(MAX(sp.displayOrder), 0) FROM StorefrontSectionProduct sp WHERE sp.storefrontSection.id = :sectionId")
+    int findMaxDisplayOrderBySectionId(@Param("sectionId") Long sectionId);
 }

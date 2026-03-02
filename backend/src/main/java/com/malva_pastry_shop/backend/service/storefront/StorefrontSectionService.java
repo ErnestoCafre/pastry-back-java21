@@ -191,7 +191,8 @@ public class StorefrontSectionService {
             throw new IllegalStateException("El producto ya está en esta sección");
         }
 
-        StorefrontSectionProduct sp = new StorefrontSectionProduct(section, product);
+        int nextOrder = sectionProductRepository.findMaxDisplayOrderBySectionId(sectionId) + 1;
+        StorefrontSectionProduct sp = new StorefrontSectionProduct(section, product, nextOrder);
         sectionProductRepository.save(sp);
     }
 
