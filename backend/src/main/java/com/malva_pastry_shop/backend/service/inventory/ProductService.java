@@ -283,6 +283,7 @@ public class ProductService {
     /**
      * Obtiene los productos activos de un tag.
      */
+    @Transactional(readOnly = true)
     public List<Product> getProductsByTag(Long tagId) {
         tagRepository.findByIdAndDeletedAtIsNull(tagId)
                 .orElseThrow(() -> new EntityNotFoundException("Tag no encontrado"));
@@ -297,6 +298,7 @@ public class ProductService {
     /**
      * Obtiene productos activos que NO están asociados a un tag.
      */
+    @Transactional(readOnly = true)
     public List<Product> getAvailableProductsForTag(Long tagId) {
         tagRepository.findByIdAndDeletedAtIsNull(tagId)
                 .orElseThrow(() -> new EntityNotFoundException("Tag no encontrado"));
@@ -314,6 +316,7 @@ public class ProductService {
     /**
      * Cuenta cuántos productos activos usan un tag.
      */
+    @Transactional(readOnly = true)
     public long countProductsByTag(Long tagId) {
         return productTagRepository.findByTagId(tagId).stream()
                 .map(ProductTag::getProduct)
