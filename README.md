@@ -31,7 +31,7 @@ El sistema esta deployado en Render y disponible para visualizacion inmediata:
 | `admin@malva.com` | `sysadmin123` | Admin |
 | `employee@malva.com` | `sysadmin123` | Employee |
 
-> **Nota:** Render Free Tier puede tardar ~30 segundos en el primer request si el servicio esta inactivo.
+> **Nota:** Render Free Tier puede tardar ~1 minuto (se muestra página de carga de carga) en el primer request si el servicio esta inactivo. 
 
 ### Endpoints publicos de la API
 
