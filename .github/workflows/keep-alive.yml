@@ -1,0 +1,49 @@
+name: Keep Render awake
+
+# Render suspende un web service Free tras 15 minutos sin trafico entrante.
+# Este workflow lo pinguea cada 10 minutos para que la demo del README responda
+# al instante en vez de tardar ~1 minuto en arrancar en frio.
+#
+# La ventana horaria del cron esta en UTC y debe mantenerse sincronizada con
+# KEEPALIVE_START / KEEPALIVE_END (que estan en hora argentina, UTC-3).
+#   09:00-01:00 ART  ==  12:00-04:00 UTC
+# La ventana existe para no agotar las 750 instance-hours mensuales del plan Free:
+# 24/7 son 744 h en un mes de 31 dias (solo 6 h de margen y compartido con
+# cualquier otro servicio Free del workspace); esta ventana usa ~496 h.
+
+on:
+  schedule:
+    - cron: '*/10 12-23,0-3 * * *'
+  workflow_dispatch:  # despertar a mano antes de mostrar la demo
+
+# Si un ping se solapa con el siguiente (cold start lento), no acumular runs.
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    # El peor caso del script son 300s (3 intentos de 90s + 2 esperas de 15s).
+    # Este timeout debe quedar por encima de eso o el job muere a mitad del reintento.
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ping al servicio
+        env:
+          KEEPALIVE_URL: https://malva-pastry-backend.onrender.com/login
+          KEEPALIVE_TZ: America/Argentina/Buenos_Aires
+          KEEPALIVE_START: '9'
+          KEEPALIVE_END: '1'
+        run: |
+          chmod +x scripts/keep-alive.sh
+          # workflow_dispatch ignora la ventana: es un despertar manual.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            scripts/keep-alive.sh --force
+          else
+            scripts/keep-alive.sh
+          fi
