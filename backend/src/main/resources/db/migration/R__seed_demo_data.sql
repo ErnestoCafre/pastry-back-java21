@@ -16,8 +16,6 @@ TRUNCATE
     product_ingredients,
     sale_ingredients,
     sales,
-    favorites,
-    product_reviews,
     products,
     categories,
     ingredients,
@@ -38,8 +36,6 @@ ALTER SEQUENCE product_ingredients_id_seq RESTART WITH 1;
 ALTER SEQUENCE storefront_section_products_id_seq RESTART WITH 1;
 ALTER SEQUENCE sales_id_seq RESTART WITH 1;
 ALTER SEQUENCE sale_ingredients_id_seq RESTART WITH 1;
-ALTER SEQUENCE favorites_id_seq RESTART WITH 1;
-ALTER SEQUENCE product_reviews_id_seq RESTART WITH 1;
 
 -- ============================================================
 -- 3. USUARIOS DEMO (adicionales al sysadmin de V2)
