@@ -17,7 +17,7 @@ public record ProductApiDTO(
         BigDecimal basePrice,
         @Schema(description = "Días de preparación", example = "2")
         Integer preparationDays,
-        @Schema(description = "URL de la imagen del producto", example = "https://example.com/images/torta-chocolate.jpg")
+        @Schema(description = "URL de la imagen del producto", example = "https://example.com/images/torta-chocolate.webp")
         String imageUrl,
         CategoryApiDTO category,
         List<TagApiDTO> tags) {
@@ -30,7 +30,7 @@ public record ProductApiDTO(
             String name,
             @Schema(description = "Precio base", example = "25.50")
             BigDecimal basePrice,
-            @Schema(description = "URL de la imagen", example = "https://example.com/images/torta-chocolate.jpg")
+            @Schema(description = "URL de la imagen", example = "https://example.com/images/torta-chocolate.webp")
             String imageUrl,
             @Schema(description = "Nombre de la categoría", example = "Tortas")
             String categoryName) {

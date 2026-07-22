@@ -87,10 +87,10 @@
                             Producto</label>
                         <input type="text" id="imageUrl" th:field="*{imageUrl}"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
-                            placeholder="/images/products/mi-producto.jpg"
+                            placeholder="/images/products/mi-producto.webp"
                             oninput="document.getElementById('imagePreview').src = this.value; document.getElementById('imagePreviewContainer').style.display = this.value ? 'block' : 'none';">
                         <p class="mt-1 text-xs text-gray-500">Ruta relativa de la imagen (ej:
-                            /images/products/nombre.jpg)</p>
+                            /images/products/nombre.webp)</p>
                         <p th:if="${#fields.hasErrors('imageUrl')}" class="mt-1 text-sm text-red-500"
                             th:errors="*{imageUrl}"></p>
                         <!-- Image Preview -->

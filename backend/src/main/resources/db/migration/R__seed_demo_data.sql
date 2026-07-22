@@ -16,8 +16,6 @@ TRUNCATE
     product_ingredients,
     sale_ingredients,
     sales,
-    favorites,
-    product_reviews,
     products,
     categories,
     ingredients,
@@ -38,8 +36,6 @@ ALTER SEQUENCE product_ingredients_id_seq RESTART WITH 1;
 ALTER SEQUENCE storefront_section_products_id_seq RESTART WITH 1;
 ALTER SEQUENCE sales_id_seq RESTART WITH 1;
 ALTER SEQUENCE sale_ingredients_id_seq RESTART WITH 1;
-ALTER SEQUENCE favorites_id_seq RESTART WITH 1;
-ALTER SEQUENCE product_reviews_id_seq RESTART WITH 1;
 
 -- ============================================================
 -- 3. USUARIOS DEMO (adicionales al sysadmin de V2)
@@ -207,83 +203,83 @@ INSERT INTO ingredients (name, description, unit_cost, unit_of_measure, inserted
 
 -- Pasteles (7)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Pastel de Chocolate Triple',  'Tres capas de bizcocho de chocolate con ganache, cubierto de chocolate belga',       3, 450.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-chocolate-triple.jpg', NOW(), NOW()),
-('Pastel Red Velvet',           'Suave bizcocho rojo aterciopelado con frosting de queso crema',                      2, 420.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-red-velvet.jpg',       NOW(), NOW()),
-('Pastel de Vainilla Clásico',  'Bizcocho esponjoso de vainilla con betún de mantequilla',                           2, 380.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-vainilla-clasico.jpg', NOW(), NOW()),
-('Pastel de Zanahoria',         'Con nueces, pasas y frosting de queso crema con canela',                            2, 400.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-zanahoria.jpg',        NOW(), NOW()),
-('Pastel de Fresas con Crema',  'Bizcocho de vainilla con fresas frescas y crema chantilly',                         1, 480.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-fresas-crema.jpg',     NOW(), NOW()),
-('Pastel Tres Leches',          'Bizcocho bañado en tres tipos de leche con merengue italiano',                      1, 350.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-tres-leches.jpg',      NOW(), NOW()),
-('Pastel Selva Negra',          'Chocolate, cerezas y crema batida. Receta alemana tradicional',                     3, 520.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-selva-negra.jpg',      NOW(), NOW());
+('Pastel de Chocolate Triple',  'Tres capas de bizcocho de chocolate con ganache, cubierto de chocolate belga',       3, 450.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-chocolate-triple.webp', NOW(), NOW()),
+('Pastel Red Velvet',           'Suave bizcocho rojo aterciopelado con frosting de queso crema',                      2, 420.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-red-velvet.webp',       NOW(), NOW()),
+('Pastel de Vainilla Clásico',  'Bizcocho esponjoso de vainilla con betún de mantequilla',                           2, 380.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-vainilla-clasico.webp', NOW(), NOW()),
+('Pastel de Zanahoria',         'Con nueces, pasas y frosting de queso crema con canela',                            2, 400.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-zanahoria.webp',        NOW(), NOW()),
+('Pastel de Fresas con Crema',  'Bizcocho de vainilla con fresas frescas y crema chantilly',                         1, 480.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-fresas-crema.webp',     NOW(), NOW()),
+('Pastel Tres Leches',          'Bizcocho bañado en tres tipos de leche con merengue italiano',                      1, 350.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-tres-leches.webp',      NOW(), NOW()),
+('Pastel Selva Negra',          'Chocolate, cerezas y crema batida. Receta alemana tradicional',                     3, 520.00, TRUE, (SELECT id FROM categories WHERE name = 'Pasteles'), '/images/products/pastel-selva-negra.webp',      NOW(), NOW());
 
 -- Cupcakes (5)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Cupcake de Chocolate',   'Base de chocolate intenso con frosting de chocolate',                    1, 45.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-chocolate.jpg',   NOW(), NOW()),
-('Cupcake Red Velvet',     'Cupcake rojo aterciopelado con queso crema',                            1, 48.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-red-velvet.jpg',  NOW(), NOW()),
-('Cupcake de Limón',       'Sabor cítrico refrescante con frosting de limón',                       1, 45.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-limon.jpg',       NOW(), NOW()),
-('Cupcake de Nutella',     'Relleno de Nutella con frosting de avellanas',                          1, 55.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-nutella.jpg',     NOW(), NOW()),
-('Cupcake de Café Moka',   'Para los amantes del café con toque de chocolate',                      1, 50.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-cafe-moka.jpg',   NOW(), NOW());
+('Cupcake de Chocolate',   'Base de chocolate intenso con frosting de chocolate',                    1, 45.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-chocolate.webp',   NOW(), NOW()),
+('Cupcake Red Velvet',     'Cupcake rojo aterciopelado con queso crema',                            1, 48.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-red-velvet.webp',  NOW(), NOW()),
+('Cupcake de Limón',       'Sabor cítrico refrescante con frosting de limón',                       1, 45.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-limon.webp',       NOW(), NOW()),
+('Cupcake de Nutella',     'Relleno de Nutella con frosting de avellanas',                          1, 55.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-nutella.webp',     NOW(), NOW()),
+('Cupcake de Café Moka',   'Para los amantes del café con toque de chocolate',                      1, 50.00, TRUE, (SELECT id FROM categories WHERE name = 'Cupcakes'), '/images/products/cupcake-cafe-moka.webp',   NOW(), NOW());
 
 -- Galletas (5)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Galletas de Chispas de Chocolate', 'Clásicas con chips de chocolate semi-amargo. Docena',         1, 85.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-chispas-chocolate.jpg', NOW(), NOW()),
-('Galletas de Avena con Pasas',      'Saludables y deliciosas con pasas y canela. Docena',          1, 75.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-avena-pasas.jpg',       NOW(), NOW()),
-('Galletas de Mantequilla',          'Tradicionales galletas danesas de mantequilla. Docena',       1, 70.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-mantequilla.jpg',       NOW(), NOW()),
-('Galletas de Jengibre',             'Especiadas y crujientes, perfectas con café. Docena',         1, 80.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-jengibre.jpg',          NOW(), NOW()),
-('Galletas Snickerdoodle',           'Con canela y azúcar, suaves por dentro. Docena',              1, 78.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-snickerdoodle.jpg',     NOW(), NOW());
+('Galletas de Chispas de Chocolate', 'Clásicas con chips de chocolate semi-amargo. Docena',         1, 85.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-chispas-chocolate.webp', NOW(), NOW()),
+('Galletas de Avena con Pasas',      'Saludables y deliciosas con pasas y canela. Docena',          1, 75.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-avena-pasas.webp',       NOW(), NOW()),
+('Galletas de Mantequilla',          'Tradicionales galletas danesas de mantequilla. Docena',       1, 70.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-mantequilla.webp',       NOW(), NOW()),
+('Galletas de Jengibre',             'Especiadas y crujientes, perfectas con café. Docena',         1, 80.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-jengibre.webp',          NOW(), NOW()),
+('Galletas Snickerdoodle',           'Con canela y azúcar, suaves por dentro. Docena',              1, 78.00, TRUE, (SELECT id FROM categories WHERE name = 'Galletas'), '/images/products/galletas-snickerdoodle.webp',     NOW(), NOW());
 
 -- Pan Dulce Mexicano (6)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Concha de Vainilla',       'Pan dulce tradicional con costra de azúcar sabor vainilla',           0, 18.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/concha-vainilla.jpg',     NOW(), NOW()),
-('Concha de Chocolate',      'Concha clásica con costra de chocolate',                              0, 18.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/concha-chocolate.jpg',    NOW(), NOW()),
-('Cuerno de Mantequilla',    'Esponjoso cuerno bañado en mantequilla y azúcar glass',               0, 20.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/cuerno-mantequilla.jpg',  NOW(), NOW()),
-('Oreja',                    'Pan hojaldrado caramelizado, crujiente y dulce',                      0, 22.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/oreja.jpg',               NOW(), NOW()),
-('Polvorón Rosa',            'Galleta de mantequilla que se deshace en la boca',                    0, 15.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/polvoron-rosa.jpg',       NOW(), NOW()),
-('Garibaldi',                'Panecillo cubierto de chochitos de colores',                          0, 16.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/garibaldi.jpg',           NOW(), NOW());
+('Concha de Vainilla',       'Pan dulce tradicional con costra de azúcar sabor vainilla',           0, 18.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/concha-vainilla.webp',     NOW(), NOW()),
+('Concha de Chocolate',      'Concha clásica con costra de chocolate',                              0, 18.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/concha-chocolate.webp',    NOW(), NOW()),
+('Cuerno de Mantequilla',    'Esponjoso cuerno bañado en mantequilla y azúcar glass',               0, 20.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/cuerno-mantequilla.webp',  NOW(), NOW()),
+('Oreja',                    'Pan hojaldrado caramelizado, crujiente y dulce',                      0, 22.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/oreja.webp',               NOW(), NOW()),
+('Polvorón Rosa',            'Galleta de mantequilla que se deshace en la boca',                    0, 15.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/polvoron-rosa.webp',       NOW(), NOW()),
+('Garibaldi',                'Panecillo cubierto de chochitos de colores',                          0, 16.00, TRUE, (SELECT id FROM categories WHERE name = 'Pan Dulce Mexicano'), '/images/products/garibaldi.webp',           NOW(), NOW());
 
 -- Tartas y Pays (5)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Pay de Manzana',          'Manzanas caramelizadas con canela en masa crujiente',                  2, 280.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/pay-manzana.jpg',         NOW(), NOW()),
-('Pay de Limón',            'Relleno cremoso de limón con merengue italiano',                       2, 260.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/pay-limon.jpg',           NOW(), NOW()),
-('Pay de Nuez',             'Nueces caramelizadas en base de mantequilla',                          2, 320.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/pay-nuez.jpg',            NOW(), NOW()),
-('Tarta de Frutos Rojos',  'Crema pastelera con frambuesas, moras y fresas',                       1, 350.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/tarta-frutos-rojos.jpg',  NOW(), NOW()),
-('Tarta Tatin',             'Tarta francesa invertida de manzana caramelizada',                     2, 300.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/tarta-tatin.jpg',         NOW(), NOW());
+('Pay de Manzana',          'Manzanas caramelizadas con canela en masa crujiente',                  2, 280.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/pay-manzana.webp',         NOW(), NOW()),
+('Pay de Limón',            'Relleno cremoso de limón con merengue italiano',                       2, 260.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/pay-limon.webp',           NOW(), NOW()),
+('Pay de Nuez',             'Nueces caramelizadas en base de mantequilla',                          2, 320.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/pay-nuez.webp',            NOW(), NOW()),
+('Tarta de Frutos Rojos',  'Crema pastelera con frambuesas, moras y fresas',                       1, 350.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/tarta-frutos-rojos.webp',  NOW(), NOW()),
+('Tarta Tatin',             'Tarta francesa invertida de manzana caramelizada',                     2, 300.00, TRUE, (SELECT id FROM categories WHERE name = 'Tartas y Pays'), '/images/products/tarta-tatin.webp',         NOW(), NOW());
 
 -- Postres Individuales (6)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Tiramisú Individual',    'Capas de mascarpone, café y bizcocho. Receta italiana',                1, 85.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/tiramisu-individual.jpg',  NOW(), NOW()),
-('Mousse de Chocolate',    'Mousse sedoso de chocolate belga 70% cacao',                           1, 75.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/mousse-chocolate.jpg',     NOW(), NOW()),
-('Cheesecake New York',    'Cremoso cheesecake estilo americano con base de galleta',              2, 90.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/cheesecake-new-york.jpg',  NOW(), NOW()),
-('Panna Cotta',            'Postre italiano de nata con coulis de frutos rojos',                   1, 70.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/panna-cotta.jpg',          NOW(), NOW()),
-('Crème Brûlée',           'Crema francesa con costra de caramelo crujiente',                      1, 80.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/creme-brulee.jpg',         NOW(), NOW()),
-('Profiteroles',           'Choux rellenos de crema con chocolate caliente',                       1, 95.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/profiteroles.jpg',         NOW(), NOW());
+('Tiramisú Individual',    'Capas de mascarpone, café y bizcocho. Receta italiana',                1, 85.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/tiramisu-individual.webp',  NOW(), NOW()),
+('Mousse de Chocolate',    'Mousse sedoso de chocolate belga 70% cacao',                           1, 75.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/mousse-chocolate.webp',     NOW(), NOW()),
+('Cheesecake New York',    'Cremoso cheesecake estilo americano con base de galleta',              2, 90.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/cheesecake-new-york.webp',  NOW(), NOW()),
+('Panna Cotta',            'Postre italiano de nata con coulis de frutos rojos',                   1, 70.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/panna-cotta.webp',          NOW(), NOW()),
+('Crème Brûlée',           'Crema francesa con costra de caramelo crujiente',                      1, 80.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/creme-brulee.webp',         NOW(), NOW()),
+('Profiteroles',           'Choux rellenos de crema con chocolate caliente',                       1, 95.00, TRUE, (SELECT id FROM categories WHERE name = 'Postres Individuales'), '/images/products/profiteroles.webp',         NOW(), NOW());
 
 -- Panes Artesanales (4)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Baguette Francesa',     'Pan crujiente de masa madre fermentada 24 horas',                       1, 45.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/baguette-francesa.jpg',   NOW(), NOW()),
-('Ciabatta Italiana',     'Pan rústico italiano con corteza crujiente y miga aireada',             1, 50.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/ciabatta-italiana.jpg',   NOW(), NOW()),
-('Focaccia de Romero',    'Pan plano italiano con aceite de oliva y romero fresco',                1, 65.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/focaccia-romero.jpg',     NOW(), NOW()),
-('Pan de Masa Madre',     'Hogaza artesanal fermentada naturalmente 48 horas',                     2, 85.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/pan-masa-madre.jpg',      NOW(), NOW());
+('Baguette Francesa',     'Pan crujiente de masa madre fermentada 24 horas',                       1, 45.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/baguette-francesa.webp',   NOW(), NOW()),
+('Ciabatta Italiana',     'Pan rústico italiano con corteza crujiente y miga aireada',             1, 50.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/ciabatta-italiana.webp',   NOW(), NOW()),
+('Focaccia de Romero',    'Pan plano italiano con aceite de oliva y romero fresco',                1, 65.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/focaccia-romero.webp',     NOW(), NOW()),
+('Pan de Masa Madre',     'Hogaza artesanal fermentada naturalmente 48 horas',                     2, 85.00, TRUE, (SELECT id FROM categories WHERE name = 'Panes Artesanales'), '/images/products/pan-masa-madre.webp',      NOW(), NOW());
 
 -- Dulces y Confitería (5)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Mazapán de Almendra',    'Dulce tradicional de almendra molida. Caja 12 piezas',                 1, 120.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/mazapan-almendra.jpg',   NOW(), NOW()),
-('Cocadas',                'Dulce de coco rallado caramelizado. Bolsa 250g',                       1,  65.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/cocadas.jpg',            NOW(), NOW()),
-('Jamoncillo de Leche',    'Dulce de leche tradicional mexicano. Caja 8 piezas',                   1,  80.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/jamoncillo-leche.jpg',   NOW(), NOW()),
-('Trufas de Chocolate',    'Trufas artesanales de chocolate belga. Caja 6 piezas',                 1, 150.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/trufas-chocolate.jpg',   NOW(), NOW()),
-('Ate con Queso',          'Dulce de membrillo artesanal con queso manchego. 300g',                1,  95.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/ate-queso.jpg',          NOW(), NOW());
+('Mazapán de Almendra',    'Dulce tradicional de almendra molida. Caja 12 piezas',                 1, 120.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/mazapan-almendra.webp',   NOW(), NOW()),
+('Cocadas',                'Dulce de coco rallado caramelizado. Bolsa 250g',                       1,  65.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/cocadas.webp',            NOW(), NOW()),
+('Jamoncillo de Leche',    'Dulce de leche tradicional mexicano. Caja 8 piezas',                   1,  80.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/jamoncillo-leche.webp',   NOW(), NOW()),
+('Trufas de Chocolate',    'Trufas artesanales de chocolate belga. Caja 6 piezas',                 1, 150.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/trufas-chocolate.webp',   NOW(), NOW()),
+('Ate con Queso',          'Dulce de membrillo artesanal con queso manchego. 300g',                1,  95.00, TRUE, (SELECT id FROM categories WHERE name = 'Dulces y Confitería'), '/images/products/ate-queso.webp',          NOW(), NOW());
 
 -- Productos Veganos (4)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Pastel Vegano de Chocolate',  'Sin huevo ni lácteos, igual de delicioso',                        2, 420.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/pastel-vegano-chocolate.jpg', NOW(), NOW()),
-('Cupcakes Veganos Variados',   'Set de 4 cupcakes veganos de sabores surtidos',                   1, 180.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/cupcakes-veganos.jpg',        NOW(), NOW()),
-('Galletas Veganas de Avena',   'Sin huevo, con chips de chocolate vegano. Docena',                1,  95.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/galletas-veganas-avena.jpg',  NOW(), NOW()),
-('Brownie Vegano',              'Brownie húmedo sin ingredientes animales',                        1,  55.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/brownie-vegano.jpg',          NOW(), NOW());
+('Pastel Vegano de Chocolate',  'Sin huevo ni lácteos, igual de delicioso',                        2, 420.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/pastel-vegano-chocolate.webp', NOW(), NOW()),
+('Cupcakes Veganos Variados',   'Set de 4 cupcakes veganos de sabores surtidos',                   1, 180.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/cupcakes-veganos.webp',        NOW(), NOW()),
+('Galletas Veganas de Avena',   'Sin huevo, con chips de chocolate vegano. Docena',                1,  95.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/galletas-veganas-avena.webp',  NOW(), NOW()),
+('Brownie Vegano',              'Brownie húmedo sin ingredientes animales',                        1,  55.00, TRUE, (SELECT id FROM categories WHERE name = 'Productos Veganos'), '/images/products/brownie-vegano.webp',          NOW(), NOW());
 
 -- Temporada y Festividades (3)
 INSERT INTO products (name, description, preparation_days, base_price, visible, category_id, image_url, inserted_at, updated_at) VALUES
-('Pan de Muerto',       'Tradicional pan de temporada con azahar. Disponible Oct-Nov',             1,  65.00, TRUE, (SELECT id FROM categories WHERE name = 'Temporada y Festividades'), '/images/products/pan-de-muerto.jpg',    NOW(), NOW()),
-('Rosca de Reyes',      'Con frutas cristalizadas y muñequito. Disponible en Enero',               2, 280.00, TRUE, (SELECT id FROM categories WHERE name = 'Temporada y Festividades'), '/images/products/rosca-de-reyes.jpg',   NOW(), NOW()),
-('Tronco de Navidad',   'Bûche de Noël con chocolate y crema de castañas',                        3, 450.00, TRUE, (SELECT id FROM categories WHERE name = 'Temporada y Festividades'), '/images/products/tronco-navidad.jpg',   NOW(), NOW());
+('Pan de Muerto',       'Tradicional pan de temporada con azahar. Disponible Oct-Nov',             1,  65.00, TRUE, (SELECT id FROM categories WHERE name = 'Temporada y Festividades'), '/images/products/pan-de-muerto.webp',    NOW(), NOW()),
+('Rosca de Reyes',      'Con frutas cristalizadas y muñequito. Disponible en Enero',               2, 280.00, TRUE, (SELECT id FROM categories WHERE name = 'Temporada y Festividades'), '/images/products/rosca-de-reyes.webp',   NOW(), NOW()),
+('Tronco de Navidad',   'Bûche de Noël con chocolate y crema de castañas',                        3, 450.00, TRUE, (SELECT id FROM categories WHERE name = 'Temporada y Festividades'), '/images/products/tronco-navidad.webp',   NOW(), NOW());
 
 -- ============================================================
 -- 7. TAGS (14)

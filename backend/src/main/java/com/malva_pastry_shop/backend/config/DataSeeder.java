@@ -448,175 +448,175 @@ public class DataSeeder implements CommandLineRunner {
                 createProduct("Pastel de Chocolate Triple",
                                 "Tres capas de bizcocho de chocolate con ganache, cubierto de chocolate belga", 3,
                                 new BigDecimal("450.00"), categories.get("Pasteles"),
-                                "/images/products/pastel-chocolate-triple.jpg");
+                                "/images/products/pastel-chocolate-triple.webp");
                 createProduct("Pastel Red Velvet", "Suave bizcocho rojo aterciopelado con frosting de queso crema", 2,
                                 new BigDecimal("420.00"), categories.get("Pasteles"),
-                                "/images/products/pastel-red-velvet.jpg");
+                                "/images/products/pastel-red-velvet.webp");
                 createProduct("Pastel de Vainilla Clásico", "Bizcocho esponjoso de vainilla con betún de mantequilla",
                                 2,
                                 new BigDecimal("380.00"), categories.get("Pasteles"),
-                                "/images/products/pastel-vainilla-clasico.jpg");
+                                "/images/products/pastel-vainilla-clasico.webp");
                 createProduct("Pastel de Zanahoria", "Con nueces, pasas y frosting de queso crema con canela", 2,
                                 new BigDecimal("400.00"), categories.get("Pasteles"),
-                                "/images/products/pastel-zanahoria.jpg");
+                                "/images/products/pastel-zanahoria.webp");
                 createProduct("Pastel de Fresas con Crema", "Bizcocho de vainilla con fresas frescas y crema chantilly",
                                 1,
                                 new BigDecimal("480.00"), categories.get("Pasteles"),
-                                "/images/products/pastel-fresas-crema.jpg");
+                                "/images/products/pastel-fresas-crema.webp");
                 createProduct("Pastel Tres Leches", "Bizcocho bañado en tres tipos de leche con merengue italiano", 1,
                                 new BigDecimal("350.00"), categories.get("Pasteles"),
-                                "/images/products/pastel-tres-leches.jpg");
+                                "/images/products/pastel-tres-leches.webp");
                 createProduct("Pastel Selva Negra", "Chocolate, cerezas y crema batida. Receta alemana tradicional", 3,
                                 new BigDecimal("520.00"), categories.get("Pasteles"),
-                                "/images/products/pastel-selva-negra.jpg");
+                                "/images/products/pastel-selva-negra.webp");
 
                 // Cupcakes (5 productos)
                 createProduct("Cupcake de Chocolate", "Base de chocolate intenso con frosting de chocolate", 1,
                                 new BigDecimal("45.00"), categories.get("Cupcakes"),
-                                "/images/products/cupcake-chocolate.jpg");
+                                "/images/products/cupcake-chocolate.webp");
                 createProduct("Cupcake Red Velvet", "Cupcake rojo aterciopelado con queso crema", 1,
                                 new BigDecimal("48.00"), categories.get("Cupcakes"),
-                                "/images/products/cupcake-red-velvet.jpg");
+                                "/images/products/cupcake-red-velvet.webp");
                 createProduct("Cupcake de Limón", "Sabor cítrico refrescante con frosting de limón", 1,
                                 new BigDecimal("45.00"), categories.get("Cupcakes"),
-                                "/images/products/cupcake-limon.jpg");
+                                "/images/products/cupcake-limon.webp");
                 createProduct("Cupcake de Nutella", "Relleno de Nutella con frosting de avellanas", 1,
                                 new BigDecimal("55.00"), categories.get("Cupcakes"),
-                                "/images/products/cupcake-nutella.jpg");
+                                "/images/products/cupcake-nutella.webp");
                 createProduct("Cupcake de Café Moka", "Para los amantes del café con toque de chocolate", 1,
                                 new BigDecimal("50.00"), categories.get("Cupcakes"),
-                                "/images/products/cupcake-cafe-moka.jpg");
+                                "/images/products/cupcake-cafe-moka.webp");
 
                 // Galletas (5 productos)
                 createProduct("Galletas de Chispas de Chocolate", "Clásicas con chips de chocolate semi-amargo. Docena",
                                 1,
                                 new BigDecimal("85.00"), categories.get("Galletas"),
-                                "/images/products/galletas-chispas-chocolate.jpg");
+                                "/images/products/galletas-chispas-chocolate.webp");
                 createProduct("Galletas de Avena con Pasas", "Saludables y deliciosas con pasas y canela. Docena", 1,
                                 new BigDecimal("75.00"), categories.get("Galletas"),
-                                "/images/products/galletas-avena-pasas.jpg");
+                                "/images/products/galletas-avena-pasas.webp");
                 createProduct("Galletas de Mantequilla", "Tradicionales galletas danesas de mantequilla. Docena", 1,
                                 new BigDecimal("70.00"), categories.get("Galletas"),
-                                "/images/products/galletas-mantequilla.jpg");
+                                "/images/products/galletas-mantequilla.webp");
                 createProduct("Galletas de Jengibre", "Especiadas y crujientes, perfectas con café. Docena", 1,
                                 new BigDecimal("80.00"), categories.get("Galletas"),
-                                "/images/products/galletas-jengibre.jpg");
+                                "/images/products/galletas-jengibre.webp");
                 createProduct("Galletas Snickerdoodle", "Con canela y azúcar, suaves por dentro. Docena", 1,
                                 new BigDecimal("78.00"), categories.get("Galletas"),
-                                "/images/products/galletas-snickerdoodle.jpg");
+                                "/images/products/galletas-snickerdoodle.webp");
 
                 // Pan Dulce Mexicano (6 productos)
                 createProduct("Concha de Vainilla", "Pan dulce tradicional con costra de azúcar sabor vainilla", 0,
                                 new BigDecimal("18.00"), categories.get("Pan Dulce Mexicano"),
-                                "/images/products/concha-vainilla.jpg");
+                                "/images/products/concha-vainilla.webp");
                 createProduct("Concha de Chocolate", "Concha clásica con costra de chocolate", 0,
                                 new BigDecimal("18.00"), categories.get("Pan Dulce Mexicano"),
-                                "/images/products/concha-chocolate.jpg");
+                                "/images/products/concha-chocolate.webp");
                 createProduct("Cuerno de Mantequilla", "Esponjoso cuerno bañado en mantequilla y azúcar glass", 0,
                                 new BigDecimal("20.00"), categories.get("Pan Dulce Mexicano"),
-                                "/images/products/cuerno-mantequilla.jpg");
+                                "/images/products/cuerno-mantequilla.webp");
                 createProduct("Oreja", "Pan hojaldrado caramelizado, crujiente y dulce", 0, new BigDecimal("22.00"),
                                 categories.get("Pan Dulce Mexicano"),
-                                "/images/products/oreja.jpg");
+                                "/images/products/oreja.webp");
                 createProduct("Polvorón Rosa", "Galleta de mantequilla que se deshace en la boca", 0,
                                 new BigDecimal("15.00"), categories.get("Pan Dulce Mexicano"),
-                                "/images/products/polvoron-rosa.jpg");
+                                "/images/products/polvoron-rosa.webp");
                 createProduct("Garibaldi", "Panecillo cubierto de chochitos de colores", 0, new BigDecimal("16.00"),
                                 categories.get("Pan Dulce Mexicano"),
-                                "/images/products/garibaldi.jpg");
+                                "/images/products/garibaldi.webp");
 
                 // Tartas y Pays (5 productos)
                 createProduct("Pay de Manzana", "Manzanas caramelizadas con canela en masa crujiente", 2,
                                 new BigDecimal("280.00"), categories.get("Tartas y Pays"),
-                                "/images/products/pay-manzana.jpg");
+                                "/images/products/pay-manzana.webp");
                 createProduct("Pay de Limón", "Relleno cremoso de limón con merengue italiano", 2,
                                 new BigDecimal("260.00"), categories.get("Tartas y Pays"),
-                                "/images/products/pay-limon.jpg");
+                                "/images/products/pay-limon.webp");
                 createProduct("Pay de Nuez", "Nueces caramelizadas en base de mantequilla", 2, new BigDecimal("320.00"),
                                 categories.get("Tartas y Pays"),
-                                "/images/products/pay-nuez.jpg");
+                                "/images/products/pay-nuez.webp");
                 createProduct("Tarta de Frutos Rojos", "Crema pastelera con frambuesas, moras y fresas", 1,
                                 new BigDecimal("350.00"), categories.get("Tartas y Pays"),
-                                "/images/products/tarta-frutos-rojos.jpg");
+                                "/images/products/tarta-frutos-rojos.webp");
                 createProduct("Tarta Tatin", "Tarta francesa invertida de manzana caramelizada", 2,
                                 new BigDecimal("300.00"), categories.get("Tartas y Pays"),
-                                "/images/products/tarta-tatin.jpg");
+                                "/images/products/tarta-tatin.webp");
 
                 // Postres Individuales (6 productos)
                 createProduct("Tiramisú Individual", "Capas de mascarpone, café y bizcocho. Receta italiana", 1,
                                 new BigDecimal("85.00"), categories.get("Postres Individuales"),
-                                "/images/products/tiramisu-individual.jpg");
+                                "/images/products/tiramisu-individual.webp");
                 createProduct("Mousse de Chocolate", "Mousse sedoso de chocolate belga 70% cacao", 1,
                                 new BigDecimal("75.00"), categories.get("Postres Individuales"),
-                                "/images/products/mousse-chocolate.jpg");
+                                "/images/products/mousse-chocolate.webp");
                 createProduct("Cheesecake New York", "Cremoso cheesecake estilo americano con base de galleta", 2,
                                 new BigDecimal("90.00"), categories.get("Postres Individuales"),
-                                "/images/products/cheesecake-new-york.jpg");
+                                "/images/products/cheesecake-new-york.webp");
                 createProduct("Panna Cotta", "Postre italiano de nata con coulis de frutos rojos", 1,
                                 new BigDecimal("70.00"), categories.get("Postres Individuales"),
-                                "/images/products/panna-cotta.jpg");
+                                "/images/products/panna-cotta.webp");
                 createProduct("Crème Brûlée", "Crema francesa con costra de caramelo crujiente", 1,
                                 new BigDecimal("80.00"), categories.get("Postres Individuales"),
-                                "/images/products/creme-brulee.jpg");
+                                "/images/products/creme-brulee.webp");
                 createProduct("Profiteroles", "Choux rellenos de crema con chocolate caliente", 1,
                                 new BigDecimal("95.00"), categories.get("Postres Individuales"),
-                                "/images/products/profiteroles.jpg");
+                                "/images/products/profiteroles.webp");
 
                 // Panes Artesanales (4 productos)
                 createProduct("Baguette Francesa", "Pan crujiente de masa madre fermentada 24 horas", 1,
                                 new BigDecimal("45.00"), categories.get("Panes Artesanales"),
-                                "/images/products/baguette-francesa.jpg");
+                                "/images/products/baguette-francesa.webp");
                 createProduct("Ciabatta Italiana", "Pan rústico italiano con corteza crujiente y miga aireada", 1,
                                 new BigDecimal("50.00"), categories.get("Panes Artesanales"),
-                                "/images/products/ciabatta-italiana.jpg");
+                                "/images/products/ciabatta-italiana.webp");
                 createProduct("Focaccia de Romero", "Pan plano italiano con aceite de oliva y romero fresco", 1,
                                 new BigDecimal("65.00"), categories.get("Panes Artesanales"),
-                                "/images/products/focaccia-romero.jpg");
+                                "/images/products/focaccia-romero.webp");
                 createProduct("Pan de Masa Madre", "Hogaza artesanal fermentada naturalmente 48 horas", 2,
                                 new BigDecimal("85.00"), categories.get("Panes Artesanales"),
-                                "/images/products/pan-masa-madre.jpg");
+                                "/images/products/pan-masa-madre.webp");
 
                 // Dulces y Confitería (5 productos)
                 createProduct("Mazapán de Almendra", "Dulce tradicional de almendra molida. Caja 12 piezas", 1,
                                 new BigDecimal("120.00"), categories.get("Dulces y Confitería"),
-                                "/images/products/mazapan-almendra.jpg");
+                                "/images/products/mazapan-almendra.webp");
                 createProduct("Cocadas", "Dulce de coco rallado caramelizado. Bolsa 250g", 1, new BigDecimal("65.00"),
                                 categories.get("Dulces y Confitería"),
-                                "/images/products/cocadas.jpg");
+                                "/images/products/cocadas.webp");
                 createProduct("Jamoncillo de Leche", "Dulce de leche tradicional mexicano. Caja 8 piezas", 1,
                                 new BigDecimal("80.00"), categories.get("Dulces y Confitería"),
-                                "/images/products/jamoncillo-leche.jpg");
+                                "/images/products/jamoncillo-leche.webp");
                 createProduct("Trufas de Chocolate", "Trufas artesanales de chocolate belga. Caja 6 piezas", 1,
                                 new BigDecimal("150.00"), categories.get("Dulces y Confitería"),
-                                "/images/products/trufas-chocolate.jpg");
+                                "/images/products/trufas-chocolate.webp");
                 createProduct("Ate con Queso", "Dulce de membrillo artesanal con queso manchego. 300g", 1,
                                 new BigDecimal("95.00"), categories.get("Dulces y Confitería"),
-                                "/images/products/ate-queso.jpg");
+                                "/images/products/ate-queso.webp");
 
                 // Productos Veganos (4 productos)
                 createProduct("Pastel Vegano de Chocolate", "Sin huevo ni lácteos, igual de delicioso", 2,
                                 new BigDecimal("420.00"), categories.get("Productos Veganos"),
-                                "/images/products/pastel-vegano-chocolate.jpg");
+                                "/images/products/pastel-vegano-chocolate.webp");
                 createProduct("Cupcakes Veganos Variados", "Set de 4 cupcakes veganos de sabores surtidos", 1,
                                 new BigDecimal("180.00"), categories.get("Productos Veganos"),
-                                "/images/products/cupcakes-veganos.jpg");
+                                "/images/products/cupcakes-veganos.webp");
                 createProduct("Galletas Veganas de Avena", "Sin huevo, con chips de chocolate vegano. Docena", 1,
                                 new BigDecimal("95.00"), categories.get("Productos Veganos"),
-                                "/images/products/galletas-veganas-avena.jpg");
+                                "/images/products/galletas-veganas-avena.webp");
                 createProduct("Brownie Vegano", "Brownie húmedo sin ingredientes animales", 1, new BigDecimal("55.00"),
                                 categories.get("Productos Veganos"),
-                                "/images/products/brownie-vegano.jpg");
+                                "/images/products/brownie-vegano.webp");
 
                 // Temporada y Festividades (3 productos)
                 createProduct("Pan de Muerto", "Tradicional pan de temporada con azahar. Disponible Oct-Nov", 1,
                                 new BigDecimal("65.00"), categories.get("Temporada y Festividades"),
-                                "/images/products/pan-de-muerto.jpg");
+                                "/images/products/pan-de-muerto.webp");
                 createProduct("Rosca de Reyes", "Con frutas cristalizadas y muñequito. Disponible en Enero", 2,
                                 new BigDecimal("280.00"), categories.get("Temporada y Festividades"),
-                                "/images/products/rosca-de-reyes.jpg");
+                                "/images/products/rosca-de-reyes.webp");
                 createProduct("Tronco de Navidad", "Bûche de Noël con chocolate y crema de castañas", 3,
                                 new BigDecimal("450.00"), categories.get("Temporada y Festividades"),
-                                "/images/products/tronco-navidad.jpg");
+                                "/images/products/tronco-navidad.webp");
 
                 log.info("Seed de productos completado. Total: 50 productos creados.");
         }
