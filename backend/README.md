@@ -143,7 +143,6 @@ TimestampedEntity (id, insertedAt, updatedAt)
 | **Inventory** | Product, Category, Ingredient, ProductIngredient, UnitOfMeasure | Catalogo interno, recetas y costos |
 | **Storefront** | StorefrontSection, StorefrontSectionProduct, Tag, ProductTag | Vitrina publica, secciones y etiquetas |
 | **Sales** | Sale, SaleIngredient | Registro de ventas con snapshots inmutables |
-| **Public User** | PublicUser, Favorite, ProductReview, ReviewStatus | Usuarios Google, favoritos y resenas |
 | **Auth** | User, Role, RoleType | Autenticacion y autorizacion interna |
 
 ### Relaciones clave
