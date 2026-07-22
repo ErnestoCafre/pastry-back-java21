@@ -182,7 +182,6 @@ src/main/java/com/malva_pastry_shop/backend/
 |   +-- inventory/              # Contexto: Catalogo interno
 |   +-- storefront/             # Contexto: Vitrina publica
 |   +-- sales/                  # Contexto: Ventas
-|   +-- publicuser/             # Contexto: Usuarios publicos
 |   +-- auth/                   # Contexto: Autenticacion
 |   +-- common/                 # Entidades Base
 |
@@ -198,16 +197,15 @@ src/main/java/com/malva_pastry_shop/backend/
 |   +-- sales/                  # SaleService
 |   +-- UserService
 |
-+-- security/                   # JWT y Google OAuth
-|
 +-- util/
 
 src/main/resources/
 +-- application.properties          # Config dev (ddl-auto=create, Flyway off)
 +-- application-prod.properties     # Config prod (ddl-auto=none, Flyway on)
 +-- db/migration/
-|   +-- V1__create_schema.sql       # Schema completo (15 tablas)
+|   +-- V1__create_schema.sql       # Schema inicial (baseline en prod)
 |   +-- V2__seed_roles_and_admin.sql # Roles + admin para produccion
+|   +-- V3__drop_public_user_tables.sql # Elimina tablas de usuario publico no usadas
 |   +-- R__seed_demo_data.sql       # Datos de demo (repeatable migration)
 +-- templates/                      # Vistas Thymeleaf
 +-- static/                         # CSS, JS, imagenes
@@ -220,7 +218,6 @@ src/main/resources/
 | **Inventory** | `domain/inventory/` | Product, Category, Ingredient, ProductIngredient, UnitOfMeasure | Catalogo interno, recetas y costos |
 | **Storefront** | `domain/storefront/` | StorefrontSection, StorefrontSectionProduct, Tag, ProductTag | Vitrina publica, secciones y etiquetas |
 | **Sales** | `domain/sales/` | Sale, SaleIngredient | Registro de ventas con snapshots |
-| **Public User** | `domain/publicuser/` | PublicUser, Favorite, ProductReview, ReviewStatus | Usuarios Google, favoritos y resenas |
 | **Auth** | `domain/auth/` | User, Role, RoleType | Autenticacion y autorizacion interna |
 
 ---
