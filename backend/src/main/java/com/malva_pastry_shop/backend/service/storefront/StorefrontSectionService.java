@@ -20,6 +20,7 @@ import com.malva_pastry_shop.backend.dto.response.api.StorefrontSectionApiDTO;
 import com.malva_pastry_shop.backend.repository.ProductRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionProductRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionRepository;
+import com.malva_pastry_shop.backend.util.ImageUrlResolver;
 import com.malva_pastry_shop.backend.util.SlugUtil;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -30,13 +31,16 @@ public class StorefrontSectionService {
     private final StorefrontSectionRepository sectionRepository;
     private final StorefrontSectionProductRepository sectionProductRepository;
     private final ProductRepository productRepository;
+    private final ImageUrlResolver imageUrlResolver;
 
     public StorefrontSectionService(StorefrontSectionRepository sectionRepository,
             StorefrontSectionProductRepository sectionProductRepository,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            ImageUrlResolver imageUrlResolver) {
         this.sectionRepository = sectionRepository;
         this.sectionProductRepository = sectionProductRepository;
         this.productRepository = productRepository;
+        this.imageUrlResolver = imageUrlResolver;
     }
 
     // ========== Consultas ==========
@@ -252,7 +256,7 @@ public class StorefrontSectionService {
                                 p.getId(),
                                 p.getName(),
                                 p.getBasePrice(),
-                                p.getImageUrl(),
+                                imageUrlResolver.resolve(p.getImageUrl()),
                                 p.getCategory() != null ? p.getCategory().getName() : null);
                     })
                     .collect(Collectors.toList());
@@ -282,7 +286,7 @@ public class StorefrontSectionService {
                             p.getId(),
                             p.getName(),
                             p.getBasePrice(),
-                            p.getImageUrl(),
+                            imageUrlResolver.resolve(p.getImageUrl()),
                             p.getCategory() != null ? p.getCategory().getName() : null);
                 })
                 .collect(Collectors.toList());
