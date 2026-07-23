@@ -404,12 +404,32 @@ public class ProductService {
             throw new IllegalStateException("El producto ya tiene este ingrediente en su receta");
         }
 
+        validateRecipeQuantity(quantity);
+
+        ProductIngredient productIngredient = new ProductIngredient(product, ingredient, quantity);
+        productIngredientRepository.save(productIngredient);
+    }
+
+    /**
+     * Valida la cantidad de un ingrediente en una receta contra los limites de
+     * la columna product_ingredients.quantity NUMERIC(14,4) / @Digits(integer=10,
+     * fraction=4). Sin esta validacion, una cantidad con mas de 4 decimales o mas
+     * de 10 digitos enteros llega a Hibernate y revienta como
+     * ConstraintViolationException (error 500 en el panel) en vez de mostrar un
+     * mensaje al usuario.
+     */
+    private void validateRecipeQuantity(BigDecimal quantity) {
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
         }
 
-        ProductIngredient productIngredient = new ProductIngredient(product, ingredient, quantity);
-        productIngredientRepository.save(productIngredient);
+        BigDecimal normalized = quantity.stripTrailingZeros();
+        if (normalized.scale() > 4) {
+            throw new IllegalArgumentException("La cantidad no puede tener mas de 4 decimales");
+        }
+        if (normalized.precision() - normalized.scale() > 10) {
+            throw new IllegalArgumentException("La cantidad no puede tener mas de 10 digitos enteros");
+        }
     }
 
     /**
@@ -435,9 +455,7 @@ public class ProductService {
         // Verificar que el producto existe
         findById(productId);
 
-        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
-        }
+        validateRecipeQuantity(quantity);
 
         ProductIngredient productIngredient = productIngredientRepository
                 .findByProductIdAndIngredientId(productId, ingredientId)
