@@ -3,6 +3,7 @@ package com.malva_pastry_shop.backend.repository;
 import com.malva_pastry_shop.backend.domain.inventory.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,6 +22,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findByIdAndDeletedAtIsNull(Long id);
 
     // Categorías eliminadas (papelera)
+    // deletedBy es obligatorio en el fetch: la vista muestra quien elimino y con
+    // open-in-view=false un proxy lazy romperia el render de la plantilla.
+    @EntityGraph(attributePaths = { "deletedBy" })
     Page<Category> findByDeletedAtIsNotNull(Pageable pageable);
 
     // Validacion de nombre unico (case-insensitive)

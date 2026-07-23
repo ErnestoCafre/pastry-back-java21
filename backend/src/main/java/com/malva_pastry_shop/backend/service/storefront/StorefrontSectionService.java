@@ -137,6 +137,16 @@ public class StorefrontSectionService {
                     "Solo se pueden eliminar permanentemente las secciones que están en la papelera");
         }
 
+        // storefront_section_products no se limpia en cascada desde la seccion, y
+        // su FK rechaza el borrado: sin esta guarda la base de datos lanzaria
+        // DataIntegrityViolationException (error 500 en el panel).
+        long usageCount = sectionProductRepository.countByStorefrontSectionId(id);
+        if (usageCount > 0) {
+            throw new IllegalStateException(
+                    "No se puede eliminar permanentemente la sección porque tiene " + usageCount
+                            + " producto(s) asociado(s)");
+        }
+
         sectionRepository.delete(section);
     }
 

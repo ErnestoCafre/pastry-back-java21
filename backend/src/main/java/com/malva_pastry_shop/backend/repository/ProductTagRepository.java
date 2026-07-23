@@ -22,6 +22,9 @@ public interface ProductTagRepository extends JpaRepository<ProductTag, Long> {
 
     boolean existsByProductIdAndTagId(Long productId, Long tagId);
 
+    // Productos asociados a un tag (para validar el borrado permanente)
+    long countByTagId(Long tagId);
+
     @EntityGraph(attributePaths = {"tag"})
     Optional<ProductTag> findByProductIdAndTagId(Long productId, Long tagId);
 

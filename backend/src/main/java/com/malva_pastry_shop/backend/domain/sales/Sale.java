@@ -46,8 +46,9 @@ public class Sale extends TimestampedEntity {
     private User registeredBy;
 
     /**
-     * Referencia al producto (puede ser null si el producto se elimina).
-     * SET NULL on delete para mantener historico de ventas.
+     * Referencia al producto. La columna admite null para poder conservar el
+     * historico, pero la FK es NO ACTION (no hay ON DELETE SET NULL en el
+     * esquema): ProductService.hardDelete rechaza borrar un producto con ventas.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", foreignKey = @ForeignKey(name = "fk_sale_product"))

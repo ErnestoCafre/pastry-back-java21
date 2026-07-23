@@ -26,10 +26,29 @@ El sistema esta deployado en Render y disponible para visualizacion inmediata:
 
 ### Credenciales de acceso (demo)
 
-| Email | Password | Rol |
-|-------|----------|-----|
-| `admin@malva.com` | `sysadmin123` | Admin |
-| `employee@malva.com` | `sysadmin123` | Employee |
+Las mismas credenciales sirven en la demo desplegada y en un entorno local levantado con el perfil `dev`.
+
+| Email | Password | Rol | Notas |
+|-------|----------|-----|-------|
+| `sysadmin@malva.com` | `sysadmin123` | Admin | Administrador del sistema (`system_admin`) |
+| `admin@malva.com` | `sysadmin123` | Admin | Acceso completo, incluida la gestion de usuarios |
+| `employee@malva.com` | `sysadmin123` | Employee | Acceso limitado: no gestiona usuarios |
+
+### Datos de demo
+
+El seed carga un catalogo completo y operable, no solo el catalogo publico:
+
+| Entidad | Cantidad | Detalle |
+|---------|----------|---------|
+| Categorias | 10 | Pasteles, cupcakes, pan dulce mexicano, veganos, temporada... |
+| Ingredientes | 75 | Con costo unitario y unidad de medida |
+| Productos | 50 | Todos visibles, con imagen `.webp` y categoria |
+| Recetas | 297 lineas | Los 50 productos tienen receta; el costo de insumos queda entre el 20% y el 43% del precio |
+| Tags / Secciones | 14 / 6 | Con 84 y 35 asociaciones a productos |
+| Ventas | 42 | Repartidas en los ultimos 45 dias, con ventas del dia actual |
+| Insumos de venta | 247 | Snapshot de costos congelado al momento de cada venta |
+
+Gracias a las recetas y ventas, el dashboard, el calculo de costos y el detalle de venta muestran datos reales desde el primer arranque.
 
 > **Nota:** Render Free Tier puede tardar ~1 minuto (se muestra página de carga de carga) en el primer request si el servicio esta inactivo. 
 
