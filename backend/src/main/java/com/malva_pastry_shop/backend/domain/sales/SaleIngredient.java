@@ -1,6 +1,7 @@
 package com.malva_pastry_shop.backend.domain.sales;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import com.malva_pastry_shop.backend.domain.common.TimestampedEntity;
 import com.malva_pastry_shop.backend.domain.inventory.Ingredient;
@@ -34,8 +35,9 @@ public class SaleIngredient extends TimestampedEntity {
     private Sale sale;
 
     /**
-     * Referencia al ingrediente (puede ser null si el ingrediente se elimina).
-     * SET NULL on delete para mantener historico.
+     * Referencia al ingrediente. La columna admite null para poder conservar el
+     * historico, pero la FK es NO ACTION (no hay ON DELETE SET NULL en el
+     * esquema): un ingrediente usado en una receta no se puede borrar.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ingredient_id", foreignKey = @ForeignKey(name = "fk_sale_ingredient_ingredient"))
@@ -94,7 +96,11 @@ public class SaleIngredient extends TimestampedEntity {
         this.quantityUsed = quantityUsed;
         this.unitCost = unitCost;
         this.unitOfMeasure = unitOfMeasure;
-        this.totalCost = quantityUsed.multiply(unitCost);
+        // quantityUsed llega con escala 4 (NUMERIC(14,4)) y unitCost con escala 2
+        // (NUMERIC(12,2)), por lo que el producto tiene escala 6. Sin redondear,
+        // @Digits(fraction = 2) falla en la validacion PreInsert de Hibernate y
+        // la venta no se puede persistir. Se redondea a la escala de la columna.
+        this.totalCost = quantityUsed.multiply(unitCost).setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.dto.request.TagRequest;
+import com.malva_pastry_shop.backend.repository.ProductTagRepository;
 import com.malva_pastry_shop.backend.repository.TagRepository;
 import com.malva_pastry_shop.backend.util.SlugUtil;
 
@@ -19,9 +20,11 @@ import jakarta.persistence.EntityNotFoundException;
 public class TagService {
 
     private final TagRepository tagRepository;
+    private final ProductTagRepository productTagRepository;
 
-    public TagService(TagRepository tagRepository) {
+    public TagService(TagRepository tagRepository, ProductTagRepository productTagRepository) {
         this.tagRepository = tagRepository;
+        this.productTagRepository = productTagRepository;
     }
 
     // ========== Consultas ==========
@@ -111,6 +114,16 @@ public class TagService {
 
         if (tag.getDeletedAt() == null) {
             throw new IllegalStateException("Solo se pueden eliminar permanentemente los tags que están en la papelera");
+        }
+
+        // product_tags no se limpia en cascada desde Tag, y su FK rechaza el
+        // borrado: sin esta guarda la base de datos lanzaria
+        // DataIntegrityViolationException (error 500 en el panel).
+        long usageCount = productTagRepository.countByTagId(id);
+        if (usageCount > 0) {
+            throw new IllegalStateException(
+                    "No se puede eliminar permanentemente el tag porque está asociado a " + usageCount
+                            + " producto(s)");
         }
 
         tagRepository.delete(tag);

@@ -6,6 +6,9 @@ import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.Category;
 import com.malva_pastry_shop.backend.domain.inventory.Ingredient;
 import com.malva_pastry_shop.backend.domain.inventory.Product;
+import com.malva_pastry_shop.backend.domain.inventory.ProductIngredient;
+import com.malva_pastry_shop.backend.domain.sales.Sale;
+import com.malva_pastry_shop.backend.domain.sales.SaleIngredient;
 import com.malva_pastry_shop.backend.domain.storefront.ProductTag;
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSection;
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSectionProduct;
@@ -13,9 +16,11 @@ import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.domain.inventory.UnitOfMeasure;
 import com.malva_pastry_shop.backend.repository.CategoryRepository;
 import com.malva_pastry_shop.backend.repository.IngredientRepository;
+import com.malva_pastry_shop.backend.repository.ProductIngredientRepository;
 import com.malva_pastry_shop.backend.repository.ProductRepository;
 import com.malva_pastry_shop.backend.repository.ProductTagRepository;
 import com.malva_pastry_shop.backend.repository.RoleRepository;
+import com.malva_pastry_shop.backend.repository.SaleRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionProductRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionRepository;
 import com.malva_pastry_shop.backend.repository.TagRepository;
@@ -30,6 +35,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +45,14 @@ import java.util.Map;
 public class DataSeeder implements CommandLineRunner {
 
         private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
+
+        /**
+         * Password de los usuarios demo. Es el mismo para los cuatro, igual que en
+         * produccion (V2 y R__seed_demo_data.sql comparten un unico hash BCrypt),
+         * para que las credenciales del README sirvan tanto en local como en la
+         * demo desplegada.
+         */
+        private static final String DEMO_PASSWORD = "sysadmin123";
 
         private final RoleRepository roleRepository;
         private final UserRepository userRepository;
@@ -48,6 +63,8 @@ public class DataSeeder implements CommandLineRunner {
         private final ProductTagRepository productTagRepository;
         private final StorefrontSectionRepository sectionRepository;
         private final StorefrontSectionProductRepository sectionProductRepository;
+        private final ProductIngredientRepository productIngredientRepository;
+        private final SaleRepository saleRepository;
         private final PasswordEncoder passwordEncoder;
 
         public DataSeeder(RoleRepository roleRepository,
@@ -59,6 +76,8 @@ public class DataSeeder implements CommandLineRunner {
                         ProductTagRepository productTagRepository,
                         StorefrontSectionRepository sectionRepository,
                         StorefrontSectionProductRepository sectionProductRepository,
+                        ProductIngredientRepository productIngredientRepository,
+                        SaleRepository saleRepository,
                         PasswordEncoder passwordEncoder) {
                 this.roleRepository = roleRepository;
                 this.userRepository = userRepository;
@@ -69,6 +88,8 @@ public class DataSeeder implements CommandLineRunner {
                 this.productTagRepository = productTagRepository;
                 this.sectionRepository = sectionRepository;
                 this.sectionProductRepository = sectionProductRepository;
+                this.productIngredientRepository = productIngredientRepository;
+                this.saleRepository = saleRepository;
                 this.passwordEncoder = passwordEncoder;
         }
 
@@ -84,6 +105,8 @@ public class DataSeeder implements CommandLineRunner {
                 seedProductTags(tags);
                 Map<String, StorefrontSection> sections = seedSections();
                 seedSectionProducts(sections);
+                seedProductIngredients();
+                seedSales();
         }
 
         private void seedRoles() {
@@ -114,7 +137,7 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setName("Administrador");
                         admin.setLastName("Sistema");
                         admin.setEmail(sysAdminEmail);
-                        admin.setPasswordHash(passwordEncoder.encode("sysadmin123"));
+                        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
                         admin.setEnabled(true);
                         admin.setSystemAdmin(true);
                         admin.setRole(adminRole);
@@ -134,7 +157,7 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setName("Administrador");
                         admin.setLastName("Sistema");
                         admin.setEmail(adminEmail);
-                        admin.setPasswordHash(passwordEncoder.encode("admin123"));
+                        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
                         admin.setEnabled(true);
                         admin.setSystemAdmin(false);
                         admin.setRole(adminRole);
@@ -154,7 +177,7 @@ public class DataSeeder implements CommandLineRunner {
                         employee.setName("Empleado");
                         employee.setLastName("Sistema");
                         employee.setEmail(employeeEmail);
-                        employee.setPasswordHash(passwordEncoder.encode("employee123"));
+                        employee.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
                         employee.setEnabled(true);
                         employee.setSystemAdmin(false);
                         employee.setRole(employeeRole);
@@ -174,7 +197,7 @@ public class DataSeeder implements CommandLineRunner {
                         user.setName("Usuario");
                         user.setLastName("Sistema");
                         user.setEmail(userEmail);
-                        user.setPasswordHash(passwordEncoder.encode("user123"));
+                        user.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
                         user.setEnabled(true);
                         user.setSystemAdmin(false);
                         user.setRole(userRole);
@@ -922,5 +945,211 @@ public class DataSeeder implements CommandLineRunner {
                         order++;
                 }
                 return count;
+        }
+
+        // ========== Recetas (Product-Ingredient) ==========
+
+        /**
+         * Recetas de los 50 productos. Cada fila es
+         * { producto, "ingrediente:cantidad", ... }.
+         * La cantidad se expresa SIEMPRE en la unidad de medida del ingrediente:
+         * "Harina de Trigo:0.5" son 0.5 kg (KILOGRAMO) y "Huevos:6" son 6 piezas
+         * (UNIDAD). Espejo exacto de la seccion 11 de R__seed_demo_data.sql.
+         */
+        private static final String[][] RECIPES = {
+                        { "Pastel de Chocolate Triple", "Harina de Trigo:0.5", "Azúcar Blanca:0.4", "Chocolate Amargo:0.35", "Mantequilla:0.25", "Huevos:6", "Crema para Batir:0.3", "Cacao en Polvo:0.08" },
+                        { "Pastel Red Velvet", "Harina de Trigo:0.45", "Azúcar Blanca:0.35", "Mantequilla:0.2", "Huevos:4", "Queso Crema:0.4", "Crema para Batir:0.2", "Colorante Alimentario:1", "Cacao en Polvo:0.03" },
+                        { "Pastel de Vainilla Clásico", "Harina de Trigo:0.5", "Azúcar Blanca:0.4", "Mantequilla:0.3", "Huevos:5", "Leche Entera:0.25", "Azúcar Glass:0.2", "Extracto de Vainilla:0.02", "Polvo para Hornear:0.015" },
+                        { "Pastel de Zanahoria", "Harina Integral:0.4", "Azúcar Morena:0.35", "Aceite Vegetal:0.25", "Huevos:4", "Nueces:0.15", "Pasas:0.1", "Queso Crema:0.35", "Canela en Polvo:0.01" },
+                        { "Pastel de Fresas con Crema", "Harina de Trigo:0.45", "Azúcar Blanca:0.3", "Huevos:5", "Fresas Frescas:0.6", "Crema para Batir:0.5", "Mantequilla:0.15", "Azúcar Glass:0.1" },
+                        { "Pastel Tres Leches", "Harina de Trigo:0.4", "Azúcar Blanca:0.3", "Huevos:6", "Leche Condensada:0.4", "Leche Evaporada:0.35", "Leche Entera:0.3", "Crema para Batir:0.25" },
+                        { "Pastel Selva Negra", "Harina de Trigo:0.4", "Azúcar Blanca:0.3", "Chocolate Amargo:0.3", "Cerezas:0.4", "Crema para Batir:0.5", "Huevos:5", "Cacao en Polvo:0.05" },
+                        { "Cupcake de Chocolate", "Harina de Trigo:0.05", "Azúcar Blanca:0.04", "Chocolate Amargo:0.03", "Mantequilla:0.03", "Huevos:1", "Cacao en Polvo:0.01" },
+                        { "Cupcake Red Velvet", "Harina de Trigo:0.05", "Azúcar Blanca:0.04", "Queso Crema:0.05", "Mantequilla:0.025", "Huevos:1", "Colorante Alimentario:0.1", "Cacao en Polvo:0.005" },
+                        { "Cupcake de Limón", "Harina de Trigo:0.05", "Azúcar Blanca:0.045", "Mantequilla:0.035", "Huevos:1", "Limones:0.08", "Azúcar Glass:0.04" },
+                        { "Cupcake de Nutella", "Harina de Trigo:0.05", "Azúcar Blanca:0.035", "Nutella:0.06", "Mantequilla:0.03", "Huevos:1", "Avellanas:0.02" },
+                        { "Cupcake de Café Moka", "Harina de Trigo:0.05", "Azúcar Blanca:0.04", "Café Instantáneo:0.01", "Chocolate de Leche:0.03", "Mantequilla:0.03", "Huevos:1" },
+                        { "Galletas de Chispas de Chocolate", "Harina de Trigo:0.25", "Azúcar Morena:0.12", "Mantequilla:0.1", "Huevos:1", "Chispas de Chocolate:0.1", "Bicarbonato de Sodio:0.005" },
+                        { "Galletas de Avena con Pasas", "Harina de Avena:0.2", "Harina de Trigo:0.1", "Azúcar Morena:0.1", "Mantequilla:0.09", "Huevos:1", "Pasas:0.08", "Canela en Polvo:0.005" },
+                        { "Galletas de Mantequilla", "Harina de Trigo:0.25", "Mantequilla:0.15", "Azúcar Glass:0.08", "Huevos:1", "Extracto de Vainilla:0.005", "Sal:0.002" },
+                        { "Galletas de Jengibre", "Harina de Trigo:0.25", "Piloncillo:0.1", "Mantequilla:0.1", "Jengibre en Polvo:0.01", "Canela en Polvo:0.008", "Huevos:1", "Bicarbonato de Sodio:0.005" },
+                        { "Galletas Snickerdoodle", "Harina de Trigo:0.25", "Azúcar Blanca:0.15", "Mantequilla:0.12", "Huevos:1", "Canela en Polvo:0.01", "Cremor Tártaro:0.004" },
+                        { "Concha de Vainilla", "Harina de Trigo:0.08", "Azúcar Blanca:0.03", "Mantequilla:0.02", "Huevos:0.5", "Levadura Fresca:0.003", "Extracto de Vainilla:0.001" },
+                        { "Concha de Chocolate", "Harina de Trigo:0.08", "Azúcar Blanca:0.03", "Mantequilla:0.02", "Huevos:0.5", "Levadura Fresca:0.003", "Cacao en Polvo:0.008" },
+                        { "Cuerno de Mantequilla", "Harina de Trigo:0.09", "Mantequilla:0.04", "Azúcar Glass:0.01", "Huevos:0.5", "Levadura Fresca:0.003", "Sal:0.001" },
+                        { "Oreja", "Harina de Trigo:0.08", "Mantequilla:0.05", "Azúcar Blanca:0.04", "Sal:0.001" },
+                        { "Polvorón Rosa", "Harina de Trigo:0.06", "Manteca Vegetal:0.03", "Azúcar Glass:0.03", "Colorante Alimentario:0.02", "Huevos:0.25" },
+                        { "Garibaldi", "Harina de Trigo:0.06", "Azúcar Blanca:0.025", "Mantequilla:0.02", "Huevos:0.5", "Mermelada de Fresa:0.015", "Sprinkles:0.005" },
+                        { "Pay de Manzana", "Harina de Trigo:0.35", "Mantequilla:0.2", "Azúcar Blanca:0.15", "Azúcar Morena:0.05", "Manzanas:0.8", "Canela en Polvo:0.01", "Huevos:1" },
+                        { "Pay de Limón", "Harina de Trigo:0.3", "Mantequilla:0.18", "Leche Condensada:0.4", "Limones:0.35", "Huevos:4", "Azúcar Blanca:0.15" },
+                        { "Pay de Nuez", "Harina de Trigo:0.3", "Mantequilla:0.18", "Nueces:0.35", "Azúcar Morena:0.2", "Huevos:3", "Miel de Abeja:0.05" },
+                        { "Tarta de Frutos Rojos", "Harina de Trigo:0.25", "Mantequilla:0.15", "Frambuesas:0.25", "Moras:0.25", "Fresas Frescas:0.2", "Leche Entera:0.3", "Yema de Huevo:0.08", "Azúcar Blanca:0.12" },
+                        { "Tarta Tatin", "Harina de Trigo:0.25", "Mantequilla:0.2", "Manzanas:0.9", "Azúcar Blanca:0.25", "Caramelo:0.1" },
+                        { "Tiramisú Individual", "Harina de Trigo:0.05", "Queso Crema:0.12", "Café Instantáneo:0.01", "Huevos:2", "Azúcar Blanca:0.05", "Crema para Batir:0.08", "Cacao en Polvo:0.008" },
+                        { "Mousse de Chocolate", "Chocolate Amargo:0.08", "Crema para Batir:0.12", "Huevos:2", "Azúcar Blanca:0.03", "Gelatina Sin Sabor:0.003" },
+                        { "Cheesecake New York", "Queso Crema:0.2", "Azúcar Blanca:0.08", "Huevos:2", "Crema para Batir:0.1", "Mantequilla:0.04", "Harina de Trigo:0.06", "Extracto de Vainilla:0.004" },
+                        { "Panna Cotta", "Crema para Batir:0.2", "Leche Entera:0.1", "Azúcar Blanca:0.05", "Gelatina Sin Sabor:0.005", "Frambuesas:0.06", "Vainilla en Vaina:0.5" },
+                        { "Crème Brûlée", "Crema para Batir:0.22", "Yema de Huevo:0.06", "Azúcar Blanca:0.06", "Vainilla en Vaina:1" },
+                        { "Profiteroles", "Harina de Trigo:0.08", "Mantequilla:0.06", "Huevos:3", "Leche Entera:0.15", "Chocolate Amargo:0.06", "Crema para Batir:0.12", "Azúcar Blanca:0.03" },
+                        { "Baguette Francesa", "Harina de Trigo:0.4", "Levadura Fresca:0.006", "Sal:0.008" },
+                        { "Ciabatta Italiana", "Harina de Trigo:0.4", "Aceite de Oliva:0.02", "Levadura Seca:0.004", "Sal:0.008" },
+                        { "Focaccia de Romero", "Harina de Trigo:0.35", "Aceite de Oliva:0.06", "Levadura Seca:0.004", "Sal de Mar:0.006", "Sal:0.006" },
+                        { "Pan de Masa Madre", "Harina de Trigo:0.5", "Harina Integral:0.15", "Levadura Fresca:0.004", "Sal:0.012" },
+                        { "Mazapán de Almendra", "Almendras:0.25", "Azúcar Glass:0.18" },
+                        { "Cocadas", "Coco Rallado:0.2", "Leche Condensada:0.15", "Azúcar Blanca:0.05" },
+                        { "Jamoncillo de Leche", "Leche Entera:0.6", "Azúcar Blanca:0.2", "Leche Condensada:0.1", "Nueces:0.04" },
+                        { "Trufas de Chocolate", "Chocolate Amargo:0.25", "Crema para Batir:0.1", "Mantequilla:0.03", "Cacao en Polvo:0.02" },
+                        { "Ate con Queso", "Manzanas:0.4", "Azúcar Blanca:0.25", "Limones:0.05", "Gelatina Sin Sabor:0.004" },
+                        { "Pastel Vegano de Chocolate", "Harina de Trigo:0.45", "Azúcar Morena:0.35", "Cacao en Polvo:0.1", "Aceite de Coco:0.15", "Leche de Almendra:0.4", "Chocolate Amargo:0.15", "Bicarbonato de Sodio:0.008" },
+                        { "Cupcakes Veganos Variados", "Harina de Trigo:0.2", "Azúcar Morena:0.15", "Aceite de Coco:0.06", "Leche de Almendra:0.18", "Cacao en Polvo:0.03", "Chispas de Chocolate:0.05", "Polvo para Hornear:0.008" },
+                        { "Galletas Veganas de Avena", "Harina de Avena:0.2", "Azúcar Morena:0.12", "Aceite de Coco:0.08", "Chispas de Chocolate:0.08", "Leche de Almendra:0.06", "Bicarbonato de Sodio:0.004" },
+                        { "Brownie Vegano", "Harina de Trigo:0.06", "Azúcar Morena:0.05", "Cacao en Polvo:0.02", "Aceite de Coco:0.03", "Leche de Almendra:0.05", "Nueces:0.02" },
+                        { "Pan de Muerto", "Harina de Trigo:0.25", "Mantequilla:0.08", "Azúcar Blanca:0.06", "Huevos:2", "Azahar:0.005", "Levadura Fresca:0.005", "Naranjas:0.05" },
+                        { "Rosca de Reyes", "Harina de Trigo:0.5", "Mantequilla:0.2", "Azúcar Blanca:0.15", "Huevos:5", "Levadura Fresca:0.008", "Duraznos:0.1", "Naranjas:0.08", "Azahar:0.006" },
+                        { "Tronco de Navidad", "Harina de Trigo:0.3", "Chocolate Amargo:0.25", "Crema para Batir:0.35", "Huevos:6", "Azúcar Blanca:0.2", "Avellanas:0.1", "Cacao en Polvo:0.04" }
+        };
+
+        private void seedProductIngredients() {
+                if (productIngredientRepository.count() > 0) {
+                        log.info("Ya existen recetas en la base de datos. Saltando seed de recetas.");
+                        return;
+                }
+
+                int totalLines = 0;
+                for (String[] recipe : RECIPES) {
+                        String productName = recipe[0];
+                        var productOpt = productRepository.findByNameIgnoreCase(productName);
+                        if (productOpt.isEmpty()) {
+                                log.warn("Producto no encontrado para receta: {}", productName);
+                                continue;
+                        }
+                        Product product = productOpt.get();
+
+                        for (int i = 1; i < recipe.length; i++) {
+                                String[] parts = recipe[i].split(":");
+                                var ingredientOpt = ingredientRepository.findByNameIgnoreCase(parts[0]);
+                                if (ingredientOpt.isEmpty()) {
+                                        log.warn("Ingrediente no encontrado para receta '{}': {}", productName,
+                                                        parts[0]);
+                                        continue;
+                                }
+                                productIngredientRepository.save(new ProductIngredient(product, ingredientOpt.get(),
+                                                new BigDecimal(parts[1])));
+                                totalLines++;
+                        }
+                }
+
+                log.info("Seed de recetas completado. Total: {} lineas de receta creadas.", totalLines);
+        }
+
+        // ========== Ventas ==========
+
+        /**
+         * Historial de ventas demo. Cada fila es
+         * { producto, cantidad, precioUnitario, diasAtras, hora, cliente, dni,
+         * telefono, notas, emailVendedor }.
+         * Las fechas son relativas al dia de arranque, por lo que el dashboard
+         * siempre encuentra ventas de hoy y del mes en curso.
+         * Espejo exacto de la seccion 12 de R__seed_demo_data.sql.
+         */
+        private static final Object[][] SALES = {
+                        { "Pastel de Chocolate Triple", 1, "450.00", 0, 10, "María González Ruiz", "30125478", "55 1234 5601", "Entrega en sucursal centro", "employee@malva.com" },
+                        { "Concha de Vainilla", 12, "18.00", 0, 11, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Cupcake de Chocolate", 6, "45.00", 0, 13, "Laura Méndez", "28994512", "55 1234 5602", "Pedido para oficina", "employee@malva.com" },
+                        { "Galletas de Chispas de Chocolate", 2, "85.00", 0, 16, "Venta de mostrador", null, null, null, "admin@malva.com" },
+                        { "Pastel Tres Leches", 1, "350.00", 1, 12, "Jorge Ramírez", "31450098", "55 1234 5603", "Cumpleaños familiar", "employee@malva.com" },
+                        { "Pay de Manzana", 1, "280.00", 1, 15, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Cuerno de Mantequilla", 10, "20.00", 1, 17, "Venta de mostrador", null, null, null, "admin@malva.com" },
+                        { "Cheesecake New York", 4, "90.00", 2, 11, "Patricia Soto", "27883421", "55 1234 5604", null, "employee@malva.com" },
+                        { "Baguette Francesa", 6, "45.00", 2, 18, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Pastel Red Velvet", 1, "420.00", 3, 9, "Andrea Villalobos", "30012765", "55 1234 5605", "Decoración especial solicitada", "admin@malva.com" },
+                        { "Cupcake Red Velvet", 12, "48.00", 3, 14, "Escuela Primaria Sol", "30559981", "55 1234 5606", "Festival escolar", "employee@malva.com" },
+                        { "Trufas de Chocolate", 3, "150.00", 4, 16, "Ricardo Fuentes", "29334410", "55 1234 5607", null, "employee@malva.com" },
+                        { "Concha de Chocolate", 20, "18.00", 4, 10, "Venta de mostrador", null, null, null, "admin@malva.com" },
+                        { "Tarta de Frutos Rojos", 1, "350.00", 5, 13, "Sofía Herrera", "31220845", "55 1234 5608", "Aniversario", "employee@malva.com" },
+                        { "Galletas de Avena con Pasas", 3, "75.00", 5, 17, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Pastel de Fresas con Crema", 1, "480.00", 6, 11, "Familia Ortega", "26778123", "55 1234 5609", "Recoger 18:00 hs", "admin@malva.com" },
+                        { "Tiramisú Individual", 8, "85.00", 6, 15, "Café Aurora", "30991256", "55 1234 5610", "Pedido mayorista semanal", "employee@malva.com" },
+                        { "Pan de Masa Madre", 4, "85.00", 8, 12, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Mousse de Chocolate", 6, "75.00", 9, 14, "Daniela Cruz", "31008877", "55 1234 5611", null, "employee@malva.com" },
+                        { "Pastel Selva Negra", 1, "520.00", 10, 10, "Empresa Nexus SA", "30447712", "55 1234 5612", "Factura a nombre de la empresa", "admin@malva.com" },
+                        { "Oreja", 15, "22.00", 11, 16, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Pay de Limón", 2, "260.00", 12, 13, "Marcos Iturbe", "28110934", "55 1234 5613", null, "employee@malva.com" },
+                        { "Brownie Vegano", 10, "55.00", 13, 15, "Tienda Verde", "31556602", "55 1234 5614", "Pedido vegano recurrente", "employee@malva.com" },
+                        { "Cupcake de Nutella", 6, "55.00", 14, 12, "Venta de mostrador", null, null, null, "admin@malva.com" },
+                        { "Profiteroles", 5, "95.00", 15, 17, "Valeria Nava", "29887340", "55 1234 5615", null, "employee@malva.com" },
+                        { "Pastel de Zanahoria", 1, "400.00", 16, 11, "Hugo Salazar", "30778215", "55 1234 5616", "Sin nueces en la cobertura", "employee@malva.com" },
+                        { "Galletas de Mantequilla", 4, "70.00", 17, 14, "Venta de mostrador", null, null, null, "admin@malva.com" },
+                        { "Panna Cotta", 6, "70.00", 18, 16, "Restaurante Bellavista", "30223391", "55 1234 5617", "Pedido para servicio de cena", "employee@malva.com" },
+                        { "Polvorón Rosa", 24, "15.00", 19, 10, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Pastel de Vainilla Clásico", 1, "380.00", 20, 13, "Elena Paredes", "27665048", "55 1234 5618", "Cumpleaños infantil", "admin@malva.com" },
+                        { "Ciabatta Italiana", 8, "50.00", 21, 18, "Bistró La Esquina", "31447790", "55 1234 5619", "Pedido mayorista", "employee@malva.com" },
+                        { "Crème Brûlée", 4, "80.00", 23, 15, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Mazapán de Almendra", 2, "120.00", 25, 12, "Gabriel Lozano", "29556614", "55 1234 5620", null, "admin@malva.com" },
+                        { "Pay de Nuez", 1, "320.00", 27, 11, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Cocadas", 6, "65.00", 29, 16, "Mercadito Artesanal", "30889945", "55 1234 5621", "Puesto de feria", "employee@malva.com" },
+                        { "Focaccia de Romero", 5, "65.00", 31, 14, "Venta de mostrador", null, null, null, "admin@malva.com" },
+                        { "Pastel Vegano de Chocolate", 1, "420.00", 33, 12, "Camila Duarte", "31770223", "55 1234 5622", "Sin trazas de lácteos", "employee@malva.com" },
+                        { "Galletas de Jengibre", 3, "80.00", 35, 17, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Tarta Tatin", 2, "300.00", 38, 13, "Fernando Aguirre", "28993377", "55 1234 5623", null, "admin@malva.com" },
+                        { "Jamoncillo de Leche", 4, "80.00", 40, 15, "Venta de mostrador", null, null, null, "employee@malva.com" },
+                        { "Cupcakes Veganos Variados", 2, "180.00", 42, 11, "Tienda Verde", "31556602", "55 1234 5614", "Segundo pedido del mes", "employee@malva.com" },
+                        { "Cupcake de Café Moka", 6, "50.00", 45, 16, "Venta de mostrador", null, null, null, "admin@malva.com" }
+        };
+
+        private void seedSales() {
+                if (saleRepository.count() > 0) {
+                        log.info("Ya existen ventas en la base de datos. Saltando seed de ventas.");
+                        return;
+                }
+
+                int totalSales = 0;
+                for (Object[] data : SALES) {
+                        String productName = (String) data[0];
+                        var productOpt = productRepository.findByNameIgnoreCase(productName);
+                        if (productOpt.isEmpty()) {
+                                log.warn("Producto no encontrado para venta: {}", productName);
+                                continue;
+                        }
+
+                        String sellerEmail = (String) data[9];
+                        var sellerOpt = userRepository.findByEmail(sellerEmail);
+                        if (sellerOpt.isEmpty()) {
+                                log.warn("Usuario no encontrado para venta de '{}': {}", productName, sellerEmail);
+                                continue;
+                        }
+
+                        Product product = productOpt.get();
+                        int quantity = (Integer) data[1];
+                        BigDecimal unitPrice = new BigDecimal((String) data[2]);
+                        LocalDateTime saleDate = LocalDate.now()
+                                        .minusDays((Integer) data[3])
+                                        .atTime((Integer) data[4], 0);
+
+                        Sale sale = new Sale(saleDate, sellerOpt.get(), product, product.getName(), quantity,
+                                        unitPrice);
+                        sale.setCustomerName((String) data[5]);
+                        sale.setCustomerDni((String) data[6]);
+                        sale.setCustomerPhone((String) data[7]);
+                        sale.setNotes((String) data[8]);
+
+                        // Snapshot de insumos con la misma logica que SaleService.create()
+                        for (ProductIngredient pi : productIngredientRepository.findByProductId(product.getId())) {
+                                BigDecimal quantityUsed = pi.getQuantity().multiply(BigDecimal.valueOf(quantity));
+                                sale.addSaleIngredient(new SaleIngredient(
+                                                sale,
+                                                pi.getIngredient(),
+                                                pi.getIngredient().getName(),
+                                                quantityUsed,
+                                                pi.getIngredient().getUnitCost(),
+                                                pi.getIngredient().getUnitOfMeasure().getDisplayName()));
+                        }
+
+                        // Cascade ALL persiste tambien los SaleIngredient
+                        saleRepository.save(sale);
+                        totalSales++;
+                }
+
+                log.info("Seed de ventas completado. Total: {} ventas creadas.", totalSales);
         }
 }

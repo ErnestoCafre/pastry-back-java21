@@ -30,6 +30,10 @@ public interface StorefrontSectionProductRepository extends JpaRepository<Storef
 
     long countByStorefrontSectionIdAndProductDeletedAtIsNull(Long storefrontSectionId);
 
+    // Todos los productos asociados, incluidos los de la papelera
+    // (para validar el borrado permanente de la seccion)
+    long countByStorefrontSectionId(Long storefrontSectionId);
+
     @Query("SELECT COALESCE(MAX(sp.displayOrder), 0) FROM StorefrontSectionProduct sp WHERE sp.storefrontSection.id = :sectionId")
     int findMaxDisplayOrderBySectionId(@Param("sectionId") Long sectionId);
 }

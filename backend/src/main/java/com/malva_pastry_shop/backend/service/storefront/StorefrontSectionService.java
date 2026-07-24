@@ -20,6 +20,7 @@ import com.malva_pastry_shop.backend.dto.response.api.StorefrontSectionApiDTO;
 import com.malva_pastry_shop.backend.repository.ProductRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionProductRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionRepository;
+import com.malva_pastry_shop.backend.util.ImageUrlResolver;
 import com.malva_pastry_shop.backend.util.SlugUtil;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -30,13 +31,16 @@ public class StorefrontSectionService {
     private final StorefrontSectionRepository sectionRepository;
     private final StorefrontSectionProductRepository sectionProductRepository;
     private final ProductRepository productRepository;
+    private final ImageUrlResolver imageUrlResolver;
 
     public StorefrontSectionService(StorefrontSectionRepository sectionRepository,
             StorefrontSectionProductRepository sectionProductRepository,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            ImageUrlResolver imageUrlResolver) {
         this.sectionRepository = sectionRepository;
         this.sectionProductRepository = sectionProductRepository;
         this.productRepository = productRepository;
+        this.imageUrlResolver = imageUrlResolver;
     }
 
     // ========== Consultas ==========
@@ -135,6 +139,16 @@ public class StorefrontSectionService {
         if (section.getDeletedAt() == null) {
             throw new IllegalStateException(
                     "Solo se pueden eliminar permanentemente las secciones que están en la papelera");
+        }
+
+        // storefront_section_products no se limpia en cascada desde la seccion, y
+        // su FK rechaza el borrado: sin esta guarda la base de datos lanzaria
+        // DataIntegrityViolationException (error 500 en el panel).
+        long usageCount = sectionProductRepository.countByStorefrontSectionId(id);
+        if (usageCount > 0) {
+            throw new IllegalStateException(
+                    "No se puede eliminar permanentemente la sección porque tiene " + usageCount
+                            + " producto(s) asociado(s)");
         }
 
         sectionRepository.delete(section);
@@ -242,7 +256,7 @@ public class StorefrontSectionService {
                                 p.getId(),
                                 p.getName(),
                                 p.getBasePrice(),
-                                p.getImageUrl(),
+                                imageUrlResolver.resolve(p.getImageUrl()),
                                 p.getCategory() != null ? p.getCategory().getName() : null);
                     })
                     .collect(Collectors.toList());
@@ -272,7 +286,7 @@ public class StorefrontSectionService {
                             p.getId(),
                             p.getName(),
                             p.getBasePrice(),
-                            p.getImageUrl(),
+                            imageUrlResolver.resolve(p.getImageUrl()),
                             p.getCategory() != null ? p.getCategory().getName() : null);
                 })
                 .collect(Collectors.toList());

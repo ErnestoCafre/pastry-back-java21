@@ -38,7 +38,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByNameIgnoreCase(String name);
 
     // Productos eliminados (papelera)
-    @EntityGraph(attributePaths = { "category" })
+    // deletedBy es obligatorio en el fetch: la vista muestra quien elimino y con
+    // open-in-view=false un proxy lazy romperia el render de la plantilla.
+    @EntityGraph(attributePaths = { "category", "deletedBy" })
     Page<Product> findByDeletedAtIsNotNull(Pageable pageable);
 
     // ========== Queries para API pública (vitrina) ==========

@@ -21,6 +21,7 @@ import com.malva_pastry_shop.backend.repository.CategoryRepository;
 import com.malva_pastry_shop.backend.repository.IngredientRepository;
 import com.malva_pastry_shop.backend.repository.ProductIngredientRepository;
 import com.malva_pastry_shop.backend.repository.ProductRepository;
+import com.malva_pastry_shop.backend.repository.SaleRepository;
 import com.malva_pastry_shop.backend.repository.ProductTagRepository;
 import com.malva_pastry_shop.backend.repository.TagRepository;
 
@@ -38,19 +39,22 @@ public class ProductService {
     private final ProductTagRepository productTagRepository;
     private final IngredientRepository ingredientRepository;
     private final ProductIngredientRepository productIngredientRepository;
+    private final SaleRepository saleRepository;
 
     public ProductService(ProductRepository productRepository,
             CategoryRepository categoryRepository,
             TagRepository tagRepository,
             ProductTagRepository productTagRepository,
             IngredientRepository ingredientRepository,
-            ProductIngredientRepository productIngredientRepository) {
+            ProductIngredientRepository productIngredientRepository,
+            SaleRepository saleRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
         this.productTagRepository = productTagRepository;
         this.ingredientRepository = ingredientRepository;
         this.productIngredientRepository = productIngredientRepository;
+        this.saleRepository = saleRepository;
     }
 
     // ========== Consultas ==========
@@ -186,6 +190,16 @@ public class ProductService {
         if (product.getDeletedAt() == null) {
             throw new IllegalStateException(
                     "Solo se pueden eliminar permanentemente los productos que están en la papelera");
+        }
+
+        // Las ventas conservan el historico y su FK (fk_sale_product) no es
+        // ON DELETE SET NULL, por lo que el borrado seria rechazado por la base
+        // de datos con DataIntegrityViolationException (error 500 en el panel).
+        long salesCount = saleRepository.countByProductId(id);
+        if (salesCount > 0) {
+            throw new IllegalStateException(
+                    "No se puede eliminar permanentemente el producto porque tiene " + salesCount
+                            + " venta(s) registrada(s)");
         }
 
         productRepository.delete(product);
@@ -390,12 +404,32 @@ public class ProductService {
             throw new IllegalStateException("El producto ya tiene este ingrediente en su receta");
         }
 
+        validateRecipeQuantity(quantity);
+
+        ProductIngredient productIngredient = new ProductIngredient(product, ingredient, quantity);
+        productIngredientRepository.save(productIngredient);
+    }
+
+    /**
+     * Valida la cantidad de un ingrediente en una receta contra los limites de
+     * la columna product_ingredients.quantity NUMERIC(14,4) / @Digits(integer=10,
+     * fraction=4). Sin esta validacion, una cantidad con mas de 4 decimales o mas
+     * de 10 digitos enteros llega a Hibernate y revienta como
+     * ConstraintViolationException (error 500 en el panel) en vez de mostrar un
+     * mensaje al usuario.
+     */
+    private void validateRecipeQuantity(BigDecimal quantity) {
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
         }
 
-        ProductIngredient productIngredient = new ProductIngredient(product, ingredient, quantity);
-        productIngredientRepository.save(productIngredient);
+        BigDecimal normalized = quantity.stripTrailingZeros();
+        if (normalized.scale() > 4) {
+            throw new IllegalArgumentException("La cantidad no puede tener mas de 4 decimales");
+        }
+        if (normalized.precision() - normalized.scale() > 10) {
+            throw new IllegalArgumentException("La cantidad no puede tener mas de 10 digitos enteros");
+        }
     }
 
     /**
@@ -421,9 +455,7 @@ public class ProductService {
         // Verificar que el producto existe
         findById(productId);
 
-        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
-        }
+        validateRecipeQuantity(quantity);
 
         ProductIngredient productIngredient = productIngredientRepository
                 .findByProductIdAndIngredientId(productId, ingredientId)

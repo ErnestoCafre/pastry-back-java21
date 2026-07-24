@@ -91,7 +91,7 @@
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3">
                 <div class="text-2xl">💰</div>
                 <div>
-                    <div class="text-xl font-bold text-green-600" th:text="'S/ ' + ${#numbers.formatDecimal(totalSalesAmount, 1, 2)}">S/ 0.00</div>
+                    <div class="text-xl font-bold text-green-600" th:text="'$' + ${#numbers.formatDecimal(totalSalesAmount, 1, 2)}">$0.00</div>
                     <div class="text-sm text-gray-500">Ingreso total del filtro</div>
                 </div>
             </div>
