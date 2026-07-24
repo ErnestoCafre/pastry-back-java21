@@ -22,6 +22,9 @@ services:
         value: prod
       - key: CORS_ALLOWED_ORIGINS
         value: https://tu-frontend.vercel.app
+      # Origen del backend para servir URLs absolutas de imágenes en la API
+      - key: PUBLIC_BASE_URL
+        value: https://malva-pastry-backend.onrender.com
       - key: DATABASE_HOST
         fromDatabase:
           name: malva-pastry-db

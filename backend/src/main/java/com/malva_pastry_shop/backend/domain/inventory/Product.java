@@ -70,7 +70,8 @@ public class Product extends SoftDeletableEntity {
 
     /**
      * Relacion con User (creador del producto).
-     * SET NULL on delete para mantener historico de productos.
+     * La columna admite null, pero la FK es NO ACTION: no hay ON DELETE SET NULL
+     * en el esquema.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_product_user"))
@@ -78,7 +79,8 @@ public class Product extends SoftDeletableEntity {
 
     /**
      * Relacion con Category.
-     * SET NULL on delete para no perder productos si se elimina categoria.
+     * La columna admite null, pero la FK es NO ACTION: CategoryService.hardDelete
+     * rechaza borrar una categoria que aun tenga productos.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_product_category"))

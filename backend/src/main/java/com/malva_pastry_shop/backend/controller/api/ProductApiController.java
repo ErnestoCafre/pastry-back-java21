@@ -20,6 +20,7 @@ import com.malva_pastry_shop.backend.dto.response.api.ErrorResponse;
 import com.malva_pastry_shop.backend.dto.response.api.ProductApiDTO;
 import com.malva_pastry_shop.backend.dto.response.api.TagApiDTO;
 import com.malva_pastry_shop.backend.service.inventory.ProductService;
+import com.malva_pastry_shop.backend.util.ImageUrlResolver;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,9 +38,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 public class ProductApiController {
 
         private final ProductService productService;
+        private final ImageUrlResolver imageUrlResolver;
 
-        public ProductApiController(ProductService productService) {
+        public ProductApiController(ProductService productService, ImageUrlResolver imageUrlResolver) {
                 this.productService = productService;
+                this.imageUrlResolver = imageUrlResolver;
         }
 
         @GetMapping
@@ -58,7 +61,7 @@ public class ProductApiController {
                                 p.getId(),
                                 p.getName(),
                                 p.getBasePrice(),
-                                p.getImageUrl(),
+                                imageUrlResolver.resolve(p.getImageUrl()),
                                 p.getCategory() != null ? p.getCategory().getName() : null));
 
                 return ResponseEntity.ok(ApiPageResponse.from(dtoPage));
@@ -81,7 +84,7 @@ public class ProductApiController {
                                 product.getDescription(),
                                 product.getBasePrice(),
                                 product.getPreparationDays(),
-                                product.getImageUrl(),
+                                imageUrlResolver.resolve(product.getImageUrl()),
                                 product.getCategory() != null
                                                 ? new CategoryApiDTO(
                                                                 product.getCategory().getId(),

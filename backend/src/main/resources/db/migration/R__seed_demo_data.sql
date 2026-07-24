@@ -86,7 +86,7 @@ INSERT INTO categories (name, description, inserted_at, updated_at) VALUES
 ('Temporada y Festividades','Productos especiales para Día de Muertos, Navidad, San Valentín y otras celebraciones. Edición limitada.', NOW(), NOW());
 
 -- ============================================================
--- 5. INGREDIENTES (58)
+-- 5. INGREDIENTES (75)
 -- ============================================================
 
 -- Harinas y Bases (8)
@@ -505,3 +505,477 @@ FROM storefront_sections s,
      ) AS ord(product_name, display_order)
 JOIN products p ON p.name = ord.product_name
 WHERE s.slug = 'para-compartir';
+
+-- ============================================================
+-- 11. PRODUCT_INGREDIENTS — Recetas (los 50 productos)
+-- ============================================================
+-- La cantidad se expresa SIEMPRE en la unidad de medida del ingrediente:
+--   0.5000 de 'Harina de Trigo' (KILOGRAMO, $25.00/kg) = 0.5 kg = $12.50
+--   6.0000 de 'Huevos'          (UNIDAD,    $2.50/u)   = 6 huevos = $15.00
+-- Las recetas estan calibradas para que el costo de ingredientes quede
+-- entre el 20% y el 45% del base_price del producto.
+INSERT INTO product_ingredients (product_id, ingredient_id, quantity, inserted_at, updated_at)
+SELECT p.id, i.id, v.quantity, NOW(), NOW()
+FROM (VALUES
+    -- Pasteles
+    ('Pastel de Chocolate Triple', 'Harina de Trigo',       0.5000),
+    ('Pastel de Chocolate Triple', 'Azúcar Blanca',         0.4000),
+    ('Pastel de Chocolate Triple', 'Chocolate Amargo',      0.3500),
+    ('Pastel de Chocolate Triple', 'Mantequilla',           0.2500),
+    ('Pastel de Chocolate Triple', 'Huevos',                6.0000),
+    ('Pastel de Chocolate Triple', 'Crema para Batir',      0.3000),
+    ('Pastel de Chocolate Triple', 'Cacao en Polvo',        0.0800),
+
+    ('Pastel Red Velvet', 'Harina de Trigo',        0.4500),
+    ('Pastel Red Velvet', 'Azúcar Blanca',          0.3500),
+    ('Pastel Red Velvet', 'Mantequilla',            0.2000),
+    ('Pastel Red Velvet', 'Huevos',                 4.0000),
+    ('Pastel Red Velvet', 'Queso Crema',            0.4000),
+    ('Pastel Red Velvet', 'Crema para Batir',       0.2000),
+    ('Pastel Red Velvet', 'Colorante Alimentario',  1.0000),
+    ('Pastel Red Velvet', 'Cacao en Polvo',         0.0300),
+
+    ('Pastel de Vainilla Clásico', 'Harina de Trigo',       0.5000),
+    ('Pastel de Vainilla Clásico', 'Azúcar Blanca',         0.4000),
+    ('Pastel de Vainilla Clásico', 'Mantequilla',           0.3000),
+    ('Pastel de Vainilla Clásico', 'Huevos',                5.0000),
+    ('Pastel de Vainilla Clásico', 'Leche Entera',          0.2500),
+    ('Pastel de Vainilla Clásico', 'Azúcar Glass',          0.2000),
+    ('Pastel de Vainilla Clásico', 'Extracto de Vainilla',  0.0200),
+    ('Pastel de Vainilla Clásico', 'Polvo para Hornear',    0.0150),
+
+    ('Pastel de Zanahoria', 'Harina Integral',   0.4000),
+    ('Pastel de Zanahoria', 'Azúcar Morena',     0.3500),
+    ('Pastel de Zanahoria', 'Aceite Vegetal',    0.2500),
+    ('Pastel de Zanahoria', 'Huevos',            4.0000),
+    ('Pastel de Zanahoria', 'Nueces',            0.1500),
+    ('Pastel de Zanahoria', 'Pasas',             0.1000),
+    ('Pastel de Zanahoria', 'Queso Crema',       0.3500),
+    ('Pastel de Zanahoria', 'Canela en Polvo',   0.0100),
+
+    ('Pastel de Fresas con Crema', 'Harina de Trigo',   0.4500),
+    ('Pastel de Fresas con Crema', 'Azúcar Blanca',     0.3000),
+    ('Pastel de Fresas con Crema', 'Huevos',            5.0000),
+    ('Pastel de Fresas con Crema', 'Fresas Frescas',    0.6000),
+    ('Pastel de Fresas con Crema', 'Crema para Batir',  0.5000),
+    ('Pastel de Fresas con Crema', 'Mantequilla',       0.1500),
+    ('Pastel de Fresas con Crema', 'Azúcar Glass',      0.1000),
+
+    ('Pastel Tres Leches', 'Harina de Trigo',    0.4000),
+    ('Pastel Tres Leches', 'Azúcar Blanca',      0.3000),
+    ('Pastel Tres Leches', 'Huevos',             6.0000),
+    ('Pastel Tres Leches', 'Leche Condensada',   0.4000),
+    ('Pastel Tres Leches', 'Leche Evaporada',    0.3500),
+    ('Pastel Tres Leches', 'Leche Entera',       0.3000),
+    ('Pastel Tres Leches', 'Crema para Batir',   0.2500),
+
+    ('Pastel Selva Negra', 'Harina de Trigo',    0.4000),
+    ('Pastel Selva Negra', 'Azúcar Blanca',      0.3000),
+    ('Pastel Selva Negra', 'Chocolate Amargo',   0.3000),
+    ('Pastel Selva Negra', 'Cerezas',            0.4000),
+    ('Pastel Selva Negra', 'Crema para Batir',   0.5000),
+    ('Pastel Selva Negra', 'Huevos',             5.0000),
+    ('Pastel Selva Negra', 'Cacao en Polvo',     0.0500),
+
+    -- Cupcakes (receta por pieza)
+    ('Cupcake de Chocolate', 'Harina de Trigo',    0.0500),
+    ('Cupcake de Chocolate', 'Azúcar Blanca',      0.0400),
+    ('Cupcake de Chocolate', 'Chocolate Amargo',   0.0300),
+    ('Cupcake de Chocolate', 'Mantequilla',        0.0300),
+    ('Cupcake de Chocolate', 'Huevos',             1.0000),
+    ('Cupcake de Chocolate', 'Cacao en Polvo',     0.0100),
+
+    ('Cupcake Red Velvet', 'Harina de Trigo',        0.0500),
+    ('Cupcake Red Velvet', 'Azúcar Blanca',          0.0400),
+    ('Cupcake Red Velvet', 'Queso Crema',            0.0500),
+    ('Cupcake Red Velvet', 'Mantequilla',            0.0250),
+    ('Cupcake Red Velvet', 'Huevos',                 1.0000),
+    ('Cupcake Red Velvet', 'Colorante Alimentario',  0.1000),
+    ('Cupcake Red Velvet', 'Cacao en Polvo',         0.0050),
+
+    ('Cupcake de Limón', 'Harina de Trigo',  0.0500),
+    ('Cupcake de Limón', 'Azúcar Blanca',    0.0450),
+    ('Cupcake de Limón', 'Mantequilla',      0.0350),
+    ('Cupcake de Limón', 'Huevos',           1.0000),
+    ('Cupcake de Limón', 'Limones',          0.0800),
+    ('Cupcake de Limón', 'Azúcar Glass',     0.0400),
+
+    ('Cupcake de Nutella', 'Harina de Trigo',  0.0500),
+    ('Cupcake de Nutella', 'Azúcar Blanca',    0.0350),
+    ('Cupcake de Nutella', 'Nutella',          0.0600),
+    ('Cupcake de Nutella', 'Mantequilla',      0.0300),
+    ('Cupcake de Nutella', 'Huevos',           1.0000),
+    ('Cupcake de Nutella', 'Avellanas',        0.0200),
+
+    ('Cupcake de Café Moka', 'Harina de Trigo',      0.0500),
+    ('Cupcake de Café Moka', 'Azúcar Blanca',        0.0400),
+    ('Cupcake de Café Moka', 'Café Instantáneo',     0.0100),
+    ('Cupcake de Café Moka', 'Chocolate de Leche',   0.0300),
+    ('Cupcake de Café Moka', 'Mantequilla',          0.0300),
+    ('Cupcake de Café Moka', 'Huevos',               1.0000),
+
+    -- Galletas (receta por docena)
+    ('Galletas de Chispas de Chocolate', 'Harina de Trigo',        0.2500),
+    ('Galletas de Chispas de Chocolate', 'Azúcar Morena',          0.1200),
+    ('Galletas de Chispas de Chocolate', 'Mantequilla',            0.1000),
+    ('Galletas de Chispas de Chocolate', 'Huevos',                 1.0000),
+    ('Galletas de Chispas de Chocolate', 'Chispas de Chocolate',   0.1000),
+    ('Galletas de Chispas de Chocolate', 'Bicarbonato de Sodio',   0.0050),
+
+    ('Galletas de Avena con Pasas', 'Harina de Avena',   0.2000),
+    ('Galletas de Avena con Pasas', 'Harina de Trigo',   0.1000),
+    ('Galletas de Avena con Pasas', 'Azúcar Morena',     0.1000),
+    ('Galletas de Avena con Pasas', 'Mantequilla',       0.0900),
+    ('Galletas de Avena con Pasas', 'Huevos',            1.0000),
+    ('Galletas de Avena con Pasas', 'Pasas',             0.0800),
+    ('Galletas de Avena con Pasas', 'Canela en Polvo',   0.0050),
+
+    ('Galletas de Mantequilla', 'Harina de Trigo',        0.2500),
+    ('Galletas de Mantequilla', 'Mantequilla',            0.1500),
+    ('Galletas de Mantequilla', 'Azúcar Glass',           0.0800),
+    ('Galletas de Mantequilla', 'Huevos',                 1.0000),
+    ('Galletas de Mantequilla', 'Extracto de Vainilla',   0.0050),
+    ('Galletas de Mantequilla', 'Sal',                    0.0020),
+
+    ('Galletas de Jengibre', 'Harina de Trigo',        0.2500),
+    ('Galletas de Jengibre', 'Piloncillo',             0.1000),
+    ('Galletas de Jengibre', 'Mantequilla',            0.1000),
+    ('Galletas de Jengibre', 'Jengibre en Polvo',      0.0100),
+    ('Galletas de Jengibre', 'Canela en Polvo',        0.0080),
+    ('Galletas de Jengibre', 'Huevos',                 1.0000),
+    ('Galletas de Jengibre', 'Bicarbonato de Sodio',   0.0050),
+
+    ('Galletas Snickerdoodle', 'Harina de Trigo',    0.2500),
+    ('Galletas Snickerdoodle', 'Azúcar Blanca',      0.1500),
+    ('Galletas Snickerdoodle', 'Mantequilla',        0.1200),
+    ('Galletas Snickerdoodle', 'Huevos',             1.0000),
+    ('Galletas Snickerdoodle', 'Canela en Polvo',    0.0100),
+    ('Galletas Snickerdoodle', 'Cremor Tártaro',     0.0040),
+
+    -- Pan Dulce Mexicano (receta por pieza)
+    ('Concha de Vainilla', 'Harina de Trigo',        0.0800),
+    ('Concha de Vainilla', 'Azúcar Blanca',          0.0300),
+    ('Concha de Vainilla', 'Mantequilla',            0.0200),
+    ('Concha de Vainilla', 'Huevos',                 0.5000),
+    ('Concha de Vainilla', 'Levadura Fresca',        0.0030),
+    ('Concha de Vainilla', 'Extracto de Vainilla',   0.0010),
+
+    ('Concha de Chocolate', 'Harina de Trigo',    0.0800),
+    ('Concha de Chocolate', 'Azúcar Blanca',      0.0300),
+    ('Concha de Chocolate', 'Mantequilla',        0.0200),
+    ('Concha de Chocolate', 'Huevos',             0.5000),
+    ('Concha de Chocolate', 'Levadura Fresca',    0.0030),
+    ('Concha de Chocolate', 'Cacao en Polvo',     0.0080),
+
+    ('Cuerno de Mantequilla', 'Harina de Trigo',    0.0900),
+    ('Cuerno de Mantequilla', 'Mantequilla',        0.0400),
+    ('Cuerno de Mantequilla', 'Azúcar Glass',       0.0100),
+    ('Cuerno de Mantequilla', 'Huevos',             0.5000),
+    ('Cuerno de Mantequilla', 'Levadura Fresca',    0.0030),
+    ('Cuerno de Mantequilla', 'Sal',                0.0010),
+
+    ('Oreja', 'Harina de Trigo',   0.0800),
+    ('Oreja', 'Mantequilla',       0.0500),
+    ('Oreja', 'Azúcar Blanca',     0.0400),
+    ('Oreja', 'Sal',               0.0010),
+
+    ('Polvorón Rosa', 'Harina de Trigo',        0.0600),
+    ('Polvorón Rosa', 'Manteca Vegetal',        0.0300),
+    ('Polvorón Rosa', 'Azúcar Glass',           0.0300),
+    ('Polvorón Rosa', 'Colorante Alimentario',  0.0200),
+    ('Polvorón Rosa', 'Huevos',                 0.2500),
+
+    ('Garibaldi', 'Harina de Trigo',       0.0600),
+    ('Garibaldi', 'Azúcar Blanca',         0.0250),
+    ('Garibaldi', 'Mantequilla',           0.0200),
+    ('Garibaldi', 'Huevos',                0.5000),
+    ('Garibaldi', 'Mermelada de Fresa',    0.0150),
+    ('Garibaldi', 'Sprinkles',             0.0050),
+
+    -- Tartas y Pays
+    ('Pay de Manzana', 'Harina de Trigo',    0.3500),
+    ('Pay de Manzana', 'Mantequilla',        0.2000),
+    ('Pay de Manzana', 'Azúcar Blanca',      0.1500),
+    ('Pay de Manzana', 'Azúcar Morena',      0.0500),
+    ('Pay de Manzana', 'Manzanas',           0.8000),
+    ('Pay de Manzana', 'Canela en Polvo',    0.0100),
+    ('Pay de Manzana', 'Huevos',             1.0000),
+
+    ('Pay de Limón', 'Harina de Trigo',     0.3000),
+    ('Pay de Limón', 'Mantequilla',         0.1800),
+    ('Pay de Limón', 'Leche Condensada',    0.4000),
+    ('Pay de Limón', 'Limones',             0.3500),
+    ('Pay de Limón', 'Huevos',              4.0000),
+    ('Pay de Limón', 'Azúcar Blanca',       0.1500),
+
+    ('Pay de Nuez', 'Harina de Trigo',   0.3000),
+    ('Pay de Nuez', 'Mantequilla',       0.1800),
+    ('Pay de Nuez', 'Nueces',            0.3500),
+    ('Pay de Nuez', 'Azúcar Morena',     0.2000),
+    ('Pay de Nuez', 'Huevos',            3.0000),
+    ('Pay de Nuez', 'Miel de Abeja',     0.0500),
+
+    ('Tarta de Frutos Rojos', 'Harina de Trigo',   0.2500),
+    ('Tarta de Frutos Rojos', 'Mantequilla',       0.1500),
+    ('Tarta de Frutos Rojos', 'Frambuesas',        0.2500),
+    ('Tarta de Frutos Rojos', 'Moras',             0.2500),
+    ('Tarta de Frutos Rojos', 'Fresas Frescas',    0.2000),
+    ('Tarta de Frutos Rojos', 'Leche Entera',      0.3000),
+    ('Tarta de Frutos Rojos', 'Yema de Huevo',     0.0800),
+    ('Tarta de Frutos Rojos', 'Azúcar Blanca',     0.1200),
+
+    ('Tarta Tatin', 'Harina de Trigo',   0.2500),
+    ('Tarta Tatin', 'Mantequilla',       0.2000),
+    ('Tarta Tatin', 'Manzanas',          0.9000),
+    ('Tarta Tatin', 'Azúcar Blanca',     0.2500),
+    ('Tarta Tatin', 'Caramelo',          0.1000),
+
+    -- Postres Individuales
+    ('Tiramisú Individual', 'Harina de Trigo',     0.0500),
+    ('Tiramisú Individual', 'Queso Crema',         0.1200),
+    ('Tiramisú Individual', 'Café Instantáneo',    0.0100),
+    ('Tiramisú Individual', 'Huevos',              2.0000),
+    ('Tiramisú Individual', 'Azúcar Blanca',       0.0500),
+    ('Tiramisú Individual', 'Crema para Batir',    0.0800),
+    ('Tiramisú Individual', 'Cacao en Polvo',      0.0080),
+
+    ('Mousse de Chocolate', 'Chocolate Amargo',      0.0800),
+    ('Mousse de Chocolate', 'Crema para Batir',      0.1200),
+    ('Mousse de Chocolate', 'Huevos',                2.0000),
+    ('Mousse de Chocolate', 'Azúcar Blanca',         0.0300),
+    ('Mousse de Chocolate', 'Gelatina Sin Sabor',    0.0030),
+
+    ('Cheesecake New York', 'Queso Crema',            0.2000),
+    ('Cheesecake New York', 'Azúcar Blanca',          0.0800),
+    ('Cheesecake New York', 'Huevos',                 2.0000),
+    ('Cheesecake New York', 'Crema para Batir',       0.1000),
+    ('Cheesecake New York', 'Mantequilla',            0.0400),
+    ('Cheesecake New York', 'Harina de Trigo',        0.0600),
+    ('Cheesecake New York', 'Extracto de Vainilla',   0.0040),
+
+    ('Panna Cotta', 'Crema para Batir',      0.2000),
+    ('Panna Cotta', 'Leche Entera',          0.1000),
+    ('Panna Cotta', 'Azúcar Blanca',         0.0500),
+    ('Panna Cotta', 'Gelatina Sin Sabor',    0.0050),
+    ('Panna Cotta', 'Frambuesas',            0.0600),
+    ('Panna Cotta', 'Vainilla en Vaina',     0.5000),
+
+    ('Crème Brûlée', 'Crema para Batir',    0.2200),
+    ('Crème Brûlée', 'Yema de Huevo',       0.0600),
+    ('Crème Brûlée', 'Azúcar Blanca',       0.0600),
+    ('Crème Brûlée', 'Vainilla en Vaina',   1.0000),
+
+    ('Profiteroles', 'Harina de Trigo',     0.0800),
+    ('Profiteroles', 'Mantequilla',         0.0600),
+    ('Profiteroles', 'Huevos',              3.0000),
+    ('Profiteroles', 'Leche Entera',        0.1500),
+    ('Profiteroles', 'Chocolate Amargo',    0.0600),
+    ('Profiteroles', 'Crema para Batir',    0.1200),
+    ('Profiteroles', 'Azúcar Blanca',       0.0300),
+
+    -- Panes Artesanales
+    ('Baguette Francesa', 'Harina de Trigo',    0.4000),
+    ('Baguette Francesa', 'Levadura Fresca',    0.0060),
+    ('Baguette Francesa', 'Sal',                0.0080),
+
+    ('Ciabatta Italiana', 'Harina de Trigo',    0.4000),
+    ('Ciabatta Italiana', 'Aceite de Oliva',    0.0200),
+    ('Ciabatta Italiana', 'Levadura Seca',      0.0040),
+    ('Ciabatta Italiana', 'Sal',                0.0080),
+
+    ('Focaccia de Romero', 'Harina de Trigo',    0.3500),
+    ('Focaccia de Romero', 'Aceite de Oliva',    0.0600),
+    ('Focaccia de Romero', 'Levadura Seca',      0.0040),
+    ('Focaccia de Romero', 'Sal de Mar',         0.0060),
+    ('Focaccia de Romero', 'Sal',                0.0060),
+
+    ('Pan de Masa Madre', 'Harina de Trigo',    0.5000),
+    ('Pan de Masa Madre', 'Harina Integral',    0.1500),
+    ('Pan de Masa Madre', 'Levadura Fresca',    0.0040),
+    ('Pan de Masa Madre', 'Sal',                0.0120),
+
+    -- Dulces y Confitería
+    ('Mazapán de Almendra', 'Almendras',      0.2500),
+    ('Mazapán de Almendra', 'Azúcar Glass',   0.1800),
+
+    ('Cocadas', 'Coco Rallado',       0.2000),
+    ('Cocadas', 'Leche Condensada',   0.1500),
+    ('Cocadas', 'Azúcar Blanca',      0.0500),
+
+    ('Jamoncillo de Leche', 'Leche Entera',        0.6000),
+    ('Jamoncillo de Leche', 'Azúcar Blanca',       0.2000),
+    ('Jamoncillo de Leche', 'Leche Condensada',    0.1000),
+    ('Jamoncillo de Leche', 'Nueces',              0.0400),
+
+    ('Trufas de Chocolate', 'Chocolate Amargo',    0.2500),
+    ('Trufas de Chocolate', 'Crema para Batir',    0.1000),
+    ('Trufas de Chocolate', 'Mantequilla',         0.0300),
+    ('Trufas de Chocolate', 'Cacao en Polvo',      0.0200),
+
+    ('Ate con Queso', 'Manzanas',              0.4000),
+    ('Ate con Queso', 'Azúcar Blanca',         0.2500),
+    ('Ate con Queso', 'Limones',               0.0500),
+    ('Ate con Queso', 'Gelatina Sin Sabor',    0.0040),
+
+    -- Productos Veganos
+    ('Pastel Vegano de Chocolate', 'Harina de Trigo',        0.4500),
+    ('Pastel Vegano de Chocolate', 'Azúcar Morena',          0.3500),
+    ('Pastel Vegano de Chocolate', 'Cacao en Polvo',         0.1000),
+    ('Pastel Vegano de Chocolate', 'Aceite de Coco',         0.1500),
+    ('Pastel Vegano de Chocolate', 'Leche de Almendra',      0.4000),
+    ('Pastel Vegano de Chocolate', 'Chocolate Amargo',       0.1500),
+    ('Pastel Vegano de Chocolate', 'Bicarbonato de Sodio',   0.0080),
+
+    ('Cupcakes Veganos Variados', 'Harina de Trigo',        0.2000),
+    ('Cupcakes Veganos Variados', 'Azúcar Morena',          0.1500),
+    ('Cupcakes Veganos Variados', 'Aceite de Coco',         0.0600),
+    ('Cupcakes Veganos Variados', 'Leche de Almendra',      0.1800),
+    ('Cupcakes Veganos Variados', 'Cacao en Polvo',         0.0300),
+    ('Cupcakes Veganos Variados', 'Chispas de Chocolate',   0.0500),
+    ('Cupcakes Veganos Variados', 'Polvo para Hornear',     0.0080),
+
+    ('Galletas Veganas de Avena', 'Harina de Avena',         0.2000),
+    ('Galletas Veganas de Avena', 'Azúcar Morena',           0.1200),
+    ('Galletas Veganas de Avena', 'Aceite de Coco',          0.0800),
+    ('Galletas Veganas de Avena', 'Chispas de Chocolate',    0.0800),
+    ('Galletas Veganas de Avena', 'Leche de Almendra',       0.0600),
+    ('Galletas Veganas de Avena', 'Bicarbonato de Sodio',    0.0040),
+
+    ('Brownie Vegano', 'Harina de Trigo',      0.0600),
+    ('Brownie Vegano', 'Azúcar Morena',        0.0500),
+    ('Brownie Vegano', 'Cacao en Polvo',       0.0200),
+    ('Brownie Vegano', 'Aceite de Coco',       0.0300),
+    ('Brownie Vegano', 'Leche de Almendra',    0.0500),
+    ('Brownie Vegano', 'Nueces',               0.0200),
+
+    -- Temporada y Festividades
+    ('Pan de Muerto', 'Harina de Trigo',    0.2500),
+    ('Pan de Muerto', 'Mantequilla',        0.0800),
+    ('Pan de Muerto', 'Azúcar Blanca',      0.0600),
+    ('Pan de Muerto', 'Huevos',             2.0000),
+    ('Pan de Muerto', 'Azahar',             0.0050),
+    ('Pan de Muerto', 'Levadura Fresca',    0.0050),
+    ('Pan de Muerto', 'Naranjas',           0.0500),
+
+    ('Rosca de Reyes', 'Harina de Trigo',    0.5000),
+    ('Rosca de Reyes', 'Mantequilla',        0.2000),
+    ('Rosca de Reyes', 'Azúcar Blanca',      0.1500),
+    ('Rosca de Reyes', 'Huevos',             5.0000),
+    ('Rosca de Reyes', 'Levadura Fresca',    0.0080),
+    ('Rosca de Reyes', 'Duraznos',           0.1000),
+    ('Rosca de Reyes', 'Naranjas',           0.0800),
+    ('Rosca de Reyes', 'Azahar',             0.0060),
+
+    ('Tronco de Navidad', 'Harina de Trigo',     0.3000),
+    ('Tronco de Navidad', 'Chocolate Amargo',    0.2500),
+    ('Tronco de Navidad', 'Crema para Batir',    0.3500),
+    ('Tronco de Navidad', 'Huevos',              6.0000),
+    ('Tronco de Navidad', 'Azúcar Blanca',       0.2000),
+    ('Tronco de Navidad', 'Avellanas',           0.1000),
+    ('Tronco de Navidad', 'Cacao en Polvo',      0.0400)
+) AS v(product_name, ingredient_name, quantity)
+JOIN products p    ON p.name = v.product_name
+JOIN ingredients i ON i.name = v.ingredient_name;
+
+-- ============================================================
+-- 12. SALES — Historial de ventas demo
+-- ============================================================
+-- Distribuidas en los ultimos 45 dias, con ventas del dia actual para que
+-- el dashboard (ventasHoy / ingresoHoy / ingresoMes) siempre tenga datos.
+-- La fecha se ancla a date_trunc('day', NOW()) para que "hoy" sea hoy
+-- independientemente de la hora del deploy.
+INSERT INTO sales (sale_date, registered_by_id, product_id, product_name, quantity, unit_price,
+                   total_amount, notes, customer_name, customer_dni, customer_phone, inserted_at, updated_at)
+SELECT date_trunc('day', NOW())
+           - (v.days_ago || ' days')::INTERVAL
+           + (v.hour     || ' hours')::INTERVAL,
+       u.id, p.id, p.name, v.quantity, v.unit_price,
+       v.unit_price * v.quantity,
+       v.notes, v.customer_name, v.customer_dni, v.customer_phone, NOW(), NOW()
+FROM (VALUES
+    -- Hoy
+    ('Pastel de Chocolate Triple',       1, 450.00,  0, 10, 'María González Ruiz',   '30125478', '55 1234 5601', 'Entrega en sucursal centro',        'employee@malva.com'),
+    ('Concha de Vainilla',              12,  18.00,  0, 11, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Cupcake de Chocolate',             6,  45.00,  0, 13, 'Laura Méndez',          '28994512', '55 1234 5602', 'Pedido para oficina',               'employee@malva.com'),
+    ('Galletas de Chispas de Chocolate', 2,  85.00,  0, 16, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'admin@malva.com'),
+    -- Ayer
+    ('Pastel Tres Leches',               1, 350.00,  1, 12, 'Jorge Ramírez',         '31450098', '55 1234 5603', 'Cumpleaños familiar',               'employee@malva.com'),
+    ('Pay de Manzana',                   1, 280.00,  1, 15, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Cuerno de Mantequilla',           10,  20.00,  1, 17, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'admin@malva.com'),
+    -- Esta semana
+    ('Cheesecake New York',              4,  90.00,  2, 11, 'Patricia Soto',         '27883421', '55 1234 5604', NULL,                                'employee@malva.com'),
+    ('Baguette Francesa',                6,  45.00,  2, 18, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Pastel Red Velvet',                1, 420.00,  3,  9, 'Andrea Villalobos',     '30012765', '55 1234 5605', 'Decoración especial solicitada',    'admin@malva.com'),
+    ('Cupcake Red Velvet',              12,  48.00,  3, 14, 'Escuela Primaria Sol',  '30559981', '55 1234 5606', 'Festival escolar',                  'employee@malva.com'),
+    ('Trufas de Chocolate',              3, 150.00,  4, 16, 'Ricardo Fuentes',       '29334410', '55 1234 5607', NULL,                                'employee@malva.com'),
+    ('Concha de Chocolate',             20,  18.00,  4, 10, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'admin@malva.com'),
+    ('Tarta de Frutos Rojos',            1, 350.00,  5, 13, 'Sofía Herrera',         '31220845', '55 1234 5608', 'Aniversario',                       'employee@malva.com'),
+    ('Galletas de Avena con Pasas',      3,  75.00,  5, 17, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Pastel de Fresas con Crema',       1, 480.00,  6, 11, 'Familia Ortega',        '26778123', '55 1234 5609', 'Recoger 18:00 hs',                  'admin@malva.com'),
+    ('Tiramisú Individual',              8,  85.00,  6, 15, 'Café Aurora',           '30991256', '55 1234 5610', 'Pedido mayorista semanal',          'employee@malva.com'),
+    -- Semanas anteriores
+    ('Pan de Masa Madre',                4,  85.00,  8, 12, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Mousse de Chocolate',              6,  75.00,  9, 14, 'Daniela Cruz',          '31008877', '55 1234 5611', NULL,                                'employee@malva.com'),
+    ('Pastel Selva Negra',               1, 520.00, 10, 10, 'Empresa Nexus SA',      '30447712', '55 1234 5612', 'Factura a nombre de la empresa',    'admin@malva.com'),
+    ('Oreja',                           15,  22.00, 11, 16, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Pay de Limón',                     2, 260.00, 12, 13, 'Marcos Iturbe',         '28110934', '55 1234 5613', NULL,                                'employee@malva.com'),
+    ('Brownie Vegano',                  10,  55.00, 13, 15, 'Tienda Verde',          '31556602', '55 1234 5614', 'Pedido vegano recurrente',          'employee@malva.com'),
+    ('Cupcake de Nutella',               6,  55.00, 14, 12, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'admin@malva.com'),
+    ('Profiteroles',                     5,  95.00, 15, 17, 'Valeria Nava',          '29887340', '55 1234 5615', NULL,                                'employee@malva.com'),
+    ('Pastel de Zanahoria',              1, 400.00, 16, 11, 'Hugo Salazar',          '30778215', '55 1234 5616', 'Sin nueces en la cobertura',        'employee@malva.com'),
+    ('Galletas de Mantequilla',          4,  70.00, 17, 14, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'admin@malva.com'),
+    ('Panna Cotta',                      6,  70.00, 18, 16, 'Restaurante Bellavista','30223391', '55 1234 5617', 'Pedido para servicio de cena',      'employee@malva.com'),
+    ('Polvorón Rosa',                   24,  15.00, 19, 10, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Pastel de Vainilla Clásico',       1, 380.00, 20, 13, 'Elena Paredes',         '27665048', '55 1234 5618', 'Cumpleaños infantil',               'admin@malva.com'),
+    ('Ciabatta Italiana',                8,  50.00, 21, 18, 'Bistró La Esquina',     '31447790', '55 1234 5619', 'Pedido mayorista',                  'employee@malva.com'),
+    ('Crème Brûlée',                     4,  80.00, 23, 15, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Mazapán de Almendra',              2, 120.00, 25, 12, 'Gabriel Lozano',        '29556614', '55 1234 5620', NULL,                                'admin@malva.com'),
+    ('Pay de Nuez',                      1, 320.00, 27, 11, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Cocadas',                          6,  65.00, 29, 16, 'Mercadito Artesanal',   '30889945', '55 1234 5621', 'Puesto de feria',                   'employee@malva.com'),
+    ('Focaccia de Romero',               5,  65.00, 31, 14, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'admin@malva.com'),
+    ('Pastel Vegano de Chocolate',       1, 420.00, 33, 12, 'Camila Duarte',         '31770223', '55 1234 5622', 'Sin trazas de lácteos',             'employee@malva.com'),
+    ('Galletas de Jengibre',             3,  80.00, 35, 17, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Tarta Tatin',                      2, 300.00, 38, 13, 'Fernando Aguirre',      '28993377', '55 1234 5623', NULL,                                'admin@malva.com'),
+    ('Jamoncillo de Leche',              4,  80.00, 40, 15, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'employee@malva.com'),
+    ('Cupcakes Veganos Variados',        2, 180.00, 42, 11, 'Tienda Verde',          '31556602', '55 1234 5614', 'Segundo pedido del mes',            'employee@malva.com'),
+    ('Cupcake de Café Moka',             6,  50.00, 45, 16, 'Venta de mostrador',    NULL,       NULL,           NULL,                                'admin@malva.com')
+) AS v(product_name, quantity, unit_price, days_ago, hour, customer_name, customer_dni, customer_phone, notes, seller_email)
+JOIN products p ON p.name  = v.product_name
+JOIN users    u ON u.email = v.seller_email;
+
+-- ============================================================
+-- 13. SALE_INGREDIENTS — Snapshot de insumos por venta
+-- ============================================================
+-- Derivado de la receta vigente, replicando exactamente SaleService.create():
+--   quantity_used = receta.quantity * venta.quantity
+--   total_cost    = quantity_used   * ingrediente.unit_cost
+-- unit_of_measure guarda el displayName del enum UnitOfMeasure ('Kilogramo'),
+-- no su nombre ('KILOGRAMO'), igual que hace la aplicacion.
+INSERT INTO sale_ingredients (sale_id, ingredient_id, ingredient_name, quantity_used, unit_cost,
+                              unit_of_measure, total_cost, inserted_at, updated_at)
+SELECT s.id,
+       i.id,
+       i.name,
+       pi.quantity * s.quantity,
+       i.unit_cost,
+       CASE i.unit_of_measure
+           WHEN 'GRAMO'       THEN 'Gramo'
+           WHEN 'KILOGRAMO'   THEN 'Kilogramo'
+           WHEN 'MILIGRAMO'   THEN 'Miligramo'
+           WHEN 'LIBRA'       THEN 'Libra'
+           WHEN 'ONZA'        THEN 'Onza'
+           WHEN 'MILILITRO'   THEN 'Mililitro'
+           WHEN 'LITRO'       THEN 'Litro'
+           WHEN 'TAZA'        THEN 'Taza'
+           WHEN 'CUCHARADA'   THEN 'Cucharada'
+           WHEN 'CUCHARADITA' THEN 'Cucharadita'
+           WHEN 'UNIDAD'      THEN 'Unidad'
+           WHEN 'DOCENA'      THEN 'Docena'
+           WHEN 'PAQUETE'     THEN 'Paquete'
+           WHEN 'PIEZA'       THEN 'Pieza'
+       END,
+       ROUND(pi.quantity * s.quantity * i.unit_cost, 2),
+       NOW(), NOW()
+FROM sales s
+JOIN product_ingredients pi ON pi.product_id = s.product_id
+JOIN ingredients i          ON i.id = pi.ingredient_id;
