@@ -50,7 +50,6 @@ public class UserController {
         try {
             User user = userService.findById(id);
             model.addAttribute("user", user);
-            model.addAttribute("isSystemAdmin", user.isSystemAdmin());
             model.addAttribute("pageTitle", "Usuario: " + user.getFullName());
             return "users/show";
         } catch (EntityNotFoundException e) {
@@ -75,6 +74,7 @@ public class UserController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
+            model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Nuevo Usuario");
             return "users/create";
         }
@@ -85,6 +85,7 @@ public class UserController {
             return "redirect:/users";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Nuevo Usuario");
             return "users/create";
         }
@@ -94,12 +95,6 @@ public class UserController {
     public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findById(id);
-
-            // Block editing of system admin users
-            if (user.isSystemAdmin()) {
-                redirectAttributes.addFlashAttribute("error", "No se puede editar al administrador del sistema");
-                return "redirect:/users";
-            }
 
             UpdateUserRequest request = new UpdateUserRequest();
             request.setName(user.getName());
@@ -152,16 +147,7 @@ public class UserController {
     @PostMapping("/{id}/toggle")
     public String toggleEnabled(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            User user = userService.findById(id);
-
-            // Block toggling of system admin users
-            if (user.isSystemAdmin()) {
-                redirectAttributes.addFlashAttribute("error",
-                        "No se puede modificar el estado del administrador del sistema");
-                return "redirect:/users";
-            }
-
-            user = userService.toggleEnabled(id);
+            User user = userService.toggleEnabled(id);
             String status = user.getEnabled() ? "activado" : "desactivado";
             redirectAttributes.addFlashAttribute("success", "Usuario " + status + " exitosamente");
         } catch (EntityNotFoundException e) {

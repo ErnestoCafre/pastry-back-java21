@@ -48,26 +48,10 @@ public class User extends TimestampedEntity implements UserDetails {
     @Column(nullable = false)
     private Boolean enabled = true;
 
-    @NotNull
-    @Column(name = "system_admin", nullable = false)
-    private Boolean systemAdmin = false;
-
     @NotNull(message = "El rol es requerido")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-
-    public boolean isSystemAdmin() {
-        return Boolean.TRUE.equals(systemAdmin);
-    }
-
-    public boolean isAdmin() {
-        return role != null && role.getName() == RoleType.ADMIN;
-    }
-
-    public boolean isEmployee() {
-        return role != null && role.getName() == RoleType.EMPLOYEE;
-    }
 
     public String getFullName() {
         if (lastName == null || lastName.isBlank()) {
@@ -111,9 +95,6 @@ public class User extends TimestampedEntity implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
         if (role != null) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().name()));
-        }
-        if (Boolean.TRUE.equals(systemAdmin)) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_SYSTEM_ADMIN"));
         }
         return authorities;
     }

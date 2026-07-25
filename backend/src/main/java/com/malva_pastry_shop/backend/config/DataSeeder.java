@@ -123,7 +123,6 @@ public class DataSeeder implements CommandLineRunner {
                 return switch (roleType) {
                         case ADMIN -> "Administrador con acceso completo al sistema";
                         case EMPLOYEE -> "Empleado con acceso limitado a gestión de productos";
-                        case USER -> "Usuario básico del sistema";
                 };
         }
 
@@ -139,7 +138,6 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setEmail(sysAdminEmail);
                         admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
                         admin.setEnabled(true);
-                        admin.setSystemAdmin(true);
                         admin.setRole(adminRole);
 
                         userRepository.save(admin);
@@ -159,7 +157,6 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setEmail(adminEmail);
                         admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
                         admin.setEnabled(true);
-                        admin.setSystemAdmin(false);
                         admin.setRole(adminRole);
 
                         userRepository.save(admin);
@@ -179,33 +176,12 @@ public class DataSeeder implements CommandLineRunner {
                         employee.setEmail(employeeEmail);
                         employee.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
                         employee.setEnabled(true);
-                        employee.setSystemAdmin(false);
                         employee.setRole(employeeRole);
 
                         userRepository.save(employee);
                         log.info("Usuario empleado creado: {}", employeeEmail);
                 } else {
                         log.info("Usuario empleado ya existe: {}", employeeEmail);
-                }
-
-                String userEmail = "user@malva.com";
-                if (userRepository.findByEmail(userEmail).isEmpty()) {
-                        Role userRole = roleRepository.findByName(RoleType.USER)
-                                        .orElseThrow(() -> new RuntimeException("Rol USER no encontrado"));
-
-                        User user = new User();
-                        user.setName("Usuario");
-                        user.setLastName("Sistema");
-                        user.setEmail(userEmail);
-                        user.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
-                        user.setEnabled(true);
-                        user.setSystemAdmin(false);
-                        user.setRole(userRole);
-
-                        userRepository.save(user);
-                        log.info("Usuario usuario creado: {}", userEmail);
-                } else {
-                        log.info("Usuario usuario ya existe: {}", userEmail);
                 }
         }
 
