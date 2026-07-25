@@ -1,5 +1,5 @@
 -- ============================================================
--- V3: Eliminar el rol USER y el flag system_admin
+-- V4: Eliminar el rol USER y el flag system_admin
 -- El rol USER no otorgaba acceso a ninguna vista del panel admin
 -- (requiere ADMIN o EMPLOYEE) y el flag system_admin era una
 -- autoridad redundante frente a ROLE_ADMIN. Se retira toda su lógica.

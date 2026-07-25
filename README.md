@@ -223,8 +223,9 @@ src/main/resources/
 +-- application-prod.properties     # Config prod (ddl-auto=none, Flyway on)
 +-- db/migration/
 |   +-- V1__create_schema.sql       # Schema inicial (baseline en prod)
-|   +-- V2__seed_roles_and_admin.sql # Roles + admin para produccion
+|   +-- V2__seed_roles_and_admin.sql # Roles (ADMIN, EMPLOYEE) + admin para produccion
 |   +-- V3__drop_public_user_tables.sql # Elimina tablas de usuario publico no usadas
+|   +-- V4__remove_system_admin_and_user_role.sql # Elimina rol USER + columna system_admin
 |   +-- R__seed_demo_data.sql       # Datos de demo (repeatable migration)
 +-- templates/                      # Vistas Thymeleaf
 +-- static/                         # CSS, JS, imagenes
