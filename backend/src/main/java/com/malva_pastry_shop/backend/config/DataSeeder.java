@@ -47,12 +47,14 @@ public class DataSeeder implements CommandLineRunner {
         private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
         /**
-         * Password de los usuarios demo. Es el mismo para los cuatro, igual que en
-         * produccion (V2 y R__seed_demo_data.sql comparten un unico hash BCrypt),
-         * para que las credenciales del README sirvan tanto en local como en la
-         * demo desplegada.
+         * Passwords de los usuarios demo. Coinciden con los hashes BCrypt
+         * sembrados en produccion (V2 para sysadmin, R__seed_demo_data.sql para
+         * admin/employee) para que las credenciales del README sirvan tanto en
+         * local (perfil dev) como en la demo desplegada.
          */
-        private static final String DEMO_PASSWORD = "sysadmin123";
+        private static final String SYSADMIN_PASSWORD = "sysadmin123";
+        private static final String ADMIN_PASSWORD = "admin123";
+        private static final String EMPLOYEE_PASSWORD = "employee123";
 
         private final RoleRepository roleRepository;
         private final UserRepository userRepository;
@@ -136,7 +138,7 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setName("Administrador");
                         admin.setLastName("Sistema");
                         admin.setEmail(sysAdminEmail);
-                        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
+                        admin.setPasswordHash(passwordEncoder.encode(SYSADMIN_PASSWORD));
                         admin.setEnabled(true);
                         admin.setRole(adminRole);
 
@@ -155,7 +157,7 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setName("Administrador");
                         admin.setLastName("Sistema");
                         admin.setEmail(adminEmail);
-                        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
+                        admin.setPasswordHash(passwordEncoder.encode(ADMIN_PASSWORD));
                         admin.setEnabled(true);
                         admin.setRole(adminRole);
 
@@ -174,7 +176,7 @@ public class DataSeeder implements CommandLineRunner {
                         employee.setName("Empleado");
                         employee.setLastName("Sistema");
                         employee.setEmail(employeeEmail);
-                        employee.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
+                        employee.setPasswordHash(passwordEncoder.encode(EMPLOYEE_PASSWORD));
                         employee.setEnabled(true);
                         employee.setRole(employeeRole);
 

@@ -42,7 +42,7 @@ ALTER SEQUENCE sale_ingredients_id_seq RESTART WITH 1;
 -- ============================================================
 INSERT INTO users (name, last_name, email, password_hash, enabled, role_id, inserted_at, updated_at)
 SELECT 'Administrador', 'Demo', 'admin@malva.com',
-       '$2a$10$98ow5cuvjd/mahLwVDL4hejQmnfBwZs4NTQDS6aJVBp8cD7J02ey.',
+       '$2a$10$bXxqzOT6ez8J1Pauuz6qBue3ahHRdhKmIKJsIbwJqEDXK6qh1D/Bq',
        TRUE, r.id, NOW(), NOW()
 FROM roles r WHERE r.name = 'ADMIN'
 ON CONFLICT (email) DO UPDATE SET
@@ -52,7 +52,7 @@ ON CONFLICT (email) DO UPDATE SET
 
 INSERT INTO users (name, last_name, email, password_hash, enabled, role_id, inserted_at, updated_at)
 SELECT 'Empleado', 'Demo', 'employee@malva.com',
-       '$2a$10$98ow5cuvjd/mahLwVDL4hejQmnfBwZs4NTQDS6aJVBp8cD7J02ey.',
+       '$2a$10$/43SRnFJ9.TWGbYraB3drumbW5NvByuiggk9.swxs/8a10yxyeDna',
        TRUE, r.id, NOW(), NOW()
 FROM roles r WHERE r.name = 'EMPLOYEE'
 ON CONFLICT (email) DO UPDATE SET

@@ -31,8 +31,8 @@ Las mismas credenciales sirven en la demo desplegada y en un entorno local levan
 | Email | Password | Rol | Notas |
 |-------|----------|-----|-------|
 | `sysadmin@malva.com` | `sysadmin123` | Admin | Acceso completo, incluida la gestion de usuarios |
-| `admin@malva.com` | `sysadmin123` | Admin | Acceso completo, incluida la gestion de usuarios |
-| `employee@malva.com` | `sysadmin123` | Employee | Acceso limitado: no gestiona usuarios |
+| `admin@malva.com` | `admin123` | Admin | Acceso completo, incluida la gestion de usuarios |
+| `employee@malva.com` | `employee123` | Employee | Acceso limitado: no gestiona usuarios |
 
 ### Datos de demo
 
