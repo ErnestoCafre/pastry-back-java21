@@ -51,13 +51,13 @@ class UserServiceTest {
     private UserService userService;
 
     private User testUser;
-    private Role userRole;
+    private Role employeeRole;
     private Role adminRole;
 
     @BeforeEach
     void setUp() {
-        userRole = new Role(RoleType.USER);
-        userRole.setId(1L);
+        employeeRole = new Role(RoleType.EMPLOYEE);
+        employeeRole.setId(1L);
 
         adminRole = new Role(RoleType.ADMIN);
         adminRole.setId(2L);
@@ -68,9 +68,8 @@ class UserServiceTest {
         testUser.setLastName("Perez");
         testUser.setEmail("juan@test.com");
         testUser.setPasswordHash("hashedPassword");
-        testUser.setRole(userRole);
+        testUser.setRole(employeeRole);
         testUser.setEnabled(true);
-        testUser.setSystemAdmin(false);
     }
 
     @Nested
@@ -189,7 +188,7 @@ class UserServiceTest {
         @DisplayName("Debe crear usuario exitosamente")
         void createUser_WithValidData_CreatesUser() {
             when(userRepository.existsByEmail("nuevo@test.com")).thenReturn(false);
-            when(roleRepository.findByName(RoleType.USER)).thenReturn(Optional.of(userRole));
+            when(roleRepository.findByName(RoleType.EMPLOYEE)).thenReturn(Optional.of(employeeRole));
             when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User saved = invocation.getArgument(0);
@@ -204,12 +203,11 @@ class UserServiceTest {
             assertThat(result.getLastName()).isEqualTo("Usuario");
             assertThat(result.getEmail()).isEqualTo("nuevo@test.com");
             assertThat(result.getPasswordHash()).isEqualTo("encodedPassword");
-            assertThat(result.getRole()).isEqualTo(userRole);
+            assertThat(result.getRole()).isEqualTo(employeeRole);
             assertThat(result.getEnabled()).isTrue();
-            assertThat(result.getSystemAdmin()).isFalse();
 
             verify(userRepository).existsByEmail("nuevo@test.com");
-            verify(roleRepository).findByName(RoleType.USER);
+            verify(roleRepository).findByName(RoleType.EMPLOYEE);
             verify(passwordEncoder).encode("password123");
             verify(userRepository).save(any(User.class));
         }
@@ -227,14 +225,14 @@ class UserServiceTest {
         }
 
         @Test
-        @DisplayName("Debe lanzar excepcion cuando el rol USER no existe")
+        @DisplayName("Debe lanzar excepcion cuando el rol EMPLOYEE por defecto no existe")
         void createUser_WhenRoleNotFound_ThrowsException() {
             when(userRepository.existsByEmail("nuevo@test.com")).thenReturn(false);
-            when(roleRepository.findByName(RoleType.USER)).thenReturn(Optional.empty());
+            when(roleRepository.findByName(RoleType.EMPLOYEE)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.createUser(createRequest))
                     .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("Rol USER no encontrado");
+                    .hasMessageContaining("Rol EMPLOYEE no encontrado");
 
             verify(userRepository, never()).save(any());
         }
