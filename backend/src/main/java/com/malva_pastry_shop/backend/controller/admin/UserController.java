@@ -83,7 +83,7 @@ public class UserController {
             userService.createUser(request);
             redirectAttributes.addFlashAttribute("success", "Usuario creado exitosamente");
             return "redirect:/users";
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | EntityNotFoundException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Nuevo Usuario");

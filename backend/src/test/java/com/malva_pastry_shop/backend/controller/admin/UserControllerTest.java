@@ -177,6 +177,20 @@ class UserControllerTest {
             verify(model).addAttribute("error", "Ya existe un usuario con el email: nuevo@test.com");
             verify(model).addAttribute("pageTitle", "Nuevo Usuario");
         }
+
+        @Test
+        @DisplayName("Debe retornar vista de creacion cuando el rol no existe")
+        void create_WithInvalidRole_ReturnsCreateViewWithError() {
+            when(bindingResult.hasErrors()).thenReturn(false);
+            when(userService.createUser(createRequest))
+                    .thenThrow(new EntityNotFoundException("Rol no encontrado con ID: 99"));
+
+            String result = userController.create(createRequest, bindingResult, model, redirectAttributes);
+
+            assertThat(result).isEqualTo("users/create");
+            verify(model).addAttribute("error", "Rol no encontrado con ID: 99");
+            verify(model).addAttribute("pageTitle", "Nuevo Usuario");
+        }
     }
 
     @Nested
