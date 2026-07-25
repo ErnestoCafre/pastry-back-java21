@@ -24,7 +24,7 @@ public class CreateUserRequest {
     private String email;
 
     @NotBlank(message = "La contrasena es requerida")
-    @Size(min = 6, max = 100, message = "La contrasena debe tener entre 6 y 100 caracteres")
+    @Size(min = 6, max = 32, message = "La contrasena debe tener entre 6 y 32 caracteres")
     private String password;
 
     private Long roleId;
