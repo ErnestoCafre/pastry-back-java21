@@ -47,12 +47,14 @@ public class DataSeeder implements CommandLineRunner {
         private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
         /**
-         * Password de los usuarios demo. Es el mismo para los cuatro, igual que en
-         * produccion (V2 y R__seed_demo_data.sql comparten un unico hash BCrypt),
-         * para que las credenciales del README sirvan tanto en local como en la
-         * demo desplegada.
+         * Passwords de los usuarios demo. Coinciden con los hashes BCrypt
+         * sembrados en produccion (V2 para sysadmin, R__seed_demo_data.sql para
+         * admin/employee) para que las credenciales del README sirvan tanto en
+         * local (perfil dev) como en la demo desplegada.
          */
-        private static final String DEMO_PASSWORD = "sysadmin123";
+        private static final String SYSADMIN_PASSWORD = "sysadmin123";
+        private static final String ADMIN_PASSWORD = "admin123";
+        private static final String EMPLOYEE_PASSWORD = "employee123";
 
         private final RoleRepository roleRepository;
         private final UserRepository userRepository;
@@ -123,7 +125,6 @@ public class DataSeeder implements CommandLineRunner {
                 return switch (roleType) {
                         case ADMIN -> "Administrador con acceso completo al sistema";
                         case EMPLOYEE -> "Empleado con acceso limitado a gestión de productos";
-                        case USER -> "Usuario básico del sistema";
                 };
         }
 
@@ -137,9 +138,8 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setName("Administrador");
                         admin.setLastName("Sistema");
                         admin.setEmail(sysAdminEmail);
-                        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
+                        admin.setPasswordHash(passwordEncoder.encode(SYSADMIN_PASSWORD));
                         admin.setEnabled(true);
-                        admin.setSystemAdmin(true);
                         admin.setRole(adminRole);
 
                         userRepository.save(admin);
@@ -157,9 +157,8 @@ public class DataSeeder implements CommandLineRunner {
                         admin.setName("Administrador");
                         admin.setLastName("Sistema");
                         admin.setEmail(adminEmail);
-                        admin.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
+                        admin.setPasswordHash(passwordEncoder.encode(ADMIN_PASSWORD));
                         admin.setEnabled(true);
-                        admin.setSystemAdmin(false);
                         admin.setRole(adminRole);
 
                         userRepository.save(admin);
@@ -177,35 +176,14 @@ public class DataSeeder implements CommandLineRunner {
                         employee.setName("Empleado");
                         employee.setLastName("Sistema");
                         employee.setEmail(employeeEmail);
-                        employee.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
+                        employee.setPasswordHash(passwordEncoder.encode(EMPLOYEE_PASSWORD));
                         employee.setEnabled(true);
-                        employee.setSystemAdmin(false);
                         employee.setRole(employeeRole);
 
                         userRepository.save(employee);
                         log.info("Usuario empleado creado: {}", employeeEmail);
                 } else {
                         log.info("Usuario empleado ya existe: {}", employeeEmail);
-                }
-
-                String userEmail = "user@malva.com";
-                if (userRepository.findByEmail(userEmail).isEmpty()) {
-                        Role userRole = roleRepository.findByName(RoleType.USER)
-                                        .orElseThrow(() -> new RuntimeException("Rol USER no encontrado"));
-
-                        User user = new User();
-                        user.setName("Usuario");
-                        user.setLastName("Sistema");
-                        user.setEmail(userEmail);
-                        user.setPasswordHash(passwordEncoder.encode(DEMO_PASSWORD));
-                        user.setEnabled(true);
-                        user.setSystemAdmin(false);
-                        user.setRole(userRole);
-
-                        userRepository.save(user);
-                        log.info("Usuario usuario creado: {}", userEmail);
-                } else {
-                        log.info("Usuario usuario ya existe: {}", userEmail);
                 }
         }
 

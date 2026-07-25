@@ -56,13 +56,13 @@ class UserControllerTest {
     private UserController userController;
 
     private User testUser;
-    private Role userRole;
+    private Role employeeRole;
     private Role adminRole;
 
     @BeforeEach
     void setUp() {
-        userRole = new Role(RoleType.USER);
-        userRole.setId(1L);
+        employeeRole = new Role(RoleType.EMPLOYEE);
+        employeeRole.setId(1L);
 
         adminRole = new Role(RoleType.ADMIN);
         adminRole.setId(2L);
@@ -73,9 +73,8 @@ class UserControllerTest {
         testUser.setLastName("Perez");
         testUser.setEmail("juan@test.com");
         testUser.setPasswordHash("hashedPassword");
-        testUser.setRole(userRole);
+        testUser.setRole(employeeRole);
         testUser.setEnabled(true);
-        testUser.setSystemAdmin(false);
     }
 
     @Nested
@@ -178,6 +177,20 @@ class UserControllerTest {
             verify(model).addAttribute("error", "Ya existe un usuario con el email: nuevo@test.com");
             verify(model).addAttribute("pageTitle", "Nuevo Usuario");
         }
+
+        @Test
+        @DisplayName("Debe retornar vista de creacion cuando el rol no existe")
+        void create_WithInvalidRole_ReturnsCreateViewWithError() {
+            when(bindingResult.hasErrors()).thenReturn(false);
+            when(userService.createUser(createRequest))
+                    .thenThrow(new EntityNotFoundException("Rol no encontrado con ID: 99"));
+
+            String result = userController.create(createRequest, bindingResult, model, redirectAttributes);
+
+            assertThat(result).isEqualTo("users/create");
+            verify(model).addAttribute("error", "Rol no encontrado con ID: 99");
+            verify(model).addAttribute("pageTitle", "Nuevo Usuario");
+        }
     }
 
     @Nested
@@ -187,7 +200,7 @@ class UserControllerTest {
         @Test
         @DisplayName("Debe retornar vista de edicion con datos del usuario")
         void showEditForm_WithExistingUser_ReturnsEditView() {
-            List<Role> roles = List.of(userRole, adminRole);
+            List<Role> roles = List.of(employeeRole, adminRole);
             when(userService.findById(1L)).thenReturn(testUser);
             when(roleRepository.findAll()).thenReturn(roles);
 
@@ -209,20 +222,6 @@ class UserControllerTest {
 
             assertThat(result).isEqualTo("redirect:/users");
             verify(redirectAttributes).addFlashAttribute("error", "Usuario no encontrado");
-        }
-
-        @Test
-        @DisplayName("Debe redirigir a lista cuando el usuario es system admin")
-        void showEditForm_WithSystemAdmin_RedirectsToListWithError() {
-            User sysAdmin = new User();
-            sysAdmin.setId(1L);
-            sysAdmin.setSystemAdmin(true);
-            when(userService.findById(1L)).thenReturn(sysAdmin);
-
-            String result = userController.showEditForm(1L, model, redirectAttributes);
-
-            assertThat(result).isEqualTo("redirect:/users");
-            verify(redirectAttributes).addFlashAttribute("error", "No se puede editar al administrador del sistema");
         }
     }
 
@@ -258,7 +257,7 @@ class UserControllerTest {
         @Test
         @DisplayName("Debe retornar vista de edicion cuando hay errores de validacion")
         void update_WithValidationErrors_ReturnsEditView() {
-            List<Role> roles = List.of(userRole, adminRole);
+            List<Role> roles = List.of(employeeRole, adminRole);
             when(bindingResult.hasErrors()).thenReturn(true);
             when(roleRepository.findAll()).thenReturn(roles);
 
@@ -274,7 +273,7 @@ class UserControllerTest {
         @Test
         @DisplayName("Debe retornar vista de edicion cuando el email esta duplicado")
         void update_WithDuplicateEmail_ReturnsEditViewWithError() {
-            List<Role> roles = List.of(userRole, adminRole);
+            List<Role> roles = List.of(employeeRole, adminRole);
             when(bindingResult.hasErrors()).thenReturn(false);
             when(userService.updateUser(1L, updateRequest))
                     .thenThrow(new IllegalArgumentException("Ya existe otro usuario con el email"));
@@ -311,8 +310,6 @@ class UserControllerTest {
             User disabledUser = new User();
             disabledUser.setId(1L);
             disabledUser.setEnabled(true);
-            disabledUser.setSystemAdmin(false);
-            when(userService.findById(1L)).thenReturn(disabledUser);
             when(userService.toggleEnabled(1L)).thenReturn(disabledUser);
 
             String result = userController.toggleEnabled(1L, redirectAttributes);
@@ -327,8 +324,6 @@ class UserControllerTest {
             User enabledUser = new User();
             enabledUser.setId(1L);
             enabledUser.setEnabled(false);
-            enabledUser.setSystemAdmin(false);
-            when(userService.findById(1L)).thenReturn(enabledUser);
             when(userService.toggleEnabled(1L)).thenReturn(enabledUser);
 
             String result = userController.toggleEnabled(1L, redirectAttributes);
@@ -340,28 +335,12 @@ class UserControllerTest {
         @Test
         @DisplayName("Debe redirigir con mensaje de error cuando el usuario no existe")
         void toggleEnabled_WhenUserNotFound_RedirectsWithError() {
-            when(userService.findById(99L)).thenThrow(new EntityNotFoundException("Usuario no encontrado"));
+            when(userService.toggleEnabled(99L)).thenThrow(new EntityNotFoundException("Usuario no encontrado"));
 
             String result = userController.toggleEnabled(99L, redirectAttributes);
 
             assertThat(result).isEqualTo("redirect:/users");
             verify(redirectAttributes).addFlashAttribute("error", "Usuario no encontrado");
-        }
-
-        @Test
-        @DisplayName("Debe redirigir con mensaje de error cuando el usuario es system admin")
-        void toggleEnabled_WhenSystemAdmin_RedirectsWithError() {
-            User sysAdmin = new User();
-            sysAdmin.setId(1L);
-            sysAdmin.setSystemAdmin(true);
-            when(userService.findById(1L)).thenReturn(sysAdmin);
-
-            String result = userController.toggleEnabled(1L, redirectAttributes);
-
-            assertThat(result).isEqualTo("redirect:/users");
-            verify(redirectAttributes).addFlashAttribute("error",
-                    "No se puede modificar el estado del administrador del sistema");
-            verify(userService, never()).toggleEnabled(anyLong());
         }
     }
 }

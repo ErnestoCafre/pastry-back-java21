@@ -63,7 +63,7 @@ public class CategoryController {
         return "categories/list";
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/deleted")
     public String listDeleted(
             @RequestParam(defaultValue = "0") int page,
@@ -206,7 +206,7 @@ public class CategoryController {
         return "redirect:/categories";
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/restore")
     public String restore(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -220,7 +220,7 @@ public class CategoryController {
 
     // ========== Hard Delete ==========
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/hard-delete")
     public String hardDelete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {

@@ -34,7 +34,7 @@
                     <label for="productId" class="block text-sm font-medium text-gray-700 mb-1">
                         Producto <span class="text-red-500">*</span>
                     </label>
-                    <select id="productId" th:field="*{productId}"
+                    <select id="productId" th:field="*{productId}" required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
                         th:classappend="${#fields.hasErrors('productId')} ? 'border-red-500' : ''">
                         <option value="">Seleccionar producto...</option>
@@ -50,7 +50,7 @@
                         <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">
                             Cantidad <span class="text-red-500">*</span>
                         </label>
-                        <input type="number" id="quantity" th:field="*{quantity}" min="1" step="1"
+                        <input type="number" id="quantity" th:field="*{quantity}" required min="1" step="1"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
                             th:classappend="${#fields.hasErrors('quantity')} ? 'border-red-500' : ''"
                             placeholder="1">
@@ -63,7 +63,7 @@
                         </label>
                         <div class="relative">
                             <span class="absolute left-3 top-2.5 text-gray-500">$</span>
-                            <input type="number" id="unitPrice" th:field="*{unitPrice}" step="0.01" min="0"
+                            <input type="number" id="unitPrice" th:field="*{unitPrice}" required step="0.01" min="0"
                                 class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
                                 th:classappend="${#fields.hasErrors('unitPrice')} ? 'border-red-500' : ''"
                                 placeholder="0.00">

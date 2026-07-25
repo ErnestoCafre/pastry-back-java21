@@ -72,7 +72,7 @@ public class TagController {
         return "tags/list";
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/deleted")
     public String listDeleted(
             @RequestParam(defaultValue = "0") int page,
@@ -193,7 +193,7 @@ public class TagController {
         return "redirect:/tags";
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/restore")
     public String restore(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -207,7 +207,7 @@ public class TagController {
 
     // ========== Hard Delete ==========
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/hard-delete")
     public String hardDelete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
