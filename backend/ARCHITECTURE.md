@@ -407,7 +407,6 @@ erDiagram
         varchar_255 email "UNIQUE, NOT NULL"
         varchar_255 password_hash "NOT NULL"
         boolean enabled "DEFAULT true"
-        boolean system_admin "DEFAULT false"
         bigint role_id FK "→ roles.id"
         timestamp inserted_at "DEFAULT now()"
         timestamp updated_at "DEFAULT now()"
@@ -415,7 +414,7 @@ erDiagram
     
     roles {
         bigint id PK "Auto-increment"
-        varchar_255 name "UNIQUE, NOT NULL (ADMIN/EMPLOYEE/USER)"
+        varchar_255 name "UNIQUE, NOT NULL (ADMIN/EMPLOYEE)"
         text description
         timestamp inserted_at "DEFAULT now()"
         timestamp updated_at "DEFAULT now()"

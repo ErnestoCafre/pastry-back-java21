@@ -93,19 +93,6 @@
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">System Admin</dt>
-                        <dd class="mt-1">
-                            <span th:if="${user.systemAdmin}"
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                Sí
-                            </span>
-                            <span th:if="${!user.systemAdmin}"
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                No
-                            </span>
-                        </dd>
-                    </div>
-                    <div>
                         <dt class="text-sm font-medium text-gray-500">Creado</dt>
                         <dd class="mt-1 text-sm text-gray-900"
                             th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">
@@ -122,16 +109,8 @@
 
             <!-- Actions -->
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center gap-3">
-                <!-- Show warning if system admin -->
-                <div th:if="${user.systemAdmin}" class="flex-1 flex items-center gap-2 text-amber-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span class="text-sm font-medium">El administrador del sistema no puede ser modificado</span>
-                </div>
-                <!-- Edit button (hidden for sys_admin) -->
-                <a th:if="${!user.systemAdmin}" th:href="@{/users/{id}/edit(id=${user.id})}"
+                <!-- Edit button -->
+                <a th:href="@{/users/{id}/edit(id=${user.id})}"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -139,8 +118,8 @@
                     </svg>
                     Editar
                 </a>
-                <!-- Toggle button (hidden for sys_admin) -->
-                <form th:if="${!user.systemAdmin}" th:action="@{/users/{id}/toggle(id=${user.id})}" method="post"
+                <!-- Toggle button -->
+                <form th:action="@{/users/{id}/toggle(id=${user.id})}" method="post"
                     class="inline">
                     <button type="submit"
                         th:class="${user.enabled} ? 'inline-flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors' : 'inline-flex items-center gap-2 px-4 py-2 border border-green-300 text-green-700 rounded-lg hover:bg-green-50 transition-colors'">

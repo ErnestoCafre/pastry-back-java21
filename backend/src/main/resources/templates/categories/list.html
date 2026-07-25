@@ -43,8 +43,8 @@
                 </div>
             </form>
             <div class="flex items-center gap-2">
-                <!-- Papelera: solo visible para ADMIN y SYSTEM_ADMIN -->
-                <a th:href="@{/categories/deleted}" sec:authorize="hasAnyRole('ADMIN', 'SYSTEM_ADMIN')"
+                <!-- Papelera: solo visible para ADMIN -->
+                <a th:href="@{/categories/deleted}" sec:authorize="hasRole('ADMIN')"
                     class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

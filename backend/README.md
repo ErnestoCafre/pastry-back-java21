@@ -32,7 +32,7 @@ El sistema expone dos interfaces:
 
 ### Sistema
 
-- **Usuarios**: Gestion de cuentas del panel de administracion. Crear, editar, habilitar/deshabilitar cuentas. Los usuarios System Admin estan protegidos contra modificacion.
+- **Usuarios**: Gestion de cuentas del panel de administracion. Crear, editar, habilitar/deshabilitar cuentas.
 
 ---
 
@@ -51,8 +51,6 @@ Control de acceso basado en roles (RBAC) con dos niveles operativos:
 | Restaurar elementos desde papelera | Si | No |
 | Eliminar permanentemente (hard delete) | Si | No |
 | Gestionar usuarios del sistema | Si | No |
-
-Existe un flag `systemAdmin` que protege ciertas cuentas: los usuarios marcados como System Admin no pueden ser editados, deshabilitados ni eliminados por ningun otro usuario.
 
 ---
 
