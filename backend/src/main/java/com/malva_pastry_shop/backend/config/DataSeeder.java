@@ -48,11 +48,9 @@ public class DataSeeder implements CommandLineRunner {
 
         /**
          * Passwords de los usuarios demo. Coinciden con los hashes BCrypt
-         * sembrados en produccion (V2 para sysadmin, R__seed_demo_data.sql para
-         * admin/employee) para que las credenciales del README sirvan tanto en
-         * local (perfil dev) como en la demo desplegada.
+         * sembrados en R__seed_demo_data.sql para que las credenciales del
+         * README sirvan tanto en local (perfil dev) como en la demo desplegada.
          */
-        private static final String SYSADMIN_PASSWORD = "sysadmin123";
         private static final String ADMIN_PASSWORD = "admin123";
         private static final String EMPLOYEE_PASSWORD = "employee123";
 
@@ -129,25 +127,6 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         private void seedBasicUsers() {
-                String sysAdminEmail = "sysadmin@malva.com";
-                if (userRepository.findByEmail(sysAdminEmail).isEmpty()) {
-                        Role adminRole = roleRepository.findByName(RoleType.ADMIN)
-                                        .orElseThrow(() -> new RuntimeException("Rol ADMIN no encontrado"));
-
-                        User admin = new User();
-                        admin.setName("Administrador");
-                        admin.setLastName("Sistema");
-                        admin.setEmail(sysAdminEmail);
-                        admin.setPasswordHash(passwordEncoder.encode(SYSADMIN_PASSWORD));
-                        admin.setEnabled(true);
-                        admin.setRole(adminRole);
-
-                        userRepository.save(admin);
-                        log.info("Usuario administrador creado: {}", sysAdminEmail);
-                } else {
-                        log.info("Usuario administrador ya existe: {}", sysAdminEmail);
-                }
-
                 String adminEmail = "admin@malva.com";
                 if (userRepository.findByEmail(adminEmail).isEmpty()) {
                         Role adminRole = roleRepository.findByName(RoleType.ADMIN)
