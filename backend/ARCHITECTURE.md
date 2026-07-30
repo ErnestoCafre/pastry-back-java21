@@ -17,6 +17,8 @@ This document describes the system architecture, design patterns, and architectu
 5. [Design Patterns](#design-patterns)
 6. [Security Architecture](#security-architecture)
 7. [API Strategy](#api-strategy)
+8. [Technology Stack Alignment](#technology-stack-alignment)
+9. [Entity Relationship Diagram](#entity-relationship-diagram)
 
 ---
 
@@ -324,6 +326,28 @@ com.malva_pastry_shop.backend/
 
 ---
 
+## Design Patterns
+
+The structural patterns below are the ones that shape the architecture — the
+reason the packages are split the way they are. They are listed here in one
+line each; the full catalogue, with the alternatives that were discarded and
+why, lives in
+[the technical dossier](../pastry-back-dosier-tecnico/dossier-tecnico/01-arquitectura-e-ingenieria/02-patrones-de-diseno.md).
+
+| Pattern | Where | What it buys |
+|---|---|---|
+| **Snapshot on write** | `Sale`, `SaleIngredient` | A sale copies product name, unit price and per-ingredient cost at the moment of the transaction, so historical margin never depends on today's catalogue |
+| **Soft delete with trash** | `SoftDeletableEntity` + the five catalogue entities | Deleting is reversible and attributable (`deletedAt`, `deletedBy`); permanent deletion is a separate, ADMIN-only step |
+| **Integrity guards before hard delete** | `ProductService`, `TagService`, `StorefrontSectionService`, … | The service counts dependants and explains the refusal, instead of letting a FK violation surface as a 500 |
+| **Mapped superclass inheritance** | `TimestampedEntity` → `SoftDeletableEntity` | Identity, timestamps and the delete lifecycle are declared once |
+| **Dual filter chain** | `SecurityConfig` | Two `SecurityFilterChain` beans ordered by `securityMatcher`: stateless/no-CSRF for the API, session/CSRF for the panel |
+| **DTO segregation** | `dto/request`, `dto/response/api` | The API never serialises an entity, so an internal field cannot leak by accident |
+| **`@EntityGraph` as fetch contract** | Every trash query | With `open-in-view=false`, what a view renders must be fetched by the query that feeds it |
+| **Derived identity, validated** | `SlugUtil` + the two storefront services | The slug comes from the name; because that mapping is not injective, the service validates the result before persisting |
+| **Cross-cutting advice with explicit scope** | `GlobalBindingAdvice` (unscoped), `ApiExceptionHandler` (`basePackages`) | Input normalisation applies everywhere; JSON error translation applies only to the API, so the panel keeps returning HTML |
+| **Environment seam** | `ImageUrlResolver` | One injectable component decides relative vs. absolute image URLs, driven by `app.public.base-url` |
+
+---
 
 ## Security Architecture
 

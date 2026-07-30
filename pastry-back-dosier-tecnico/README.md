@@ -38,7 +38,7 @@ Está **desplegado y operativo**, no es un entorno de demostración local:
 | Bounded contexts | 4 (inventory · storefront · sales · auth) |
 | Entidades de dominio | 12 + 2 superclases mapeadas + 2 enums |
 | Tablas en PostgreSQL | 12 (5 con soft-delete) |
-| Migraciones Flyway | 5 versionadas + 1 repetible (seed de demo) |
+| Migraciones Flyway | 6 versionadas + 1 repetible (seed de demo) |
 | Tests | 62 (JUnit 5 · Mockito · AssertJ) |
 | Plantillas Thymeleaf | 40 |
 | Endpoints de la API pública | 7 (todos `GET`) |
