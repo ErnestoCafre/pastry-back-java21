@@ -6,6 +6,12 @@ import java.text.Normalizer;
  * Utilidad para generar slugs URL-friendly a partir de strings.
  * Normaliza texto eliminando acentos, convirtiendo a minúsculas y
  * reemplazando espacios por guiones.
+ *
+ * <p><b>La transformación no es inyectiva:</b> nombres distintos pueden producir
+ * el mismo slug ("Café" y "Cafe!", "Sin Gluten" y "sin-gluten"), y un nombre sin
+ * caracteres alfanuméricos produce un slug vacío. Como las columnas de slug son
+ * UNIQUE y NOT NULL, quien genere un slug para persistirlo debe validar el
+ * resultado antes de guardarlo.
  */
 public class SlugUtil {
 
@@ -44,19 +50,5 @@ public class SlugUtil {
         slug = slug.replaceAll("^-+|-+$", "");
 
         return slug;
-    }
-
-    /**
-     * Genera un slug único agregando un sufijo numérico si es necesario.
-     * 
-     * @param baseSlug Slug base
-     * @param counter  Contador para sufijo (usar 1 para el primer intento)
-     * @return Slug con sufijo si counter > 1, o slug base si counter == 1
-     */
-    public static String generateUniqueSlug(String baseSlug, int counter) {
-        if (counter <= 1) {
-            return baseSlug;
-        }
-        return baseSlug + "-" + counter;
     }
 }
