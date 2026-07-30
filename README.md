@@ -229,6 +229,7 @@ src/main/resources/
 |   +-- V3__drop_public_user_tables.sql # Elimina tablas de usuario publico no usadas
 |   +-- V4__remove_system_admin_and_user_role.sql # Elimina rol USER + columna system_admin
 |   +-- V5__remove_sysadmin_user.sql # Elimina sysadmin (redundante con admin@malva.com)
+|   +-- V6__unique_product_ingredient.sql # UNIQUE (product_id, ingredient_id) en recetas
 |   +-- R__seed_demo_data.sql       # Datos de demo (repeatable migration)
 +-- templates/                      # Vistas Thymeleaf
 +-- static/                         # CSS, JS, imagenes
