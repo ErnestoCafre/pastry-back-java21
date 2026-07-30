@@ -34,6 +34,12 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 
     Optional<Tag> findByNameIgnoreCase(String name);
 
+    // ========== Validacion de slug unico ==========
+
+    // Sin filtrar por deletedAt a proposito: uq_tags_slug cubre la tabla entera,
+    // asi que un tag en la papelera sigue ocupando su slug.
+    Optional<Tag> findBySlug(String slug);
+
     // ========== Busqueda por IDs ==========
 
     List<Tag> findByIdInAndDeletedAtIsNull(List<Long> ids);
