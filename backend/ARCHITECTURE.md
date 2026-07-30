@@ -223,7 +223,7 @@ graph TD
     subgraph "Infrastructure Layer"
         I1[Repositories<br/>Data Access]
         I2[Security<br/>Authentication]
-        I3[Utils<br/>SlugUtil]
+        I3[Utils<br/>SlugUtil, ImageUrlResolver]
     end
     
     P1 --> A1
@@ -264,8 +264,12 @@ graph TD
 
 #### Infrastructure Layer
 - **Repositories**: Database queries via Spring Data JPA
+- **Fetch contract**: `spring.jpa.open-in-view=false` in every profile. The
+  Hibernate session closes with the service method, so any association a view
+  renders must be declared with `@EntityGraph` on the query that feeds it
 - **Security**: Spring Security configuration
-- **Utilities**: Helper classes (e.g., SlugUtil)
+- **Utilities**: `SlugUtil` (URL slugs derived from names), `ImageUrlResolver`
+  (absolute image URLs for cross-origin API consumers)
 
 ---
 
@@ -297,11 +301,15 @@ com.malva_pastry_shop.backend/
 │
 ├── repository/                 # Infrastructure
 ├── config/                     # Configuration
-│   ├── SecurityConfig
-│   └── DataSeeder
+│   ├── SecurityConfig          # Dual filter chain
+│   ├── CorsConfig              # CORS for the public API
+│   ├── OpenApiConfig           # Swagger/OpenAPI metadata
+│   ├── GlobalBindingAdvice     # Trims every inbound form string
+│   └── DataSeeder              # Dev-profile data
 │
 └── util/                       # Utilities
-    └── SlugUtil
+    ├── SlugUtil                # Name -> URL slug
+    └── ImageUrlResolver        # Relative -> absolute image URLs
 ```
 
 ### Package Naming Conventions
