@@ -37,4 +37,10 @@ public interface StorefrontSectionRepository extends JpaRepository<StorefrontSec
     // ========== Validacion de nombre unico (case-insensitive) ==========
 
     Optional<StorefrontSection> findByNameIgnoreCase(String name);
+
+    // ========== Validacion de slug unico ==========
+
+    // Sin filtrar por deletedAt a proposito: uq_storefront_sections_slug cubre la
+    // tabla entera, asi que una seccion en la papelera sigue ocupando su slug.
+    Optional<StorefrontSection> findBySlug(String slug);
 }

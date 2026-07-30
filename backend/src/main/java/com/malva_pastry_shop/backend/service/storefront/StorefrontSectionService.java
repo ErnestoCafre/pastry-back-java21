@@ -79,7 +79,7 @@ public class StorefrontSectionService {
 
         StorefrontSection section = new StorefrontSection();
         section.setName(request.getName());
-        section.setSlug(SlugUtil.generateSlug(request.getName()));
+        section.setSlug(buildSlug(request.getName(), null));
         section.setDescription(request.getDescription());
         section.setDisplayOrder(request.getDisplayOrder());
         section.setVisible(request.getVisible() != null ? request.getVisible() : true);
@@ -93,7 +93,7 @@ public class StorefrontSectionService {
         validateSectionName(request.getName(), id);
 
         section.setName(request.getName());
-        section.setSlug(SlugUtil.generateSlug(request.getName()));
+        section.setSlug(buildSlug(request.getName(), id));
         section.setDescription(request.getDescription());
         section.setDisplayOrder(request.getDisplayOrder());
         section.setVisible(request.getVisible() != null ? request.getVisible() : true);
@@ -170,6 +170,53 @@ public class StorefrontSectionService {
                 throw new IllegalArgumentException("Ya existe una sección con el nombre: " + name);
             }
         });
+    }
+
+    /**
+     * Deriva el slug desde el nombre y valida los invariantes que la base de datos
+     * ya conoce, para poder explicarlos en vez de fallar con un error 500.
+     *
+     * El slug no es el nombre: generateSlug elimina acentos y colapsa todo lo que
+     * no sea alfanumerico, asi que dos nombres que validateSectionName considera
+     * distintos ("Otoño" y "Otono", "Mas Vendidos" y "mas-vendidos") pueden
+     * producir el mismo slug, y un nombre sin alfanumericos ("***") produce un slug
+     * vacio. Contra la columna (uq_storefront_sections_slug, NOT NULL) eso termina
+     * en DataIntegrityViolationException o ConstraintViolationException, que el
+     * panel no captura. Ademas el slug es la clave publica de la seccion en
+     * GET /api/v1/sections/{slug}: uno vacio dejaria la seccion inalcanzable.
+     *
+     * @param name      Nombre desde el que se deriva el slug
+     * @param excludeId ID de la seccion a excluir (para updates), null para creates
+     * @return Slug validado, listo para persistir
+     */
+    private String buildSlug(String name, Long excludeId) {
+        String slug = SlugUtil.generateSlug(name);
+
+        if (slug == null || slug.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "El nombre '" + name + "' no genera un enlace válido: debe contener al menos una letra o un "
+                            + "número.");
+        }
+
+        sectionRepository.findBySlug(slug).ifPresent(existing -> {
+            if (excludeId != null && existing.getId().equals(excludeId)) {
+                return;
+            }
+
+            if (existing.isDeleted()) {
+                throw new IllegalArgumentException(
+                        "El nombre '" + name + "' genera el mismo enlace ('" + slug + "') que la sección '"
+                                + existing.getName() + "', que está en la papelera. " +
+                                "Puedes restaurarla o eliminarla permanentemente antes de usar este nombre.");
+            } else {
+                throw new IllegalArgumentException(
+                        "El nombre '" + name + "' genera el mismo enlace ('" + slug + "') que la sección '"
+                                + existing.getName() + "'. Elige un nombre que se diferencie en algo más que "
+                                + "acentos, mayúsculas o signos de puntuación.");
+            }
+        });
+
+        return slug;
     }
 
     // ========== Gestión de Productos ==========
