@@ -106,6 +106,10 @@ Respuestas paginadas:
 }
 ```
 
+### URLs de imagen
+
+Las respuestas devuelven la ruta de imagen tal como esta guardada (`/images/...`), valida mientras el frontend consuma desde el mismo origen. Si se define `PUBLIC_BASE_URL`, la API antepone ese origen y devuelve URLs absolutas, para que un frontend en otro dominio pueda cargarlas. Una URL ya absoluta se deja sin tocar.
+
 ---
 
 ## Seguridad

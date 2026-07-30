@@ -190,6 +190,7 @@ src/main/java/com/malva_pastry_shop/backend/
 |   +-- SecurityConfig.java     # Spring Security 7 (dual chain)
 |   +-- CorsConfig.java         # CORS para API
 |   +-- OpenApiConfig.java      # Swagger/OpenAPI
+|   +-- GlobalBindingAdvice.java # Trim global de strings en formularios
 |   +-- DataSeeder.java         # Datos iniciales (solo dev)
 |
 +-- controller/                 # Capa de Presentacion
@@ -216,15 +217,19 @@ src/main/java/com/malva_pastry_shop/backend/
 |   +-- UserService
 |
 +-- util/
+|   +-- SlugUtil.java               # Slugs URL-friendly derivados del nombre
+|   +-- ImageUrlResolver.java       # Resuelve URLs de imagen absolutas para la API
 
 src/main/resources/
 +-- application.properties          # Config dev (ddl-auto=create, Flyway off)
 +-- application-prod.properties     # Config prod (ddl-auto=none, Flyway on)
 +-- db/migration/
-|   +-- V1__create_schema.sql       # Schema inicial (baseline en prod)
-|   +-- V2__seed_roles_and_admin.sql # Roles (ADMIN, EMPLOYEE) + admin para produccion
+|   +-- V1__create_schema.sql       # Schema inicial
+|   +-- V2__seed_roles_and_admin.sql # Roles (ADMIN, EMPLOYEE) + usuario sysadmin
 |   +-- V3__drop_public_user_tables.sql # Elimina tablas de usuario publico no usadas
 |   +-- V4__remove_system_admin_and_user_role.sql # Elimina rol USER + columna system_admin
+|   +-- V5__remove_sysadmin_user.sql # Elimina sysadmin (redundante con admin@malva.com)
+|   +-- V6__unique_product_ingredient.sql # UNIQUE (product_id, ingredient_id) en recetas
 |   +-- R__seed_demo_data.sql       # Datos de demo (repeatable migration)
 +-- templates/                      # Vistas Thymeleaf
 +-- static/                         # CSS, JS, imagenes

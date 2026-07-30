@@ -11,6 +11,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -19,7 +20,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "product_ingredients")
+@Table(name = "product_ingredients", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_product_ingredient", columnNames = { "product_id", "ingredient_id" })
+})
 @Getter
 @Setter
 @NoArgsConstructor
