@@ -77,6 +77,10 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 // Login público
                                                 .requestMatchers("/login", "/login/**").permitAll()
+                                                // Páginas de error: el forward de accessDeniedPage tiene
+                                                // que poder renderizarse aunque no haya sesión, o el
+                                                // usuario termina rebotado al login sin saber qué pasó.
+                                                .requestMatchers("/error", "/error/**").permitAll()
                                                 // Gestión de usuarios solo para ADMIN
                                                 .requestMatchers("/users/**").hasRole("ADMIN")
                                                 // Todo lo demás requiere ADMIN o EMPLOYEE
