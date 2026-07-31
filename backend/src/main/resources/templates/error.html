@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  Página de error genérica.
+
+  Spring Boot resuelve las vistas de error por convención. Su
+  DefaultErrorViewResolver prueba primero "error/<status>" (error/404) y después
+  "error/<serie>xx" (error/4xx); si ninguna existe, BasicErrorController cae en
+  la vista llamada "error", que es ESTE archivo —templates/error.html, no
+  templates/error/error.html—. Un solo archivo cubre entonces cualquier código y
+  adapta el texto con ${status}; no hace falta un ErrorController propio.
+
+  Ojo: BasicErrorController tiene dos handlers y elige por Accept. Un navegador
+  manda "Accept: text/html" y recibe esta página; un cliente que manda "*/*"
+  —curl por defecto— recibe el JSON de error. Al probar con curl hay que mandar
+  la cabecera o parece que la página no funciona.
+
+  Convive con error/403.html, que es otra cosa: ahí Spring Security hace forward
+  desde accessDeniedPage y ErrorPageController distingue "sesión expirada" de
+  "sin permiso". Si un 403 llegara igual por este camino, se resuelve error/403
+  antes que este archivo, así que el mensaje sigue siendo el bueno.
+
+  No decora layout/main: puede llegar sin sesión y el sidebar necesita un
+  usuario autenticado.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${status} == 404 ? 'Página no encontrada - Malva Pastry Shop'
+                                     : 'Error - Malva Pastry Shop'">Error</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4',
+                            400: '#f472b6', 500: '#ec4899', 600: '#db2777', 700: '#be185d',
+                            800: '#9d174d', 900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <main class="w-full max-w-md text-center">
+        <div class="rounded-2xl bg-white p-10 shadow-xl">
+
+            <div class="mb-4 text-5xl" aria-hidden="true"
+                 th:text="${status} == 404 ? '🔍' : '⚠️'">⚠️</div>
+
+            <p class="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-400"
+               th:text="'Error ' + ${status}">Error</p>
+
+            <h1 class="mb-2 text-2xl font-bold text-gray-900"
+                th:text="${status} == 404 ? 'No encontramos esa página' : 'Algo salió mal'">
+                Algo salió mal</h1>
+
+            <p class="mb-8 text-gray-500" th:if="${status} == 404">
+                La dirección no existe o el elemento que buscabas ya no está disponible.
+                Revisá el enlace o volvé al panel.
+            </p>
+            <p class="mb-8 text-gray-500" th:unless="${status} == 404">
+                Hubo un problema al procesar tu pedido. Si vuelve a pasar, avisale
+                a un administrador.
+            </p>
+
+            <!-- La ruta ayuda a reportar el problema; se escapa como texto. -->
+            <p th:if="${path}" class="mb-8 break-all font-mono text-xs text-gray-400"
+               th:text="${path}"></p>
+
+            <a th:href="@{/dashboard}"
+               class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                Volver al panel
+            </a>
+        </div>
+    </main>
+</body>
+
+</html>
