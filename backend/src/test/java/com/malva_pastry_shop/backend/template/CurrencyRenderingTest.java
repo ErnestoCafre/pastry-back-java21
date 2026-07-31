@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,8 +78,15 @@ class CurrencyRenderingTest {
         admin.setRole(role);
     }
 
+    /**
+     * El locale se fija a propósito. #numbers.formatDecimal resuelve el
+     * separador decimal contra el locale de la petición y la app no configura
+     * ninguno, así que el mismo importe sale "$12.50" en un navegador en
+     * inglés y "$12,50" en uno en español. Sin fijarlo, estas aserciones
+     * pasarían o fallarían según el locale por defecto de la máquina.
+     */
     private String render(String url) throws Exception {
-        return mockMvc.perform(get(url).with(user(admin)))
+        return mockMvc.perform(get(url).locale(Locale.US).with(user(admin)))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
