@@ -26,10 +26,12 @@ import org.springframework.web.servlet.ModelAndView;
  * con "Productos de:"). Además una entidad llamada "Ventas" resaltaba el ítem
  * equivocado.
  *
- * <p>Acá la sección sale del primer segmento de la URL, que es exactamente el
- * prefijo {@code @RequestMapping} de cada controller. No hay literales que
- * mantener sincronizados y agregar una pantalla nueva bajo un prefijo ya
- * existente funciona sin tocar nada.
+ * <p>La sección sale de la carpeta del nombre de vista ({@code products/recipe}
+ * -&gt; {@code products}), que es exactamente cómo están organizadas las
+ * plantillas: cada controller devuelve vistas de una sola carpeta y esa carpeta
+ * coincide con su ítem de menú. Tomarlo de la vista y no del primer segmento de
+ * la URL evita tener que descontar el context path y hace que el resaltado
+ * dependa de lo que se está renderizando, no de por qué URL se llegó.
  */
 @Component
 public class ActiveNavInterceptor implements HandlerInterceptor {
@@ -45,25 +47,25 @@ public class ActiveNavInterceptor implements HandlerInterceptor {
         }
         String viewName = modelAndView.getViewName();
         // Las redirecciones no renderizan el layout; el interceptor corre de
-        // nuevo sobre el destino.
-        if (viewName == null || viewName.startsWith("redirect:")) {
+        // nuevo sobre el destino. Un View resuelto en vez de un nombre (getViewName
+        // null) tampoco es una plantilla del panel.
+        if (viewName == null || viewName.startsWith("redirect:") || viewName.startsWith("forward:")) {
             return;
         }
-        modelAndView.addObject(ATTRIBUTE, sectionOf(request.getRequestURI(), request.getContextPath()));
+        modelAndView.addObject(ATTRIBUTE, sectionOf(viewName));
     }
 
     /**
-     * Primer segmento de la ruta, sin el context path.
-     * {@code /products/5/recipe} -> {@code products}; {@code /dashboard} ->
-     * {@code dashboard}; la raíz -> cadena vacía.
+     * Carpeta del nombre de vista. {@code products/recipe} -&gt;
+     * {@code products}; {@code dashboard/index} -&gt; {@code dashboard}; una
+     * vista sin carpeta se devuelve tal cual y simplemente no coincide con
+     * ningún ítem del menú.
      */
-    static String sectionOf(String requestUri, String contextPath) {
-        String path = requestUri;
-        if (contextPath != null && !contextPath.isEmpty() && path.startsWith(contextPath)) {
-            path = path.substring(contextPath.length());
+    static String sectionOf(String viewName) {
+        if (viewName == null) {
+            return "";
         }
-        int from = path.startsWith("/") ? 1 : 0;
-        int slash = path.indexOf('/', from);
-        return slash < 0 ? path.substring(from) : path.substring(from, slash);
+        int slash = viewName.indexOf('/');
+        return slash < 0 ? viewName : viewName.substring(0, slash);
     }
 }
