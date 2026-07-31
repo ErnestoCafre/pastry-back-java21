@@ -1,6 +1,7 @@
 package com.malva_pastry_shop.backend.template;
 
 import com.malva_pastry_shop.backend.controller.admin.CategoryController;
+import com.malva_pastry_shop.backend.controller.admin.StorefrontSectionController;
 import com.malva_pastry_shop.backend.controller.admin.TagController;
 import com.malva_pastry_shop.backend.domain.auth.Role;
 import com.malva_pastry_shop.backend.domain.auth.RoleType;
@@ -9,6 +10,7 @@ import com.malva_pastry_shop.backend.domain.inventory.Category;
 import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.service.inventory.CategoryService;
 import com.malva_pastry_shop.backend.service.inventory.ProductService;
+import com.malva_pastry_shop.backend.service.storefront.StorefrontSectionService;
 import com.malva_pastry_shop.backend.service.storefront.TagService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +60,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 // sec:authorize, y el dialecto de seguridad de Thymeleaf necesita el
 // SecurityExpressionHandler que publica la configuración web de seguridad.
 // La autenticación entra por el post-processor user(...) de spring-security-test.
-@WebMvcTest(controllers = { TagController.class, CategoryController.class })
+@WebMvcTest(controllers = { TagController.class, CategoryController.class,
+        StorefrontSectionController.class })
 @DisplayName("Renderizado de fragments")
 class FragmentRenderingTest {
 
@@ -73,6 +76,9 @@ class FragmentRenderingTest {
 
     @MockitoBean
     private CategoryService categoryService;
+
+    @MockitoBean
+    private StorefrontSectionService sectionService;
 
     private User admin;
 
@@ -247,6 +253,70 @@ class FragmentRenderingTest {
         // interrumpir. Hay exactamente un data-confirm en la página.
         assertThat(html).contains("Restaurar");
         assertThat(html).containsOnlyOnce("data-confirm=");
+    }
+
+    // ---------- Sidebar ----------
+
+    @Test
+    @DisplayName("el sidebar marca la sección activa con aria-current")
+    void sidebarMarksActiveSection() throws Exception {
+        when(tagService.findAllActive(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 50), 0));
+
+        String html = render("/tags");
+
+        // El enlace de Tags es el que lleva la marca, y es el único.
+        assertThat(html).containsPattern("href=\"/tags\"\\s+aria-current=\"page\"");
+        assertThat(html).containsOnlyOnce("aria-current=\"page\"");
+        // y es el único con el fondo resaltado
+        assertThat(html).containsOnlyOnce("bg-white/20 text-white");
+    }
+
+    @Test
+    @DisplayName("una ficha de detalle también resalta su sección")
+    void detailViewKeepsSectionHighlighted() throws Exception {
+        // Este era el bug: la ficha pone pageTitle = nombre de la entidad, que
+        // no coincidía con ninguno de los literales que comparaba el sidebar,
+        // así que NINGUNA página de detalle resaltaba nada.
+        when(tagService.findById(1L)).thenReturn(tag(1L, "Vegano", "Sin origen animal"));
+        when(productService.countProductsByTag(1L)).thenReturn(4L);
+
+        String html = render("/tags/1");
+
+        assertThat(html).contains("aria-current=\"page\"");
+        assertThat(html).contains("href=\"/tags\"");
+    }
+
+    @Test
+    @DisplayName("sec:authorize sigue filtrando el ítem de Usuarios")
+    void adminOnlyNavItemStaysGuarded() throws Exception {
+        when(tagService.findAllActive(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 50), 0));
+
+        String html = render("/tags");
+
+        // Bajo MockMvc el dialecto de seguridad no ve la autenticación, así que
+        // sec:authorize da false. Eso vuelve útil esta aserción: si el
+        // sec:authorize estuviera junto al th:replace (precedencia 100 contra
+        // 300) el authorize no se evaluaría y el ítem aparecería igual. Que no
+        // aparezca prueba que el envoltorio th:block se está respetando.
+        assertThat(html).doesNotContain("Usuarios");
+    }
+
+    @Test
+    @DisplayName("el form de sección emite un solo parámetro 'visible'")
+    void sectionFormEmitsSingleVisibleParam() throws Exception {
+        String html = render("/sections/new");
+
+        // Había un <input type="hidden" name="visible" value="false"> puesto a
+        // mano ANTES del checkbox. th:field ya emite su propio marcador
+        // (_visible) para el caso desmarcado, así que ese hidden agregaba un
+        // segundo parámetro con el mismo nombre: al tildar la casilla se
+        // enviaban visible=false y visible=true, y el binder toma el primero.
+        assertThat(html).doesNotContain("value=\"false\"");
+        assertThat(html).containsOnlyOnce("name=\"visible\"");
+        // el marcador de Spring para "desmarcado" sí tiene que estar
+        assertThat(html).containsOnlyOnce("name=\"_visible\"");
     }
 
     // ---------- Formularios ----------

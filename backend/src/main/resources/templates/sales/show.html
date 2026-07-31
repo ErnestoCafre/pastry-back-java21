@@ -46,7 +46,7 @@
                             </p>
                         </div>
                         <span class="px-4 py-2 text-lg font-bold bg-green-100 text-green-800 rounded-full"
-                            th:text="'' + ${#numbers.formatDecimal(sale.totalAmount, 1, 2)}"></span>
+                            th:text="${'$' + #numbers.formatDecimal(sale.totalAmount, 1, 2)}"></span>
                     </div>
 
                     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -57,7 +57,7 @@
                         <div class="bg-gray-50 px-4 py-3 rounded-lg">
                             <dt class="text-sm font-medium text-gray-500">Precio unitario</dt>
                             <dd class="mt-1 text-lg font-semibold text-gray-900"
-                                th:text="'' + ${#numbers.formatDecimal(sale.unitPrice, 1, 2)}"></dd>
+                                th:text="${'$' + #numbers.formatDecimal(sale.unitPrice, 1, 2)}"></dd>
                         </div>
                         <div class="bg-gray-50 px-4 py-3 rounded-lg">
                             <dt class="text-sm font-medium text-gray-500">Registrada por</dt>
@@ -137,11 +137,11 @@
                                         <span th:text="${#numbers.formatDecimal(ing.quantityUsed, 1, 4)}"></span>
                                         <span th:text="${ing.unitOfMeasure}"></span>
                                         <span class="text-gray-400">x</span>
-                                        <span th:text="'' + ${#numbers.formatDecimal(ing.unitCost, 1, 2)}"></span>
+                                        <span th:text="${'$' + #numbers.formatDecimal(ing.unitCost, 1, 2)}"></span>
                                     </p>
                                 </div>
                                 <span class="text-sm font-semibold text-gray-700"
-                                    th:text="'' + ${#numbers.formatDecimal(ing.totalCost, 1, 2)}"></span>
+                                    th:text="${'$' + #numbers.formatDecimal(ing.totalCost, 1, 2)}"></span>
                             </div>
                         </div>
 
@@ -150,7 +150,7 @@
                             <div class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-gray-500">Costo total de ingredientes:</span>
                                 <span class="text-lg font-bold text-gray-900"
-                                    th:text="'' + ${#numbers.formatDecimal(totalIngredientCost, 1, 2)}"></span>
+                                    th:text="${'$' + #numbers.formatDecimal(totalIngredientCost, 1, 2)}"></span>
                             </div>
                         </div>
 
@@ -159,7 +159,7 @@
                             <div class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-green-700">Margen de ganancia:</span>
                                 <span class="text-lg font-bold text-green-700"
-                                    th:text="'' + ${#numbers.formatDecimal(profitMargin, 1, 2)}"></span>
+                                    th:text="${'$' + #numbers.formatDecimal(profitMargin, 1, 2)}"></span>
                             </div>
                         </div>
                     </div>

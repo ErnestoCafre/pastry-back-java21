@@ -85,110 +85,26 @@
             <!-- Navigation -->
             <nav class="flex-1 px-3 py-4 overflow-y-auto">
                 <ul class="space-y-1">
-                    <!-- Dashboard -->
-                    <li>
-                        <a th:href="@{/dashboard}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Dashboard'} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            Dashboard
-                        </a>
-                    </li>
+                    <li th:replace="~{fragments/nav :: item('dashboard', '/dashboard', 'home', 'Dashboard', ${activeNav})}"></li>
 
-                    <!-- Sección: Inventario -->
-                    <li class="border-t border-white/10 pt-3 mt-3">
-                        <span class="text-xs font-semibold text-white/50 uppercase tracking-wider px-4 mb-1 block">Inventario</span>
-                    </li>
-                    <li>
-                        <a th:href="@{/products}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Productos' || pageTitle == 'Nuevo Producto' || pageTitle == 'Editar Producto' || pageTitle == 'Productos Eliminados' || (pageTitle != null && (#strings.startsWith(pageTitle, 'Receta:') || #strings.startsWith(pageTitle, 'Tags de:')))} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                            Productos
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/categories}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Categorías' || pageTitle == 'Nueva Categoría' || pageTitle == 'Editar Categoría' || pageTitle == 'Categorías Eliminadas'} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                            </svg>
-                            Categorías
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/ingredients}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Ingredientes' || pageTitle == 'Nuevo Ingrediente' || pageTitle == 'Editar Ingrediente' || pageTitle == 'Ingredientes Eliminados'} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                            </svg>
-                            Ingredientes
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/sales}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Ventas' || (pageTitle != null && #strings.startsWith(pageTitle, 'Venta'))} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            Ventas
-                        </a>
-                    </li>
+                    <li th:replace="~{fragments/nav :: group('Inventario')}"></li>
+                    <li th:replace="~{fragments/nav :: item('products', '/products', 'box', 'Productos', ${activeNav})}"></li>
+                    <li th:replace="~{fragments/nav :: item('categories', '/categories', 'folder', 'Categorías', ${activeNav})}"></li>
+                    <li th:replace="~{fragments/nav :: item('ingredients', '/ingredients', 'beaker', 'Ingredientes', ${activeNav})}"></li>
+                    <li th:replace="~{fragments/nav :: item('sales', '/sales', 'cart', 'Ventas', ${activeNav})}"></li>
 
-                    <!-- Sección: Storefront -->
-                    <li class="border-t border-white/10 pt-3 mt-3">
-                        <span class="text-xs font-semibold text-white/50 uppercase tracking-wider px-4 mb-1 block">Storefront</span>
-                    </li>
-                    <li>
-                        <a th:href="@{/tags}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Tags' || pageTitle == 'Nuevo Tag' || pageTitle == 'Editar Tag' || pageTitle == 'Tags Eliminados' || (pageTitle != null && #strings.startsWith(pageTitle, 'Productos con tag:'))} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                            </svg>
-                            Tags
-                        </a>
-                    </li>
-                    <li>
-                        <a th:href="@{/sections}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Secciones' || pageTitle == 'Nueva Sección' || pageTitle == 'Editar Sección' || pageTitle == 'Secciones Eliminadas' || (pageTitle != null && #strings.startsWith(pageTitle, 'Productos de:'))} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 6h16M4 12h16M4 18h7" />
-                            </svg>
-                            Secciones
-                        </a>
-                    </li>
+                    <li th:replace="~{fragments/nav :: group('Storefront')}"></li>
+                    <li th:replace="~{fragments/nav :: item('tags', '/tags', 'tag', 'Tags', ${activeNav})}"></li>
+                    <li th:replace="~{fragments/nav :: item('sections', '/sections', 'list', 'Secciones', ${activeNav})}"></li>
 
-                    <!-- Sección: Sistema (solo ADMIN) -->
-                    <li sec:authorize="hasRole('ADMIN')" class="border-t border-white/10 pt-3 mt-3">
-                        <span class="text-xs font-semibold text-white/50 uppercase tracking-wider px-4 mb-1 block">Sistema</span>
-                    </li>
-                    <li sec:authorize="hasRole('ADMIN')">
-                        <a th:href="@{/users}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all"
-                            th:classappend="${pageTitle == 'Usuarios' || pageTitle == 'Nuevo Usuario' || pageTitle == 'Editar Usuario' || (pageTitle != null && #strings.startsWith(pageTitle, 'Usuario:'))} ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            Usuarios
-                        </a>
-                    </li>
+                    <!-- sec:authorize va en un envoltorio, NO junto al th:replace:
+                         th:replace precede 100 y sec:authorize 300, así que en el
+                         mismo elemento el authorize no llegaría a evaluarse y el
+                         ítem se vería con cualquier rol. -->
+                    <th:block sec:authorize="hasRole('ADMIN')">
+                        <li th:replace="~{fragments/nav :: group('Sistema')}"></li>
+                        <li th:replace="~{fragments/nav :: item('users', '/users', 'users', 'Usuarios', ${activeNav})}"></li>
+                    </th:block>
                 </ul>
             </nav>
 
