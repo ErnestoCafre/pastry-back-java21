@@ -12,47 +12,43 @@ class ActiveNavInterceptorTest {
 
     @ParameterizedTest(name = "{0} -> {1}")
     @CsvSource({
-            "/dashboard,                  dashboard",
-            "/products,                   products",
-            "/products/new,               products",
-            "/products/5,                 products",
-            "/products/5/edit,            products",
-            "/products/5/recipe,          products",
-            "/products/5/tags,            products",
-            "/products/deleted,           products",
-            "/categories/9/products,      categories",
-            "/sales,                      sales",
-            "/sales/new,                  sales",
-            "/sales/12,                   sales",
-            "/tags/3,                     tags",
-            "/sections/2/products,        sections",
-            "/users/1,                    users",
+            // Una vista por sección alcanza para fijar el mapeo; lo que importa
+            // es que TODA vista de una carpeta caiga en el mismo ítem de menú.
+            "dashboard/index,      dashboard",
+            "products/list,        products",
+            "products/create,      products",
+            "products/show,        products",
+            "products/recipe,      products",
+            "products/tags,        products",
+            "products/deleted,     products",
+            "categories/products,  categories",
+            "ingredients/list,     ingredients",
+            "sales/create,         sales",
+            "sales/show,           sales",
+            "tags/show,            tags",
+            "sections/products,    sections",
+            "users/show,           users",
     })
-    @DisplayName("la sección sale del primer segmento de la ruta")
-    void resolvesSection(String uri, String expected) {
-        assertThat(ActiveNavInterceptor.sectionOf(uri.trim(), "")).isEqualTo(expected);
+    @DisplayName("la sección es la carpeta del nombre de vista")
+    void resolvesSectionFromViewFolder(String viewName, String expected) {
+        assertThat(ActiveNavInterceptor.sectionOf(viewName.trim())).isEqualTo(expected);
     }
 
     @Test
-    @DisplayName("descuenta el context path")
-    void stripsContextPath() {
-        assertThat(ActiveNavInterceptor.sectionOf("/admin/products/5", "/admin")).isEqualTo("products");
-    }
-
-    @Test
-    @DisplayName("la raíz no resuelve a ninguna sección")
-    void rootResolvesToEmpty() {
-        assertThat(ActiveNavInterceptor.sectionOf("/", "")).isEmpty();
+    @DisplayName("una vista sin carpeta no coincide con ningún ítem")
+    void viewWithoutFolderIsHarmless() {
+        assertThat(ActiveNavInterceptor.sectionOf("index")).isEqualTo("index");
+        assertThat(ActiveNavInterceptor.sectionOf(null)).isEmpty();
     }
 
     /**
      * El esquema anterior comparaba pageTitle contra literales, así que una
      * entidad llamada como otra sección resaltaba el ítem equivocado. Con la
-     * ruta como fuente, el nombre de la entidad no influye.
+     * vista como fuente, el nombre de la entidad no influye.
      */
     @Test
     @DisplayName("el nombre de la entidad no puede secuestrar otra sección")
     void entityNameCannotHijackAnotherSection() {
-        assertThat(ActiveNavInterceptor.sectionOf("/categories/7", "")).isEqualTo("categories");
+        assertThat(ActiveNavInterceptor.sectionOf("categories/show")).isEqualTo("categories");
     }
 }

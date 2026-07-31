@@ -8,6 +8,7 @@ import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.Ingredient;
 import com.malva_pastry_shop.backend.domain.inventory.UnitOfMeasure;
 import com.malva_pastry_shop.backend.domain.sales.Sale;
+import com.malva_pastry_shop.backend.domain.sales.SaleIngredient;
 import com.malva_pastry_shop.backend.service.inventory.IngredientService;
 import com.malva_pastry_shop.backend.service.inventory.ProductService;
 import com.malva_pastry_shop.backend.service.sales.SaleService;
@@ -100,6 +101,66 @@ class CurrencyRenderingTest {
 
         assertThat(html).contains("Harina 000");
         assertThat(html).contains("$12.50");
+    }
+
+    @Test
+    @DisplayName("ingredients/show e ingredients/deleted muestran el costo con símbolo")
+    void ingredientDetailAndTrashShowCurrency() throws Exception {
+        Ingredient harina = new Ingredient();
+        harina.setId(1L);
+        harina.setName("Harina 000");
+        harina.setUnitOfMeasure(UnitOfMeasure.KILOGRAMO);
+        harina.setUnitCost(new BigDecimal("12.50"));
+
+        when(ingredientService.findById(1L)).thenReturn(harina);
+        when(ingredientService.countProductsUsingIngredient(1L)).thenReturn(3L);
+        assertThat(render("/ingredients/1")).contains("$12.50");
+
+        harina.setDeletedAt(LocalDateTime.of(2026, 3, 14, 10, 30));
+        when(ingredientService.findDeleted(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(harina), PageRequest.of(0, 50), 1));
+        assertThat(render("/ingredients/deleted")).contains("$12.50");
+    }
+
+    /**
+     * sales/show es el archivo con más importes (6) y fue uno de los que quedó
+     * con expresiones corruptas tras la edición masiva. No tenía ninguna
+     * cobertura, que es exactamente por qué la corrupción no saltó.
+     */
+    @Test
+    @DisplayName("sales/show renderiza los seis importes y el margen")
+    void saleDetailShowsCurrency() throws Exception {
+        Sale sale = new Sale();
+        sale.setId(7L);
+        sale.setProductName("Torta de chocolate");
+        sale.setQuantity(2);
+        sale.setUnitPrice(new BigDecimal("30.00"));
+        sale.setTotalAmount(new BigDecimal("60.00"));
+        sale.setSaleDate(LocalDateTime.of(2026, 3, 14, 10, 30));
+        // registered_by_id es NOT NULL en la base y @NotNull en la entidad, así
+        // que la ficha lo desreferencia sin comprobar: el fixture debe traerlo.
+        sale.setRegisteredBy(admin);
+
+        SaleIngredient harina = new SaleIngredient();
+        harina.setIngredientName("Harina 000");
+        harina.setQuantityUsed(new BigDecimal("0.5000"));
+        harina.setUnitCost(new BigDecimal("12.50"));
+        harina.setUnitOfMeasure("kg");
+        harina.setTotalCost(new BigDecimal("6.25"));
+
+        when(saleService.findByIdWithDetails(7L)).thenReturn(sale);
+        when(saleService.getSaleIngredients(7L)).thenReturn(List.of(harina));
+        when(saleService.calculateTotalIngredientCost(7L)).thenReturn(new BigDecimal("6.25"));
+
+        String html = render("/sales/7");
+
+        assertThat(html).contains("$30.00");   // precio unitario
+        assertThat(html).contains("$60.00");   // total de la venta
+        assertThat(html).contains("$12.50");   // costo unitario del ingrediente
+        assertThat(html).contains("$6.25");    // costo del ingrediente y total
+        assertThat(html).contains("$53.75");   // margen = 60.00 - 6.25
+        // La cantidad usada es una medida, no un importe.
+        assertThat(html).contains("0.5000").doesNotContain("$0.5000");
     }
 
     @Test
