@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  Mensajes flash. Unifica las TRES variantes que había en el proyecto
+  (listados con SVG, formularios sin icono, login con emoji).
+
+  Uso:
+    <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
+
+  IMPORTANTE — no pongas th:if en el elemento que llama:
+    th:replace tiene precedencia 100 y th:if precedencia 300, así que el
+    th:if del elemento llamador NUNCA se evalúa: el tag se reemplaza antes.
+    Por eso las condiciones viven acá adentro, sobre el propio th:fragment
+    (precedencia 800, o sea que su th:if sí corre primero).
+
+  Accesibilidad:
+    role="status" (polite)    -> confirmaciones, no interrumpen
+    role="alert"  (assertive) -> errores, interrumpen al lector de pantalla
+    Estos mensajes se renderizan en el HTML inicial, así que el lector los
+    lee al recorrer la página; los roles además los marcan como live regions
+    para cualquier actualización posterior vía JS.
+
+  Sobre la paleta:
+    Se mantiene la de los templates todavía sin migrar
+    (bg-*-100 / border-*-400 / text-*-700, tamaño base) a propósito. Mientras
+    la migración esté a medias, una alerta en /tags tiene que verse igual que
+    una en /products. Cuando no quede ningún template legacy, cambiar estos
+    tres tokens acá actualiza el panel entero de una sola vez.
+-->
+
+<body>
+
+<th:block th:fragment="flash(success, error)">
+    <div th:replace="~{:: successBox(${success})}"></div>
+    <div th:replace="~{:: errorBox(${error})}"></div>
+</th:block>
+
+
+<div th:fragment="successBox(message)" th:if="${message}" role="status"
+     class="mb-6 flex items-start gap-3 rounded-lg border border-green-400 bg-green-100 p-4 text-green-700">
+    <svg th:replace="~{fragments/icons :: solid('check-circle', 'w-5 h-5 shrink-0 mt-0.5 text-green-700')}"></svg>
+    <span th:text="${message}"></span>
+</div>
+
+
+<div th:fragment="errorBox(message)" th:if="${message}" role="alert"
+     class="mb-6 flex items-start gap-3 rounded-lg border border-red-400 bg-red-100 p-4 text-red-700">
+    <svg th:replace="~{fragments/icons :: solid('x-circle', 'w-5 h-5 shrink-0 mt-0.5 text-red-700')}"></svg>
+    <span th:text="${message}"></span>
+</div>
+
+
+<!--
+  Resumen de errores de validación del formulario, para el tope del <form>.
+  Debe llamarse dentro del scope de th:object. Complementa (no reemplaza)
+  el mensaje por campo: WCAG 3.3.1 pide identificar el error, y un resumen
+  enlazado es la forma más usable en formularios largos.
+-->
+<div th:fragment="formErrors" th:if="${#fields.hasAnyErrors()}" role="alert"
+     class="mb-6 rounded-lg border border-red-400 bg-red-100 p-4 text-red-700">
+    <div class="flex items-start gap-3">
+        <svg th:replace="~{fragments/icons :: solid('x-circle', 'w-5 h-5 shrink-0 mt-0.5 text-red-700')}"></svg>
+        <div>
+            <p class="font-medium">Revisá los siguientes campos:</p>
+            <ul class="mt-1 list-disc pl-5">
+                <li th:each="err : ${#fields.allErrors()}" th:text="${err}"></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
