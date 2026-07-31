@@ -40,7 +40,7 @@
                     <div class="bg-gray-50 px-4 py-3 rounded-lg">
                         <dt class="text-sm font-medium text-gray-500">Costo Unitario</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="'' + ${#numbers.formatDecimal(ingredient.unitCost, 1, 2)}"></dd>
+                            th:text="${'$' + #numbers.formatDecimal(ingredient.unitCost, 1, 2)}"></dd>
                     </div>
                     <div class="bg-gray-50 px-4 py-3 rounded-lg">
                         <dt class="text-sm font-medium text-gray-500">Unidad de Medida</dt>
