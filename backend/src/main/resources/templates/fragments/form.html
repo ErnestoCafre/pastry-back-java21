@@ -2,9 +2,10 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <!--
-  Átomos de formulario. Reemplaza ~45 bloques label+input+error copiados
-  a mano, y permite fusionar los 6 pares create/edit (~1.140 líneas que
-  difieren solo en th:action y el texto del botón).
+  Átomos de formulario. Reemplazaron ~45 bloques label+input+error copiados
+  a mano y permitieron fusionar los 6 pares create/edit: 12 archivos y 1.083
+  líneas pasaron a 6 archivos y 412, con el modo elegido según el controller
+  publique o no el id de la entidad.
 
   Uso — deben llamarse DENTRO del <form th:object="...">, porque th:field
   se resuelve contra ese objeto:
@@ -54,9 +55,9 @@
 </div>
 
 
-<!-- Numérico con prefijo (precios, costos). step/min como texto: '0.01', '0'. -->
-<!-- SIN USO TODAVÍA: preparado para la migración pendiente, no lo cubre
-     FragmentRenderingTest. Verificalo al migrar el primer template que lo use. -->
+<!-- Numérico con prefijo (precios, costos). step/min como texto: '0.01', '0'.
+     Lo usan sections (displayOrder), ingredients (unitCost) y products
+     (basePrice, preparationDays). -->
 <div th:fragment="number(field, label, required, placeholder, prefix, step, min)">
     <label th:for="${field}" class="mb-1 block text-sm font-medium text-gray-700">
         <span th:text="${label}">Etiqueta</span>
@@ -99,9 +100,13 @@
   Select sobre una colección. valueProp/labelProp son nombres de propiedad
   y se resuelven por preprocesamiento (item.__${valueProp}__ -> item.id),
   no por indexado tipo item['id'], que en SpEL no es fiable sobre POJOs.
+
+  El preprocesamiento admite cadenas de propiedades y llamadas: users pasa
+  labelProp='name.name()' para mostrar el nombre del enum del rol.
+
+  Solo hace listas planas. El select de unidad de medida de ingredients agrupa
+  con <optgroup> y por eso quedó escrito a mano en su plantilla.
 -->
-<!-- SIN USO TODAVÍA: preparado para la migración pendiente, no lo cubre
-     FragmentRenderingTest. Verificalo al migrar el primer template que lo use. -->
 <div th:fragment="select(field, label, required, items, valueProp, labelProp, emptyLabel)">
     <label th:for="${field}" class="mb-1 block text-sm font-medium text-gray-700">
         <span th:text="${label}">Etiqueta</span>
@@ -127,13 +132,12 @@
 
   NO lleva un <input type="hidden" name="..." value="false"> manual.
   th:field ya emite su propio marcador _campo para el caso desmarcado; el
-  hidden extra que había en sections/create.html:64 y sections/edit.html:64
-  agregaba un SEGUNDO parámetro con el mismo nombre, así que al tildar la
-  casilla se enviaban visible=false y visible=true y el binder se queda con
-  el primero. Acá el bug no puede reaparecer.
+  hidden extra que había en sections/create.html y sections/edit.html —hoy
+  fusionadas en sections/form.html— agregaba un SEGUNDO parámetro con el mismo
+  nombre, así que al tildar la casilla se enviaban visible=false y visible=true
+  y el binder se quedaba con el primero: la sección nunca se hacía visible.
+  Acá el bug no puede reaparecer.
 -->
-<!-- SIN USO TODAVÍA: preparado para la migración pendiente, no lo cubre
-     FragmentRenderingTest. Verificalo al migrar el primer template que lo use. -->
 <div th:fragment="checkbox(field, label, hint)">
     <span class="mb-1 block text-sm font-medium text-gray-700" th:text="${label}">Etiqueta</span>
     <div class="mt-2 flex items-center gap-2">

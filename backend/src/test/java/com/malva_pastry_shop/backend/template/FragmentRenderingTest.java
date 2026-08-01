@@ -321,10 +321,21 @@ class FragmentRenderingTest {
 
     // ---------- Formularios ----------
 
+    /**
+     * categories/create.html y categories/edit.html se fusionaron en
+     * categories/form.html, que elige el modo según haya o no categoryId.
+     * Estos dos tests fijan que cada rama siga dando lo suyo: si la condición
+     * se invirtiera, el formulario de alta postearía contra una URL de edición.
+     */
     @Test
-    @DisplayName("categories/create renderiza breadcrumb y átomos de formulario")
+    @DisplayName("categories/form en alta: postea al listado y dice Guardar")
     void categoryCreateRenders() throws Exception {
         String html = render("/categories/new");
+
+        assertThat(html).contains("action=\"/categories\"");
+        assertThat(html).contains("Guardar Categoría");
+        assertThat(html).doesNotContain("Actualizar Categoría");
+        assertThat(html).contains("Nueva");
 
         // breadcrumb :: trail, con el aria-current que antes no existía
         assertThat(html).contains("aria-label=\"Migas de pan\"");
@@ -350,7 +361,7 @@ class FragmentRenderingTest {
     }
 
     @Test
-    @DisplayName("categories/edit apunta al action correcto y precarga valores")
+    @DisplayName("categories/form en edición: postea al id y precarga valores")
     void categoryEditRenders() throws Exception {
         Category category = new Category();
         category.setId(9L);
@@ -365,5 +376,7 @@ class FragmentRenderingTest {
         assertThat(html).contains("value=\"Tortas\"");
         assertThat(html).contains("Tortas y tartas");
         assertThat(html).contains("Actualizar Categoría");
+        assertThat(html).doesNotContain("Guardar Categoría");
+        assertThat(html).contains("Editar");
     }
 }

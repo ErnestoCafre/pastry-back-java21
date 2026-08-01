@@ -63,7 +63,7 @@ public class UserController {
         model.addAttribute("user", new CreateUserRequest());
         model.addAttribute("roles", roleRepository.findAll());
         model.addAttribute("pageTitle", "Nuevo Usuario");
-        return "users/create";
+        return "users/form";
     }
 
     @PostMapping
@@ -76,7 +76,7 @@ public class UserController {
         if (result.hasErrors()) {
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Nuevo Usuario");
-            return "users/create";
+            return "users/form";
         }
 
         try {
@@ -87,7 +87,7 @@ public class UserController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Nuevo Usuario");
-            return "users/create";
+            return "users/form";
         }
     }
 
@@ -107,7 +107,7 @@ public class UserController {
             model.addAttribute("userId", id);
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Editar Usuario");
-            return "users/edit";
+            return "users/form";
         } catch (EntityNotFoundException e) {
             redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
             return "redirect:/users";
@@ -126,7 +126,7 @@ public class UserController {
             model.addAttribute("userId", id);
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Editar Usuario");
-            return "users/edit";
+            return "users/form";
         }
 
         try {
@@ -138,7 +138,7 @@ public class UserController {
             model.addAttribute("userId", id);
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Editar Usuario");
-            return "users/edit";
+            return "users/form";
         } catch (EntityNotFoundException e) {
             return "redirect:/users";
         }

@@ -93,7 +93,7 @@ public class StorefrontSectionController {
     public String showCreateForm(Model model) {
         model.addAttribute("section", new StorefrontSectionRequest());
         model.addAttribute("pageTitle", "Nueva Sección");
-        return "sections/create";
+        return "sections/form";
     }
 
     @PostMapping
@@ -105,7 +105,7 @@ public class StorefrontSectionController {
 
         if (result.hasErrors()) {
             model.addAttribute("pageTitle", "Nueva Sección");
-            return "sections/create";
+            return "sections/form";
         }
 
         try {
@@ -115,7 +115,7 @@ public class StorefrontSectionController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("pageTitle", "Nueva Sección");
-            return "sections/create";
+            return "sections/form";
         }
     }
 
@@ -133,7 +133,7 @@ public class StorefrontSectionController {
             model.addAttribute("section", request);
             model.addAttribute("sectionId", id);
             model.addAttribute("pageTitle", "Editar Sección");
-            return "sections/edit";
+            return "sections/form";
         } catch (EntityNotFoundException e) {
             return "redirect:/sections";
         }
@@ -150,7 +150,7 @@ public class StorefrontSectionController {
         if (result.hasErrors()) {
             model.addAttribute("sectionId", id);
             model.addAttribute("pageTitle", "Editar Sección");
-            return "sections/edit";
+            return "sections/form";
         }
 
         try {
@@ -161,7 +161,7 @@ public class StorefrontSectionController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("sectionId", id);
             model.addAttribute("pageTitle", "Editar Sección");
-            return "sections/edit";
+            return "sections/form";
         }
     }
 
