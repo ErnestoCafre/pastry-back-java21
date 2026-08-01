@@ -14,6 +14,12 @@
   Cuando sí se muestra, queda restringida a ADMIN, que es como estaba en
   products y tags. Antes esa regla se repetía suelta en cada listado, así
   que era fácil olvidarla en uno nuevo.
+
+  El <form> de búsqueda lo pone ESTE fragment, no el campo. Los campos de
+  form :: no traen formulario propio justamente para poder convivir con otros
+  en una misma barra de filtros (ver sales/list, que tiene tres). Un listado
+  con varios filtros no usa listBar: arma su propio <form> y mete adentro los
+  campos que necesite.
 -->
 
 <body>
@@ -21,7 +27,9 @@
 <div th:fragment="listBar(searchUrl, searchPlaceholder, searchValue, trashUrl, newUrl, newLabel)"
      class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-    <form th:replace="~{fragments/form :: search(${searchUrl}, ${searchPlaceholder}, ${searchValue})}"></form>
+    <form th:action="@{${searchUrl}}" method="get" class="w-full max-w-md">
+        <div th:replace="~{fragments/form :: searchField('search', 'search', ${searchPlaceholder}, ${searchValue})}"></div>
+    </form>
 
     <div class="flex items-center gap-2">
         <a th:if="${trashUrl}" sec:authorize="hasRole('ADMIN')" th:href="@{${trashUrl}}"

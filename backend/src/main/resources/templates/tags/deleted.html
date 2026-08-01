@@ -56,10 +56,11 @@
                             </td>
                         </tr>
 
+                        <!--/* La papelera no tiene filtros ni CTA: nada que crear ni que limpiar. */-->
                         <tr th:replace="~{fragments/table :: emptyRow(${tags.content}, 5, 'trash',
                                 'La papelera está vacía',
                                 'Los tags que elimines aparecerán acá y podrás restaurarlos.',
-                                null, null)}"></tr>
+                                null, null, null)}"></tr>
                     </tbody>
                 </table>
             </div>

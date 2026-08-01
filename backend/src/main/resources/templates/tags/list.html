@@ -63,10 +63,14 @@
                             </td>
                         </tr>
 
+                        <!--/* El último argumento distingue "todavía no hay tags" de
+                               "ninguno coincide con la búsqueda": con filtro activo,
+                               ofrecer "Crear tag" sería la acción equivocada. */-->
                         <tr th:replace="~{fragments/table :: emptyRow(${tags.content}, 4, 'tag',
-                                'No hay tags registrados',
+                                ${#strings.isEmpty(search)} ? 'No hay tags registrados' : 'Sin resultados',
                                 'Los tags permiten clasificar productos en la vitrina pública.',
-                                '/tags/new', 'Crear tag')}"></tr>
+                                '/tags/new', 'Crear tag',
+                                ${#strings.isEmpty(search)} ? null : '/tags')}"></tr>
                     </tbody>
                 </table>
             </div>

@@ -43,21 +43,48 @@
 
   ctaUrl/ctaLabel son opcionales: pasá null en las papeleras, donde
   "crear" no tiene sentido.
+
+  clearUrl distingue los DOS estados vacíos que no son el mismo:
+
+    clearUrl == null  -> "todavía no hay nada": se muestran title/subtitle y
+                         el CTA de crear.
+    clearUrl != null  -> "no hay nada CON ESTOS FILTROS": texto fijo y
+                         "Limpiar filtros" apuntando a clearUrl. Se ignoran
+                         subtitle y el CTA, porque "Crear el primero" es la
+                         acción equivocada cuando lo que falla es el filtro:
+                         puede haber cien productos y ninguno coincidir.
+
+  El llamador pasa `${filtrosActivos} ? '/products' : null`, y el texto del
+  caso filtrado vive en un solo lugar en vez de reescribirse por listado
+  (products/list y sales/list ya lo redactaban distinto entre sí).
 -->
-<tr th:fragment="emptyRow(items, colspan, icon, title, subtitle, ctaUrl, ctaLabel)"
+<tr th:fragment="emptyRow(items, colspan, icon, title, subtitle, ctaUrl, ctaLabel, clearUrl)"
     th:if="${#lists.isEmpty(items)}">
     <td th:colspan="${colspan}" class="px-6 py-12 text-center">
-        <div th:replace="~{:: emptyBody(${icon}, ${title}, ${subtitle}, ${ctaUrl}, ${ctaLabel})}"></div>
+        <div th:replace="~{:: emptyBody(${icon}, ${title}, ${subtitle}, ${ctaUrl}, ${ctaLabel}, ${clearUrl})}"></div>
     </td>
 </tr>
 
 
 <!-- Mismo estado vacío fuera de una tabla (paneles, listas en tarjetas). -->
-<div th:fragment="emptyBody(icon, title, subtitle, ctaUrl, ctaLabel)" class="text-center text-gray-500">
+<div th:fragment="emptyBody(icon, title, subtitle, ctaUrl, ctaLabel, clearUrl)" class="text-center text-gray-500">
     <svg th:replace="~{fragments/icons :: icon(${icon}, 'mx-auto h-12 w-12 text-gray-300')}"></svg>
+
     <p class="mt-2 font-medium text-gray-900" th:text="${title}">Sin resultados</p>
-    <p th:if="${subtitle}" class="mt-1 text-sm" th:text="${subtitle}"></p>
-    <a th:if="${ctaUrl}" th:href="@{${ctaUrl}}"
+
+    <!--/* `and` de SpEL exige Booleanos: la verdad-idad laxa de Thymeleaf solo
+           se aplica al resultado entero de th:if, no adentro de la expresión.
+           Con `${clearUrl == null and subtitle}` intentaba convertir el texto
+           del subtítulo a Boolean y reventaba el render. */-->
+    <p th:if="${clearUrl}" class="mt-1 text-sm">Ningún resultado coincide con los filtros aplicados.</p>
+    <p th:if="${clearUrl == null and subtitle != null}" class="mt-1 text-sm" th:text="${subtitle}"></p>
+
+    <a th:if="${clearUrl}" th:href="@{${clearUrl}}"
+       class="mt-4 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+        <svg th:replace="~{fragments/icons :: icon('x', 'w-5 h-5')}"></svg>
+        <span>Limpiar filtros</span>
+    </a>
+    <a th:if="${clearUrl == null and ctaUrl != null}" th:href="@{${ctaUrl}}"
        class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
         <svg th:replace="~{fragments/icons :: icon('plus', 'w-5 h-5')}"></svg>
         <span th:text="${ctaLabel}">Crear</span>
