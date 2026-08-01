@@ -27,9 +27,21 @@
 <div th:fragment="listBar(searchUrl, searchPlaceholder, searchValue, trashUrl, newUrl, newLabel)"
      class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-    <form th:action="@{${searchUrl}}" method="get" class="w-full max-w-md">
-        <div th:replace="~{fragments/form :: searchField('search', 'search', ${searchPlaceholder}, ${searchValue})}"></div>
-    </form>
+    <!--/* searchUrl null -> sin buscador. users/list lo necesita: tenía una caja
+           de búsqueda que no hacía nada, porque UserController.list ni siquiera
+           acepta el parámetro. Un control que se puede usar y no produce ningún
+           efecto es peor que no tenerlo. Cuando exista búsqueda de usuarios,
+           basta con pasarle la URL.
+
+           El envoltorio th:block es obligatorio: con el th:if junto al
+           th:replace, la condición no llegaría a evaluarse. */-->
+    <th:block th:if="${searchUrl}">
+        <form th:action="@{${searchUrl}}" method="get" class="w-full max-w-md">
+            <div th:replace="~{fragments/form :: searchField('search', 'search', ${searchPlaceholder}, ${searchValue})}"></div>
+        </form>
+    </th:block>
+    <!--/* Sin buscador, el botón primario igual queda a la derecha. */-->
+    <div th:if="${searchUrl == null}" class="hidden sm:block"></div>
 
     <div class="flex items-center gap-2">
         <a th:if="${trashUrl}" sec:authorize="hasRole('ADMIN')" th:href="@{${trashUrl}}"

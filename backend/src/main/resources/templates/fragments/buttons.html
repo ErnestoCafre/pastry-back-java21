@@ -74,14 +74,32 @@
 </a>
 
 
-<form th:fragment="iconDelete(action, message, label)" th:action="@{${action}}" method="post"
+<!--
+  Acción POST de solo icono. `message` puede ser null: las acciones que no
+  destruyen nada no confirman.
+
+  Los tonos son los mismos que iconLink, para que la misma semántica se vea
+  igual sea un enlace o un envío.
+-->
+<form th:fragment="iconSubmit(action, icon, label, tone, message)" th:action="@{${action}}" method="post"
       class="inline" th:data-confirm="${message}">
     <button type="submit" th:title="${label}"
-            class="inline-flex rounded-lg p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">
-        <svg th:replace="~{fragments/icons :: icon('trash', 'w-5 h-5')}"></svg>
-        <span class="sr-only" th:text="${label}">Eliminar</span>
+            th:class="'inline-flex rounded-lg p-2 text-gray-500 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 ' +
+                      (${tone} == 'edit'    ? 'hover:bg-amber-50 hover:text-amber-600 focus:ring-amber-500' :
+                      (${tone} == 'danger'  ? 'hover:bg-red-50 hover:text-red-600 focus:ring-red-500' :
+                      (${tone} == 'info'    ? 'hover:bg-indigo-50 hover:text-indigo-600 focus:ring-indigo-500' :
+                      (${tone} == 'success' ? 'hover:bg-green-50 hover:text-green-600 focus:ring-green-500' :
+                                              'hover:bg-gray-100 hover:text-primary-600 focus:ring-primary-500'))))">
+        <svg th:replace="~{fragments/icons :: icon(${icon}, 'w-5 h-5')}"></svg>
+        <span class="sr-only" th:text="${label}">Acción</span>
     </button>
 </form>
+
+
+<!-- Borrado: el caso más común de iconSubmit, con nombre propio porque se
+     repite en todos los listados y conviene que no se pueda escribir mal. -->
+<form th:fragment="iconDelete(action, message, label)"
+      th:replace="~{:: iconSubmit(${action}, 'trash', ${label}, 'danger', ${message})}"></form>
 
 
 <!-- ---------- Acciones con etiqueta, para papeleras y footers ---------- -->
