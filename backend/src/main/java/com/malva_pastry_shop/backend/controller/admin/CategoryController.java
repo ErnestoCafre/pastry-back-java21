@@ -117,7 +117,7 @@ public class CategoryController {
     public String showCreateForm(Model model) {
         model.addAttribute("category", new CategoryRequest());
         model.addAttribute("pageTitle", "Nueva Categoría");
-        return "categories/create";
+        return "categories/form";
     }
 
     @PostMapping
@@ -129,7 +129,7 @@ public class CategoryController {
 
         if (result.hasErrors()) {
             model.addAttribute("pageTitle", "Nueva Categoría");
-            return "categories/create";
+            return "categories/form";
         }
 
         try {
@@ -139,7 +139,7 @@ public class CategoryController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("pageTitle", "Nueva Categoría");
-            return "categories/create";
+            return "categories/form";
         }
     }
 
@@ -155,7 +155,7 @@ public class CategoryController {
             model.addAttribute("category", request);
             model.addAttribute("categoryId", id);
             model.addAttribute("pageTitle", "Editar Categoría");
-            return "categories/edit";
+            return "categories/form";
         } catch (EntityNotFoundException e) {
             return "redirect:/categories";
         }
@@ -172,7 +172,7 @@ public class CategoryController {
         if (result.hasErrors()) {
             model.addAttribute("categoryId", id);
             model.addAttribute("pageTitle", "Editar Categoría");
-            return "categories/edit";
+            return "categories/form";
         }
 
         try {
@@ -183,7 +183,7 @@ public class CategoryController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("categoryId", id);
             model.addAttribute("pageTitle", "Editar Categoría");
-            return "categories/edit";
+            return "categories/form";
         }
     }
 

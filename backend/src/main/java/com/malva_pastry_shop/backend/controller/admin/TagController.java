@@ -104,7 +104,7 @@ public class TagController {
     public String showCreateForm(Model model) {
         model.addAttribute("tag", new TagRequest());
         model.addAttribute("pageTitle", "Nuevo Tag");
-        return "tags/create";
+        return "tags/form";
     }
 
     @PostMapping
@@ -116,7 +116,7 @@ public class TagController {
 
         if (result.hasErrors()) {
             model.addAttribute("pageTitle", "Nuevo Tag");
-            return "tags/create";
+            return "tags/form";
         }
 
         try {
@@ -126,7 +126,7 @@ public class TagController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("pageTitle", "Nuevo Tag");
-            return "tags/create";
+            return "tags/form";
         }
     }
 
@@ -142,7 +142,7 @@ public class TagController {
             model.addAttribute("tag", request);
             model.addAttribute("tagId", id);
             model.addAttribute("pageTitle", "Editar Tag");
-            return "tags/edit";
+            return "tags/form";
         } catch (EntityNotFoundException e) {
             return "redirect:/tags";
         }
@@ -159,7 +159,7 @@ public class TagController {
         if (result.hasErrors()) {
             model.addAttribute("tagId", id);
             model.addAttribute("pageTitle", "Editar Tag");
-            return "tags/edit";
+            return "tags/form";
         }
 
         try {
@@ -170,7 +170,7 @@ public class TagController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("tagId", id);
             model.addAttribute("pageTitle", "Editar Tag");
-            return "tags/edit";
+            return "tags/form";
         }
     }
 

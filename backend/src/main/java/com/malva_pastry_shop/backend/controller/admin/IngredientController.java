@@ -95,7 +95,7 @@ public class IngredientController {
         model.addAttribute("ingredient", new IngredientRequest());
         model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
         model.addAttribute("pageTitle", "Nuevo Ingrediente");
-        return "ingredients/create";
+        return "ingredients/form";
     }
 
     @PostMapping
@@ -108,7 +108,7 @@ public class IngredientController {
         if (result.hasErrors()) {
             model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
             model.addAttribute("pageTitle", "Nuevo Ingrediente");
-            return "ingredients/create";
+            return "ingredients/form";
         }
 
         try {
@@ -119,7 +119,7 @@ public class IngredientController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
             model.addAttribute("pageTitle", "Nuevo Ingrediente");
-            return "ingredients/create";
+            return "ingredients/form";
         }
     }
 
@@ -138,7 +138,7 @@ public class IngredientController {
             model.addAttribute("ingredientId", id);
             model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
             model.addAttribute("pageTitle", "Editar Ingrediente");
-            return "ingredients/edit";
+            return "ingredients/form";
         } catch (EntityNotFoundException e) {
             return "redirect:/ingredients";
         }
@@ -156,7 +156,7 @@ public class IngredientController {
             model.addAttribute("ingredientId", id);
             model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
             model.addAttribute("pageTitle", "Editar Ingrediente");
-            return "ingredients/edit";
+            return "ingredients/form";
         }
 
         try {
@@ -168,7 +168,7 @@ public class IngredientController {
             model.addAttribute("ingredientId", id);
             model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
             model.addAttribute("pageTitle", "Editar Ingrediente");
-            return "ingredients/edit";
+            return "ingredients/form";
         }
     }
 

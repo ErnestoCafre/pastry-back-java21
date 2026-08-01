@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<!--/*
+  Alta y edición de categoría en una sola plantilla.
+
+  Reemplaza a categories/create.html y categories/edit.html, que eran copias
+  idénticas salvo por tres cosas: el texto de la miga, el th:action y la
+  etiqueta del botón. Mantener dos archivos para eso garantiza que tarde o
+  temprano diverjan: un campo agregado en uno y olvidado en el otro no falla
+  en ningún lado, simplemente no aparece.
+
+  El modo sale de `categoryId`, que el controller ya publicaba en todas las
+  rutas de edición y en ninguna de alta. No hizo falta ningún atributo nuevo:
+  lo único que cambia en el controller es el nombre de la vista.
+*/-->
+
+<head>
+    <title th:text="${pageTitle}">Categoría</title>
+</head>
+
+<body>
+    <div layout:fragment="content" th:with="editing=${categoryId != null}">
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Categorías', '/categories',
+                ${editing} ? 'Editar' : 'Nueva')}"></nav>
+
+        <div class="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div th:replace="~{fragments/alerts :: errorBox(${error})}"></div>
+
+            <form th:action="${editing} ? @{/categories/{id}(id=${categoryId})} : @{/categories}"
+                  th:object="${category}" method="post" class="space-y-6">
+                <div th:replace="~{fragments/alerts :: formErrors}"></div>
+
+                <div th:replace="~{fragments/form :: text(
+                        'name', 'Nombre', true, 'Ej: Tortas, Galletas, Cupcakes', null)}"></div>
+
+                <div th:replace="~{fragments/form :: textarea(
+                        'description', 'Descripción', false, 'Descripción opcional de la categoría')}"></div>
+
+                <div th:replace="~{fragments/form :: actions(
+                        ${editing} ? 'Actualizar Categoría' : 'Guardar Categoría', '/categories')}"></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

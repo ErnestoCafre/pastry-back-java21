@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<!--/*
+  Alta y edición de usuario. Reemplaza a users/create.html y users/edit.html.
+
+  Es el par que MÁS difería, y no solo en cosmética: la contraseña es
+  obligatoria al crear y opcional al editar (vacía = no cambiarla), el rol
+  cambia de opción por defecto, y la casilla "habilitado" solo existe en
+  edición. Justamente por eso convenía fusionarlos: con dos archivos, esas
+  reglas estaban implícitas en cuál de los dos abrías.
+
+  La contraseña se escribe a mano y NO usa form :: text: ese átomo va con
+  th:field, que precargaría el valor en el input. Una contraseña no se
+  devuelve al navegador.
+*/-->
+
+<head>
+    <title th:text="${pageTitle}">Usuario</title>
+</head>
+
+<body>
+    <div layout:fragment="content" th:with="editing=${userId != null}">
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Usuarios', '/users',
+                ${editing} ? 'Editar' : 'Nuevo')}"></nav>
+
+        <div class="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div th:replace="~{fragments/alerts :: errorBox(${error})}"></div>
+
+            <form th:action="${editing} ? @{/users/{id}(id=${userId})} : @{/users}"
+                  th:object="${user}" method="post" class="space-y-6">
+                <div th:replace="~{fragments/alerts :: formErrors}"></div>
+
+                <div th:replace="~{fragments/form :: text('name', 'Nombre', true, null, null)}"></div>
+
+                <div th:replace="~{fragments/form :: text('lastName', 'Apellido', false, null, null)}"></div>
+
+                <div th:replace="~{fragments/form :: text('email', 'Email', true, null, 'email')}"></div>
+
+                <div>
+                    <label for="password" class="mb-1 block text-sm font-medium text-gray-700">
+                        <span>Contraseña</span>
+                        <span th:if="${!editing}" class="text-red-500" aria-hidden="true">*</span>
+                        <span th:if="${editing}" class="text-xs text-gray-400">(dejar vacío para no cambiar)</span>
+                    </label>
+                    <input type="password" id="password" name="password" maxlength="32"
+                           th:required="${!editing}" placeholder="••••••••"
+                           th:errorclass="border-red-500 focus:border-red-500 focus:ring-red-500"
+                           th:aria-invalid="${#fields.hasErrors('password')} ? 'true' : null"
+                           th:aria-describedby="${#fields.hasErrors('password')} ? 'password-error' : null"
+                           class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:ring-primary-500">
+                    <p th:if="${#fields.hasErrors('password')}" id="password-error"
+                       class="mt-1 text-sm text-red-600" th:errors="*{password}"></p>
+                </div>
+
+                <div th:replace="~{fragments/form :: select('roleId', 'Rol', ${editing}, ${roles},
+                        'id', 'name.name()',
+                        ${editing} ? 'Seleccione un rol' : 'Empleado (por defecto)')}"></div>
+
+                <!--/* El th:if va en un envoltorio, NO junto al th:replace: th:replace
+                       precede 100 y th:if 300, así que en el mismo elemento la
+                       condición no llegaría a evaluarse y la casilla se dibujaría
+                       también en el alta. */-->
+                <th:block th:if="${editing}">
+                    <div th:replace="~{fragments/form :: checkbox(
+                            'enabled', 'Estado', 'Usuario habilitado')}"></div>
+                </th:block>
+
+                <div th:replace="~{fragments/form :: actions(
+                        ${editing} ? 'Actualizar Usuario' : 'Guardar Usuario', '/users')}"></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -103,7 +103,7 @@ public class ProductController {
         model.addAttribute("product", new ProductRequest());
         model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
         model.addAttribute("pageTitle", "Nuevo Producto");
-        return "products/create";
+        return "products/form";
     }
 
     @PostMapping
@@ -117,7 +117,7 @@ public class ProductController {
         if (result.hasErrors()) {
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Nuevo Producto");
-            return "products/create";
+            return "products/form";
         }
 
         try {
@@ -128,7 +128,7 @@ public class ProductController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Nuevo Producto");
-            return "products/create";
+            return "products/form";
         }
     }
 
@@ -149,7 +149,7 @@ public class ProductController {
             model.addAttribute("productId", id);
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Editar Producto");
-            return "products/edit";
+            return "products/form";
         } catch (EntityNotFoundException e) {
             return "redirect:/products";
         }
@@ -167,7 +167,7 @@ public class ProductController {
             model.addAttribute("productId", id);
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Editar Producto");
-            return "products/edit";
+            return "products/form";
         }
 
         try {
@@ -179,7 +179,7 @@ public class ProductController {
             model.addAttribute("productId", id);
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Editar Producto");
-            return "products/edit";
+            return "products/form";
         }
     }
 

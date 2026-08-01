@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<!--/*
+  Alta y edición de sección de vitrina. Reemplaza a sections/create.html y
+  sections/edit.html, que diferían en cuatro líneas.
+
+  Estrena form :: number y form :: checkbox, los dos átomos que estaban
+  escritos pero sin ningún consumidor.
+
+  El checkbox importa especialmente: la versión anterior agregaba a mano un
+  <input type="hidden" name="visible" value="false"> junto al th:field. Pero
+  th:field ya emite su propio marcador _visible para el caso desmarcado, así
+  que al tildar la casilla se enviaban DOS parámetros con el mismo nombre y el
+  binder se quedaba con el primero: la sección nunca se hacía visible. El
+  fragment no emite ese hidden, así que el bug no puede reaparecer.
+
+  El <label> de "Visible en vitrina" tampoco tenía `for` y no estaba asociado
+  a su casilla; el fragment lo asocia por construcción.
+*/-->
+
+<head>
+    <title th:text="${pageTitle}">Sección</title>
+</head>
+
+<body>
+    <div layout:fragment="content" th:with="editing=${sectionId != null}">
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Secciones', '/sections',
+                ${editing} ? 'Editar' : 'Nueva')}"></nav>
+
+        <div class="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div th:replace="~{fragments/alerts :: errorBox(${error})}"></div>
+
+            <form th:action="${editing} ? @{/sections/{id}(id=${sectionId})} : @{/sections}"
+                  th:object="${section}" method="post" class="space-y-6">
+                <div th:replace="~{fragments/alerts :: formErrors}"></div>
+
+                <div th:replace="~{fragments/form :: text(
+                        'name', 'Nombre', true, 'Ej: Más Vendidos, Novedades, Pasteles Destacados', null)}"></div>
+
+                <div th:replace="~{fragments/form :: textarea(
+                        'description', 'Descripción', false, 'Descripción opcional de la sección')}"></div>
+
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div th:replace="~{fragments/form :: number(
+                            'displayOrder', 'Orden de visualización', false, 'Ej: 1, 2, 3...',
+                            null, '1', '0')}"></div>
+
+                    <div th:replace="~{fragments/form :: checkbox(
+                            'visible', 'Visible en vitrina', 'Mostrar sección en la página pública')}"></div>
+                </div>
+
+                <div th:replace="~{fragments/form :: actions(
+                        ${editing} ? 'Actualizar Sección' : 'Guardar Sección', '/sections')}"></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
