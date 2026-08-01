@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout/main}">
+    layout:decorate="~{layout/main}">
+
+<!--/*
+  Acciones de fila: Ver, Editar y Borrar, el modelo único del panel. Antes esta
+  fila ofrecía solo "Ver", así que editar una categoría obligaba a entrar al
+  detalle aunque la ruta /categories/{id}/edit existiera desde siempre.
+
+  "Ver productos" NO es una acción de fila: es la columna de datos que lleva al
+  sub-recurso, igual que el contador de tags/list. Las acciones quedan para lo
+  que se le hace a la entidad.
+*/-->
 
 <head>
     <title th:text="${pageTitle}">Categorías</title>
@@ -9,193 +19,69 @@
 <body>
     <div layout:fragment="content">
 
-        <!-- Alert Messages -->
-        <div th:if="${success}"
-            class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${success}"></span>
-        </div>
-        <div th:if="${error}"
-            class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${error}"></span>
-        </div>
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
 
-        <!-- Header Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <form th:action="@{/categories}" method="get" class="flex-1 max-w-md">
-                <div class="relative">
-                    <input type="text" name="search" th:value="${search}" placeholder="Buscar categorías..."
-                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
-                    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-            </form>
-            <div class="flex items-center gap-2">
-                <!-- Papelera: solo visible para ADMIN -->
-                <a th:href="@{/categories/deleted}" sec:authorize="hasRole('ADMIN')"
-                    class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span class="hidden sm:inline">Papelera</span>
-                </a>
-                <a th:href="@{/categories/new}"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nueva Categoría
-                </a>
-            </div>
-        </div>
+        <div th:replace="~{fragments/toolbar :: listBar(
+                '/categories', 'Buscar categorías...', ${search},
+                '/categories/deleted', '/categories/new', 'Nueva Categoría')}"></div>
 
-        <!-- Categories Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
+                    <caption class="sr-only">Listado de categorías</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Nombre</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Descripción</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Productos</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Acciones</th>
+                            <th th:replace="~{fragments/table :: th('Nombre')}"></th>
+                            <th th:replace="~{fragments/table :: th('Descripción')}"></th>
+                            <th th:replace="~{fragments/table :: thCenter('Productos')}"></th>
+                            <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200 bg-white">
                         <tr th:each="category : ${categories.content}" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="font-medium text-gray-900" th:text="${category.name}"></div>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <a th:href="@{/categories/{id}(id=${category.id})}"
+                                   class="font-medium text-gray-900 transition-colors hover:text-primary-600"
+                                   th:text="${category.name}"></a>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-500 max-w-xs truncate"
-                                    th:text="${category.description ?: '-'}"></div>
+                                <div class="max-w-xs truncate text-sm text-gray-500"
+                                     th:text="${category.description} ?: '—'"></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap px-6 py-4 text-center">
                                 <a th:href="@{/categories/{id}/products(id=${category.id})}"
-                                    class="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-800">
+                                   th:title="'Ver productos de ' + ${category.name}"
+                                   class="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1">
+                                    <svg th:replace="~{fragments/icons :: icon('box', 'w-4 h-4')}"></svg>
                                     <span>Ver productos</span>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
                                 </a>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a th:href="@{/categories/{id}(id=${category.id})}"
-                                        class="p-2 text-gray-500 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                        title="Ver">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </a>
+                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
+                                <div class="flex items-center justify-end gap-1">
+                                    <a th:replace="~{fragments/buttons :: iconLink(
+                                            '/categories/' + ${category.id}, 'eye', 'Ver categoría', 'neutral')}"></a>
+                                    <a th:replace="~{fragments/buttons :: iconLink(
+                                            '/categories/' + ${category.id} + '/edit', 'pencil', 'Editar categoría', 'edit')}"></a>
+                                    <form th:replace="~{fragments/buttons :: iconDelete(
+                                            '/categories/' + ${category.id} + '/delete',
+                                            '¿Eliminar esta categoría? Se moverá a la papelera.',
+                                            'Eliminar categoría')}"></form>
                                 </div>
                             </td>
                         </tr>
-                        <!-- Empty categories -->
-                        <tr th:if="${categories.content.empty}">
-                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                                </svg>
-                                <p class="mt-2">No hay categorías registradas</p>
-                                <a th:href="@{/categories/new}"
-                                    class="mt-2 inline-block text-primary-600 hover:text-primary-800">
-                                    Crear categoría
-                                </a>
-                            </td>
-                        </tr>
+
+                        <tr th:replace="~{fragments/table :: emptyRow(${categories.content}, 4, 'folder',
+                                ${#strings.isEmpty(search)} ? 'No hay categorías registradas' : 'Sin resultados',
+                                'Las categorías agrupan productos en el catálogo.',
+                                '/categories/new', 'Crear categoría',
+                                ${#strings.isEmpty(search)} ? null : '/categories')}"></tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div th:if="${!categories.content.empty}" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <!-- Info -->
-                    <div class="text-sm text-gray-500">
-                        Mostrando
-                        <span class="font-medium" th:text="${categories.number * categories.size + 1}"></span>
-                        -
-                        <span class="font-medium"
-                            th:text="${categories.number * categories.size + categories.numberOfElements}"></span>
-                        de
-                        <span class="font-medium" th:text="${categories.totalElements}"></span>
-                        categorías
-                    </div>
-
-                    <!-- Navigation -->
-                    <nav th:if="${categories.totalPages > 1}" class="flex items-center gap-1">
-                        <!-- Previous -->
-                        <a th:if="${categories.hasPrevious()}"
-                            th:href="@{/categories(page=${categories.number - 1}, size=${categories.size}, search=${search})}"
-                            class="px-3 py-2 text-sm text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </a>
-                        <span th:if="${!categories.hasPrevious()}"
-                            class="px-3 py-2 text-sm text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </span>
-
-                        <!-- Page Numbers -->
-                        <th:block th:each="i : ${#numbers.sequence(0, categories.totalPages - 1)}">
-                            <a th:if="${i != categories.number}"
-                                th:href="@{/categories(page=${i}, size=${categories.size}, search=${search})}"
-                                th:text="${i + 1}"
-                                class="px-3 py-2 text-sm text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"></a>
-                            <span th:if="${i == categories.number}" th:text="${i + 1}"
-                                class="px-3 py-2 text-sm text-white bg-primary-600 border border-primary-600 rounded-lg"></span>
-                        </th:block>
-
-                        <!-- Next -->
-                        <a th:if="${categories.hasNext()}"
-                            th:href="@{/categories(page=${categories.number + 1}, size=${categories.size}, search=${search})}"
-                            class="px-3 py-2 text-sm text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                        <span th:if="${!categories.hasNext()}"
-                            class="px-3 py-2 text-sm text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
-                    </nav>
-                </div>
-            </div>
+            <div th:replace="~{fragments/pagination :: bar(
+                    ${categories}, '/categories', 'categorías', ${ {'search': search} })}"></div>
         </div>
-
     </div>
 </body>
 
