@@ -7,47 +7,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title layout:title-pattern="$CONTENT_TITLE - Malva Pastry Shop">Malva Pastry Shop</title>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#fdf2f8',
-                            100: '#fce7f3',
-                            200: '#fbcfe8',
-                            300: '#f9a8d4',
-                            400: '#f472b6',
-                            500: '#ec4899',
-                            600: '#db2777',
-                            700: '#be185d',
-                            800: '#9d174d',
-                            900: '#831843',
-                        }
-                    },
-                    animation: {
-                        'fadeInUp': 'fadeInUp 0.5s ease-out',
-                        'logoFloat': 'logoFloat 2s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        logoFloat: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!--/*
+        CSS compilado (Tailwind 3, ver backend/tailwind.config.js).
 
-    <!-- Flowbite CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+        Antes acá vivían el Play CDN de Tailwind y su config en un <script>
+        inline. El CDN bajaba el compilador y generaba las clases en el
+        navegador en cada carga; está desaconsejado para producción y además
+        el <script> inline impedía servir una CSP sin 'unsafe-inline'.
+
+        Flowbite (CSS + JS por CDN) también salió: se usaba únicamente para el
+        drawer mobile, que ahora resuelve /js/admin.js en ~40 líneas.
+
+        Para regenerar este archivo: `npm run css` dentro de backend/.
+
+        Este bloque es un comentario de nivel de parser de Thymeleaf, no un
+        comentario HTML: se descarta al renderizar en vez de viajar al
+        navegador en cada página. Los comentarios HTML normales SÍ se sirven.
+
+        Cuidado al editarlo: la secuencia de cierre no puede aparecer en el
+        texto, porque el comentario termina en su primera aparición y el resto
+        queda suelto dentro del <head>.
+    */-->
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 
 <body class="bg-gray-50">
@@ -58,7 +39,7 @@
                 <span class="text-2xl">🧁</span>
                 <span class="font-bold text-xl text-primary-600">Malva Pastry</span>
             </a>
-            <button data-drawer-target="sidebar" data-drawer-toggle="sidebar" aria-controls="sidebar"
+            <button type="button" data-drawer-toggle="sidebar" aria-controls="sidebar" aria-expanded="false"
                 class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
                 <span class="sr-only">Abrir menú</span>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,8 +125,10 @@
         </div>
     </aside>
 
-    <!-- Backdrop for mobile -->
-    <div data-drawer-backdrop="sidebar" class="hidden fixed inset-0 z-40 bg-gray-900/50 lg:hidden"></div>
+    <!--/* Backdrop for mobile. aria-hidden: el cierre por Escape y el botón de
+         toggle ya cubren el caso accesible; esto es solo la superficie de clic. */-->
+    <div data-drawer-backdrop="sidebar" aria-hidden="true"
+        class="hidden fixed inset-0 z-40 bg-gray-900/50 lg:hidden"></div>
 
     <!-- Main Content -->
     <div class="lg:ml-64">
@@ -169,11 +152,9 @@
         </footer>
     </div>
 
-    <!-- Flowbite JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
-
-    <!-- Comportamiento compartido: confirmaciones vía [data-confirm] -->
-    <script th:src="@{/js/admin.js}"></script>
+    <!--/* Comportamiento compartido: confirmaciones [data-confirm], drawer mobile
+         y modales [data-dialog-*]. Sin dependencias externas. */-->
+    <script th:src="@{/js/admin.js}" defer></script>
 
     <!-- Additional scripts -->
     <div layout:fragment="scripts">

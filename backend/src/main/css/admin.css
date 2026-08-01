@@ -1,0 +1,33 @@
+/*
+ * Fuente del CSS del panel. Se compila con `npm run css` a
+ * src/main/resources/static/css/admin.css, que es el archivo que sirve la app.
+ *
+ * El compilado esta commiteado a proposito: asi `mvn spring-boot:run` y los
+ * tests de renderizado funcionan sin instalar Node. El Dockerfile lo vuelve a
+ * generar antes de empaquetar, de modo que produccion nunca depende de que
+ * alguien se haya acordado de correr el build.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    /*
+     * Preflight pone `margin: 0` en todos los elementos, y <dialog> depende de
+     * `margin: auto` para centrarse cuando se abre con showModal(). Sin esto el
+     * modal aparece pegado arriba a la izquierda.
+     */
+    dialog {
+        margin: auto;
+    }
+
+    /*
+     * El overlay de un <dialog> nativo es el pseudo-elemento ::backdrop, que no
+     * es alcanzable desde una clase de utilidad en Tailwind 3. Equivale al
+     * `bg-gray-500 bg-opacity-75` del overlay artesanal que reemplaza.
+     */
+    dialog::backdrop {
+        background-color: rgb(107 114 128 / 0.75);
+    }
+}

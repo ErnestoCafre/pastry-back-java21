@@ -110,10 +110,12 @@
                             </div>
                             <div class="flex items-center gap-1">
                                 <!-- Editar cantidad -->
+                                <!--/* data-action lo arma Thymeleaf con @{...}, no el JS concatenando
+                                     '/products/' + id: así la URL respeta el context-path. */-->
                                 <button type="button"
                                     class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors edit-btn"
                                     title="Editar cantidad"
-                                    th:data-ingredient-id="${pi.ingredient.id}"
+                                    th:data-action="@{/products/{productId}/recipe/ingredients/{ingredientId}/update(productId=${product.id}, ingredientId=${pi.ingredient.id})}"
                                     th:data-ingredient-name="${pi.ingredient.name}"
                                     th:data-quantity="${pi.quantity}"
                                     th:data-unit="${pi.ingredient.unitOfMeasure}">
@@ -124,11 +126,11 @@
                                 </button>
                                 <!-- Quitar ingrediente -->
                                 <form th:action="@{/products/{productId}/recipe/ingredients/{ingredientId}/remove(productId=${product.id}, ingredientId=${pi.ingredient.id})}"
-                                    method="post">
+                                    method="post"
+                                    data-confirm="¿Quitar este ingrediente de la receta?">
                                     <button type="submit"
                                         class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Quitar ingrediente"
-                                        onclick="return confirm('Quitar este ingrediente de la receta?');">
+                                        title="Quitar ingrediente">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M6 18L18 6M6 6l12 12" />
@@ -197,78 +199,62 @@
             </div>
         </div>
 
-        <!-- Modal para editar cantidad -->
-        <div id="editModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-                <!-- Overlay -->
-                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onclick="closeEditModal()"></div>
+        <!--/*
+          Modal para editar cantidad.
 
-                <!-- Modal content -->
-                <div class="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Editar cantidad</h3>
-                        <p class="mt-1 text-sm text-gray-500" id="modalIngredientName"></p>
-                    </div>
-                    <form id="editForm" method="post">
-                        <div class="mb-4">
-                            <label for="editQuantity" class="block text-sm font-medium text-gray-700">
-                                Cantidad (<span id="modalUnit"></span>)
-                            </label>
-                            <input type="number" name="quantity" id="editQuantity" step="0.0001" min="0.0001" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                        </div>
-                        <div class="flex justify-end gap-3">
-                            <button type="button" onclick="closeEditModal()"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                Cancelar
-                            </button>
-                            <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">
-                                Guardar
-                            </button>
-                        </div>
-                    </form>
-                </div>
+          <dialog> nativo abierto con showModal(). El bloque anterior era un
+          <div class="hidden"> a mano: sin role="dialog", sin aria-modal, sin
+          atrapado del foco (se podía tabular a la página de atrás) y sin
+          devolver el foco al botón al cerrar. El elemento nativo trae las
+          cuatro cosas, más el overlay como ::backdrop, sin ninguna librería.
+        */-->
+        <dialog id="editQuantityDialog" aria-labelledby="editQuantityTitle"
+            class="w-[calc(100%-2rem)] max-w-lg rounded-lg bg-white p-6 text-left shadow-xl">
+            <div class="mb-4">
+                <h2 id="editQuantityTitle" class="text-lg font-medium text-gray-900">Editar cantidad</h2>
+                <p class="mt-1 text-sm text-gray-500" data-dialog-ingredient></p>
             </div>
-        </div>
+            <form id="editQuantityForm" method="post">
+                <!--/*
+                  El token CSRF va explícito porque este form es el único del
+                  panel sin th:action: la URL la fija el JS al abrir el modal,
+                  según qué ingrediente se esté editando. Y es justamente
+                  th:action lo que dispara el RequestDataValueProcessor de
+                  Spring Security que inyecta el hidden en todos los demás.
 
-        <!-- Script para el modal -->
-        <script th:inline="javascript">
-            const productId = [[${product.id}]];
-
-            function openEditModal(ingredientId, ingredientName, currentQuantity, unit) {
-                document.getElementById('modalIngredientName').textContent = ingredientName;
-                document.getElementById('modalUnit').textContent = unit;
-                document.getElementById('editQuantity').value = currentQuantity;
-                document.getElementById('editForm').action = '/products/' + productId + '/recipe/ingredients/' + ingredientId + '/update';
-                document.getElementById('editModal').classList.remove('hidden');
-            }
-
-            function closeEditModal() {
-                document.getElementById('editModal').classList.add('hidden');
-            }
-
-            // Event listeners para botones de editar (usando data attributes para evitar problemas con caracteres especiales)
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.edit-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        const ingredientId = this.dataset.ingredientId;
-                        const ingredientName = this.dataset.ingredientName;
-                        const quantity = this.dataset.quantity;
-                        const unit = this.dataset.unit;
-                        openEditModal(ingredientId, ingredientName, quantity, unit);
-                    });
-                });
-            });
-
-            // Cerrar modal con Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeEditModal();
-                }
-            });
-        </script>
+                  Sin esto el POST salía sin token y la cadena de seguridad del
+                  panel lo rechazaba con 403: "editar cantidad" mostraba la
+                  página de "Tu sesión expiró" en vez de guardar. Estaba así
+                  desde antes de migrar el modal a <dialog>.
+                */-->
+                <input th:if="${_csrf}" type="hidden"
+                    th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="mb-4">
+                    <label for="editQuantity" class="block text-sm font-medium text-gray-700">
+                        Cantidad (<span data-dialog-unit></span>)
+                    </label>
+                    <input type="number" name="quantity" id="editQuantity" step="0.0001" min="0.0001" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" data-dialog-close
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </dialog>
     </div>
+
+    <!--/* El JS vive en un archivo aparte, no en un <script th:inline>: sin JS
+         inline el panel puede servir una CSP sin 'unsafe-inline'. */-->
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/recipe.js}" defer></script>
+    </th:block>
 </body>
 
 </html>
