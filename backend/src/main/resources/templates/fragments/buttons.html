@@ -49,7 +49,17 @@
              (${tone} == 'danger'  ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500' :
              (${tone} == 'ghost'   ? 'text-gray-700 hover:bg-gray-100 focus:ring-gray-400' :
                                      'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-400')))">
-    <svg th:if="${icon}" th:replace="~{fragments/icons :: icon(${icon}, 'w-5 h-5')}"></svg>
+    <!--/* El th:if va en un envoltorio y NO junto al th:replace.
+
+           Estaba mal desde que se escribió el fragment: con los dos en el mismo
+           <svg>, th:replace (precedencia 100) gana sobre th:if (300) y la
+           condición nunca se evalúa. El resultado era que un link sin icono
+           igual llamaba a icons :: icon(null), que cae en el caso por defecto
+           y dibuja el triángulo de "icono desconocido". El botón Limpiar de
+           sales/list se veía así. */-->
+    <th:block th:if="${icon}">
+        <svg th:replace="~{fragments/icons :: icon(${icon}, 'w-5 h-5')}"></svg>
+    </th:block>
     <span th:text="${label}">Acción</span>
 </a>
 
