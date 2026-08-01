@@ -70,7 +70,7 @@
                 <!-- Costo total de la receta -->
                 <div class="px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
                     <span class="text-sm text-green-700">Costo receta: </span>
-                    <span class="font-semibold text-green-800" th:text="${'$' + #numbers.formatDecimal(recipeCost, 1, 2)}">$0.00</span>
+                    <span class="font-semibold text-green-800" th:text="${@money.format(recipeCost)}">$0.00</span>
                 </div>
                 <a th:href="@{/products}"
                     class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
@@ -98,14 +98,14 @@
                                 </div>
                                 <div class="mt-1 text-sm text-gray-500">
                                     <span>Cantidad: </span>
-                                    <span class="font-medium" th:text="${#numbers.formatDecimal(pi.quantity, 1, 4)}"></span>
+                                    <span class="font-medium" th:text="${@money.quantity(pi.quantity)}"></span>
                                     <span class="mx-2">|</span>
                                     <span>Costo unitario: </span>
-                                    <span th:text="${'$' + #numbers.formatDecimal(pi.ingredient.unitCost, 1, 2)}"></span>
+                                    <span th:text="${@money.format(pi.ingredient.unitCost)}"></span>
                                     <span class="mx-2">|</span>
                                     <span>Subtotal: </span>
                                     <span class="font-medium text-green-600"
-                                        th:text="${'$' + #numbers.formatDecimal(pi.quantity * pi.ingredient.unitCost, 1, 2)}"></span>
+                                        th:text="${@money.format(pi.quantity * pi.ingredient.unitCost)}"></span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1">
@@ -168,7 +168,7 @@
                                         th:text="${ingredient.unitOfMeasure}"></span>
                                 </div>
                                 <p class="text-sm text-gray-500"
-                                    th:text="${'Costo: $' + #numbers.formatDecimal(ingredient.unitCost, 1, 2) + ' por ' + ingredient.unitOfMeasure}"></p>
+                                    th:text="${'Costo: ' + @money.format(ingredient.unitCost) + ' por ' + ingredient.unitOfMeasure}"></p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" name="quantity" step="0.0001" min="0.0001" required

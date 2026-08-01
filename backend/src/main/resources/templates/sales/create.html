@@ -44,7 +44,7 @@
                         <option th:each="product : ${products}"
                                 th:value="${product.id}"
                                 th:data-price="${product.basePrice}"
-                                th:text="${product.name + (product.basePrice != null ? ' - $' + #numbers.formatDecimal(product.basePrice, 1, 2) : '')}"></option>
+                                th:text="${product.name + (product.basePrice != null ? ' - ' + @money.format(product.basePrice) : '')}"></option>
                     </select>
                     <p th:if="${#fields.hasErrors('productId')}" class="mt-1 text-sm text-red-500" th:errors="*{productId}"></p>
                 </div>

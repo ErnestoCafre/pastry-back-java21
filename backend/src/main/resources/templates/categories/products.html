@@ -60,7 +60,7 @@
                         th:text="${product.description ?: 'Sin descripción'}"></p>
                     <div class="flex items-center justify-between">
                         <span class="text-xl font-bold text-gray-900" th:if="${product.basePrice}"
-                            th:text="${'$' + #numbers.formatDecimal(product.basePrice, 1, 2)}"></span>
+                            th:text="${@money.format(product.basePrice)}"></span>
                         <span class="text-gray-400" th:unless="${product.basePrice}">Sin precio</span>
                     </div>
                 </div>
