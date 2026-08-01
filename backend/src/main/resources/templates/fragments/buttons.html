@@ -27,10 +27,10 @@
       - cambiar confirm() por un <dialog> accesible pasa a ser un cambio
         de un solo archivo;
       - es un paso hacia poder aplicar una CSP sin 'unsafe-inline'. Ojo:
-        todavía NO alcanza. Ya no queda ningún <script> inline (la config
-        de Tailwind salió de layout/main.html al compilar el CSS), pero
-        siguen los onsubmit/onclick inline en 12 templates sin migrar, y
-        no hay ninguna cabecera CSP configurada.
+        todavía NO alcanza. Quedan 9 plantillas con JS inline: ocho fichas
+        de detalle y sublistados con manejadores en atributos (onclick,
+        onsubmit) y sales/create con un bloque <script> propio. Tampoco hay
+        ninguna cabecera CSP configurada todavía.
 
   Accesibilidad:
     - Los botones de solo icono llevan title Y <span class="sr-only">.
