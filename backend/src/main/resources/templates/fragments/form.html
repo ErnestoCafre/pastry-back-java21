@@ -156,21 +156,52 @@
 
 
 <!--
-  Campo de búsqueda de los listados. Antes: 8 copias, todas con un <label>
-  ausente o sin `for`. La etiqueta va en sr-only — visible para lectores de
-  pantalla, invisible en pantalla, que es lo que pide el diseño.
+  ---------- Campos de filtro de los listados ----------
+
+  Estos NO traen su propio <form>: lo pone el llamador.
+
+  La versión anterior sí lo traía, y eso la volvía inservible justo donde más
+  falta hacía. sales/list tiene tres filtros (producto + desde + hasta) que
+  viajan en un mismo <form>, y los formularios no se pueden anidar: no había
+  forma de usar el fragment ahí. Quien quiera solo una búsqueda envuelve con
+  toolbar :: listBar, que es el que aporta el <form>.
+
+  El id también era fijo (id="search", con un <label for="search"> escrito a
+  mano). Ahora se parametriza, así que dos campos pueden convivir en una misma
+  página sin pisarse los ids ni robarse la etiqueta.
 -->
-<form th:fragment="search(url, placeholder, value)" th:action="@{${url}}" method="get"
-      class="w-full max-w-md">
-    <label for="search" class="sr-only" th:text="${placeholder}">Buscar</label>
-    <div class="relative">
-        <input type="search" id="search" name="search" th:value="${value}" th:placeholder="${placeholder}"
-               class="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-primary-500 focus:ring-primary-500">
-        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg th:replace="~{fragments/icons :: icon('search', 'w-5 h-5')}"></svg>
-        </span>
-    </div>
-</form>
+
+<!--
+  Búsqueda: etiqueta en sr-only —visible para lectores de pantalla, invisible
+  en pantalla, que es lo que pide el diseño— y lupa decorativa.
+-->
+<div th:fragment="searchField(id, name, placeholder, value)" class="relative w-full max-w-md">
+    <label th:for="${id}" class="sr-only" th:text="${placeholder}">Buscar</label>
+    <input type="search" th:id="${id}" th:name="${name}" th:value="${value}" th:placeholder="${placeholder}"
+           class="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-primary-500 focus:ring-primary-500">
+    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <svg th:replace="~{fragments/icons :: icon('search', 'w-5 h-5')}"></svg>
+    </span>
+</div>
+
+
+<!--
+  Filtro con etiqueta visible, para las barras de varios campos.
+
+  `type` es el del input: 'text', 'date', 'number'. Con 'date' el valor tiene
+  que llegar en ISO (yyyy-MM-dd) o el navegador muestra el campo vacío;
+  th:value sobre un LocalDate ya da ISO, así que pasarlo directo funciona.
+
+  Existe sobre todo por accesibilidad: los tres filtros de sales/list tienen
+  hoy un <label> sin `for`, así que no están asociados a su campo. Acá la
+  asociación es por construcción y no se puede olvidar.
+-->
+<div th:fragment="filterField(id, name, label, type, value, placeholder)">
+    <label th:for="${id}" class="mb-1 block text-xs font-medium text-gray-500" th:text="${label}">Filtro</label>
+    <input th:type="${type} ?: 'text'" th:id="${id}" th:name="${name}"
+           th:value="${value}" th:placeholder="${placeholder}"
+           class="rounded-lg border border-gray-300 px-3 py-2 focus:border-primary-500 focus:ring-primary-500">
+</div>
 
 </body>
 </html>
