@@ -121,7 +121,9 @@ Gracias a las recetas y ventas, el dashboard, el calculo de costos y el detalle 
 ### Frontend (Panel Admin)
 - **Motor de plantillas:** Thymeleaf 3.x
 - **Layout:** Thymeleaf Layout Dialect 3.3
-- **Estilos:** Tailwind CSS (CDN) + Flowbite
+- **Estilos:** Tailwind CSS 3 compilado (`npm run css` en `backend/`, salida en
+  `static/css/admin.css`; el Dockerfile lo regenera al construir la imagen)
+- **JavaScript:** sin dependencias externas (`static/js/`)
 
 ### Base de Datos
 - **RDBMS:** PostgreSQL 13+

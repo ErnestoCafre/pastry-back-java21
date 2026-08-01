@@ -1,5 +1,11 @@
 backend/HELP.md
 target/
+
+### Tailwind ###
+# Solo el toolchain. El CSS compilado (backend/src/main/resources/static/css/
+# admin.css) SI se commitea: es lo que permite correr la app y los tests de
+# renderizado sin instalar Node.
+node_modules/
 backend/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
