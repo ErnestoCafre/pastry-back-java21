@@ -163,7 +163,7 @@
                             <!-- Price -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span th:if="${product.basePrice != null}" class="text-sm font-semibold text-gray-900"
-                                    th:text="${'$' + #numbers.formatDecimal(product.basePrice, 1, 2)}"></span>
+                                    th:text="${@money.format(product.basePrice)}"></span>
                                 <span th:if="${product.basePrice == null}" class="text-sm text-gray-400 italic">Sin
                                     precio</span>
                             </td>

@@ -91,7 +91,7 @@
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3">
                 <div class="text-2xl">💰</div>
                 <div>
-                    <div class="text-xl font-bold text-green-600" th:text="${'$' + #numbers.formatDecimal(totalSalesAmount, 1, 2)}">$0.00</div>
+                    <div class="text-xl font-bold text-green-600" th:text="${@money.format(totalSalesAmount)}">$0.00</div>
                     <div class="text-sm text-gray-500">Ingreso total del filtro</div>
                 </div>
             </div>
@@ -141,11 +141,11 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900"
-                                    th:text="${'$' + #numbers.formatDecimal(sale.unitPrice, 1, 2)}"></div>
+                                    th:text="${@money.format(sale.unitPrice)}"></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-green-600"
-                                    th:text="${'$' + #numbers.formatDecimal(sale.totalAmount, 1, 2)}"></div>
+                                    th:text="${@money.format(sale.totalAmount)}"></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                 <div class="flex items-center justify-end gap-2">

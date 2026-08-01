@@ -79,11 +79,17 @@ class CurrencyRenderingTest {
     }
 
     /**
-     * El locale se fija a propósito. #numbers.formatDecimal resuelve el
-     * separador decimal contra el locale de la petición y la app no configura
-     * ninguno, así que el mismo importe sale "$12.50" en un navegador en
-     * inglés y "$12,50" en uno en español. Sin fijarlo, estas aserciones
-     * pasarían o fallarían según el locale por defecto de la máquina.
+     * Las peticiones van con Locale.US <b>a propósito</b>, y aun así se espera
+     * formato argentino.
+     *
+     * <p>Antes este pin existía para tapar un defecto: {@code formatDecimal}
+     * resolvía el separador contra el locale de la petición, la app no fijaba
+     * ninguno, y sin el pin las aserciones pasaban o fallaban según la máquina.
+     *
+     * <p>Ahora el pin es la prueba: si algo devolviera el formato a manos del
+     * navegador —sacando el FixedLocaleResolver o volviendo a
+     * {@code #numbers.formatDecimal}— estos tests fallarían, porque Locale.US
+     * daría "$12.50" en lugar de "$12,50".
      */
     private String render(String url) throws Exception {
         return mockMvc.perform(get(url).locale(Locale.US).with(user(admin)))
@@ -108,7 +114,7 @@ class CurrencyRenderingTest {
         String html = render("/ingredients");
 
         assertThat(html).contains("Harina 000");
-        assertThat(html).contains("$12.50");
+        assertThat(html).contains("$12,50");
     }
 
     @Test
@@ -122,12 +128,12 @@ class CurrencyRenderingTest {
 
         when(ingredientService.findById(1L)).thenReturn(harina);
         when(ingredientService.countProductsUsingIngredient(1L)).thenReturn(3L);
-        assertThat(render("/ingredients/1")).contains("$12.50");
+        assertThat(render("/ingredients/1")).contains("$12,50");
 
         harina.setDeletedAt(LocalDateTime.of(2026, 3, 14, 10, 30));
         when(ingredientService.findDeleted(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(harina), PageRequest.of(0, 50), 1));
-        assertThat(render("/ingredients/deleted")).contains("$12.50");
+        assertThat(render("/ingredients/deleted")).contains("$12,50");
     }
 
     /**
@@ -162,13 +168,13 @@ class CurrencyRenderingTest {
 
         String html = render("/sales/7");
 
-        assertThat(html).contains("$30.00");   // precio unitario
-        assertThat(html).contains("$60.00");   // total de la venta
-        assertThat(html).contains("$12.50");   // costo unitario del ingrediente
-        assertThat(html).contains("$6.25");    // costo del ingrediente y total
-        assertThat(html).contains("$53.75");   // margen = 60.00 - 6.25
+        assertThat(html).contains("$30,00");   // precio unitario
+        assertThat(html).contains("$60,00");   // total de la venta
+        assertThat(html).contains("$12,50");   // costo unitario del ingrediente
+        assertThat(html).contains("$6,25");    // costo del ingrediente y total
+        assertThat(html).contains("$53,75");   // margen = 60.00 - 6.25
         // La cantidad usada es una medida, no un importe.
-        assertThat(html).contains("0.5000").doesNotContain("$0.5000");
+        assertThat(html).contains("0,5000").doesNotContain("$0,5000");
     }
 
     @Test
@@ -189,9 +195,9 @@ class CurrencyRenderingTest {
         String html = render("/sales");
 
         assertThat(html).contains("Torta de chocolate");
-        assertThat(html).contains("$30.00");
-        assertThat(html).contains("$60.00");
+        assertThat(html).contains("$30,00");
+        assertThat(html).contains("$60,00");
         // La cantidad es un conteo, no un importe: nunca lleva símbolo.
-        assertThat(html).doesNotContain("$2<").doesNotContain("$2.00");
+        assertThat(html).doesNotContain("$2<").doesNotContain("$2,00");
     }
 }
