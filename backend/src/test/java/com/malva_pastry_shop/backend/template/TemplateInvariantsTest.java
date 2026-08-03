@@ -82,21 +82,30 @@ class TemplateInvariantsTest {
      * {@code #fields.hasErrors('x')}. Si al agregar un tono nuevo este test
      * falla, el arreglo es sumarlo acá; si falla por cualquier otra cosa, es
      * una clase que falta de verdad.
+     *
+     * <p>La lista la mantiene honesta {@link #noExceptionOutlivesItsReason()}:
+     * una entrada que ya no aparece en ninguna plantilla no filtra nada y hay
+     * que sacarla.
      */
     private static final Set<String> NOT_CLASSES = Set.of(
             // valores de `tone` de fragments/buttons.html
-            "primary", "secondary", "danger", "ghost", "edit", "info", "success", "neutral", "safe",
+            "primary", "danger", "ghost", "edit", "info", "success",
             // nombres de campo de #fields.hasErrors(...)
-            "name", "lastName", "email", "password", "roleId", "productId", "quantity",
-            "unitPrice", "unitCost", "unitOfMeasure", "customerName", "customerDni", "customerPhone",
+            "productId", "quantity", "unitPrice", "customerName", "customerDni", "customerPhone",
             // rol comparado en users/*
             "ADMIN",
             // enganche de JS, no de estilo
             "edit-btn");
 
-    /** Clases que se sabe que no hacen nada, con su motivo. */
-    private static final Map<String, String> KNOWN_NOOP = Map.of(
-            "prose", "requiere @tailwindcss/typography, que nunca se cargó (tampoco con el Play CDN)");
+    /**
+     * Clases que se sabe que no hacen nada, con su motivo.
+     *
+     * <p>Vacío, y a propósito. Tuvo {@code prose}, que necesitaba
+     * {@code @tailwindcss/typography} —un plugin que nunca se cargó, tampoco
+     * con el Play CDN—. Al reescribir las cuatro fichas esos contenedores se
+     * volvieron {@code <p>} y la clase desapareció sola.
+     */
+    private static final Map<String, String> KNOWN_NOOP = Map.of();
 
     @Test
     @DisplayName("toda clase usada en una plantilla existe en el CSS compilado")
@@ -123,6 +132,42 @@ class TemplateInvariantsTest {
 
                         Si el token no es una clase (un literal de SpEL, un nombre de campo),
                         sumalo a NOT_CLASSES en este test.
+                        """)
+                .isEmpty();
+    }
+
+    /**
+     * Las dos listas de excepciones de arriba solo pueden crecer, y una
+     * excepción que sobrevive a su motivo deja de documentar: pasa a
+     * <b>suprimir</b>.
+     *
+     * <p>Pasó con {@code prose}. Se declaró en {@code KNOWN_NOOP} porque las
+     * cuatro fichas la usaban sin que el plugin de tipografía estuviera
+     * cargado; al reescribir las fichas esos contenedores se volvieron
+     * {@code <p>} y la clase desapareció de las plantillas. La entrada quedó, y
+     * a partir de ahí tapaba el aviso: si alguien volvía a escribir
+     * {@code class="prose"}, el test callaba.
+     *
+     * <p>El invariante es la simetría — declarar una excepción tiene que costar
+     * lo mismo que retirarla.
+     */
+    @Test
+    @DisplayName("toda excepción declarada sigue haciendo falta")
+    void noExceptionOutlivesItsReason() {
+        Set<String> used = usedClasses().keySet();
+
+        List<String> expired = Stream.concat(NOT_CLASSES.stream(), KNOWN_NOOP.keySet().stream())
+                .filter(token -> !used.contains(token))
+                .sorted()
+                .toList();
+
+        assertThat(expired)
+                .as("""
+                        Hay tokens declarados como excepción que ya no aparecen en ninguna
+                        plantilla. No filtran nada, y si el token vuelve, lo dejan pasar sin
+                        aviso: la excepción se aplica antes de que nadie mire.
+
+                        Sacalos de NOT_CLASSES o de KNOWN_NOOP.
                         """)
                 .isEmpty();
     }
@@ -427,6 +472,66 @@ class TemplateInvariantsTest {
                         Usá ${@money.format(x)} para importes y ${@money.quantity(x)} para medidas.
                         """)
                 .isEmpty();
+    }
+
+    /**
+     * La regla de formato de importes vive en dos lenguajes y no hay forma de
+     * evitarlo: el total que previsualiza {@code sales/create} se calcula en el
+     * navegador y el que muestra la ficha lo formatea {@code @money.format} en
+     * el servidor. Duplicar es inevitable; <b>divergir</b> no.
+     *
+     * <p>Ya divergió una vez: el JS usaba {@code toFixed(2)}, así que el total
+     * previsualizado decía {@code $12.50} y la misma venta, ya guardada, salía
+     * {@code $12,50} en la ficha.
+     */
+    @Test
+    @DisplayName("el JavaScript formatea importes con el mismo locale que el servidor")
+    void clientSideMoneyMatchesTheServerLocale() {
+        List<String> offenders = new ArrayList<>();
+
+        for (Path p : scripts()) {
+            // Igual que con las plantillas: el comentario de sale-form.js
+            // explica que ANTES usaba toFixed(2), así que sin quitarlo el test
+            // se dispara con la documentación del propio arreglo.
+            String s = withoutJsComments(read(p));
+            String name = p.getFileName().toString();
+            if (s.contains("toFixed(")) {
+                offenders.add(name + " usa toFixed(), que da punto decimal");
+            }
+            Matcher m = Pattern.compile("Intl\\.NumberFormat\\(\\s*'([^']*)'").matcher(s);
+            while (m.find()) {
+                if (!m.group(1).equals(PANEL_LOCALE)) {
+                    offenders.add(name + " formatea con locale '" + m.group(1) + "'");
+                }
+            }
+        }
+
+        assertThat(offenders)
+                .as("""
+                        El formato de importes del cliente no coincide con el del servidor.
+
+                        El panel está fijo en es-AR (FixedLocaleResolver en WebMvcConfig), así
+                        que un importe calculado en el navegador tiene que salir igual que el
+                        que emite ${@money.format(x)}: separador decimal coma.
+
+                        Usá new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2 }).
+                        """)
+                .isEmpty();
+    }
+
+    /** El mismo que fija el FixedLocaleResolver de WebMvcConfig. */
+    private static final String PANEL_LOCALE = "es-AR";
+
+    private static String withoutJsComments(String js) {
+        return js.replaceAll("(?s)/\\*.*?\\*/", "").replaceAll("(?m)//.*$", "");
+    }
+
+    private static List<Path> scripts() {
+        try (Stream<Path> files = Files.walk(JS)) {
+            return files.filter(p -> p.toString().endsWith(".js")).sorted().toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Test
