@@ -76,14 +76,14 @@
                                             '/sections/' + ${section.id} + '/edit', 'pencil', 'Editar sección', 'edit')}"></a>
                                     <form th:replace="~{fragments/buttons :: iconDelete(
                                             '/sections/' + ${section.id} + '/delete',
-                                            '¿Eliminar esta sección? Se moverá a la papelera.',
+                                            #{confirm.delete.section},
                                             'Eliminar sección')}"></form>
                                 </div>
                             </td>
                         </tr>
 
                         <tr th:replace="~{fragments/table :: emptyRow(${sections.content}, 6, 'list',
-                                ${#strings.isEmpty(search)} ? 'No hay secciones registradas' : 'Sin resultados',
+                                ${#strings.isEmpty(search)} ? 'No hay secciones registradas' : #{empty.results},
                                 'Las secciones ordenan cómo se muestran los productos en la vitrina pública.',
                                 '/sections/new', 'Crear sección',
                                 ${#strings.isEmpty(search)} ? null : '/sections')}"></tr>

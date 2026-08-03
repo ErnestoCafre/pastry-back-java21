@@ -83,7 +83,7 @@
                                 <!-- Quitar ingrediente -->
                                 <form th:action="@{/products/{productId}/recipe/ingredients/{ingredientId}/remove(productId=${product.id}, ingredientId=${pi.ingredient.id})}"
                                     method="post"
-                                    data-confirm="¿Quitar este ingrediente de la receta?">
+                                    th:data-confirm="#{confirm.remove.ingredientFromRecipe}">
                                     <button type="submit"
                                         class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         title="Quitar ingrediente">

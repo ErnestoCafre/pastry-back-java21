@@ -45,7 +45,7 @@
                                      th:text="${section.description} ?: '—'"></div>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
-                                th:text="${#temporals.format(section.deletedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                th:text="${@dates.format(section.deletedAt)}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
                                 th:text="${section.deletedBy?.fullName} ?: 'Desconocido'"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-right">
@@ -55,7 +55,7 @@
                                             'Restaurar', 'restore', 'safe')}"></form>
                                     <form th:replace="~{fragments/buttons :: pill(
                                             '/sections/' + ${section.id} + '/hard-delete',
-                                            '¿Eliminar PERMANENTEMENTE esta sección? Esta acción no se puede deshacer.',
+                                            #{confirm.hardDelete.section},
                                             'Eliminar', 'trash', 'danger')}"></form>
                                 </div>
                             </td>

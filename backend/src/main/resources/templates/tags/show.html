@@ -40,7 +40,7 @@
 
                 <p th:if="${tag.description}" class="mb-6 text-gray-600" th:text="${tag.description}"></p>
                 <th:block th:unless="${tag.description}">
-                    <p class="mb-6"><span th:replace="~{fragments/table :: muted('Sin descripción')}"></span></p>
+                    <p class="mb-6"><span th:replace="~{fragments/table :: muted(#{empty.description})}"></span></p>
                 </th:block>
 
                 <div class="mb-6 rounded-lg bg-gray-50 p-4">
@@ -52,12 +52,12 @@
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(tag.insertedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(tag.insertedAt)}"></dd>
                     </div>
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Última actualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(tag.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(tag.updatedAt)}"></dd>
                     </div>
                 </dl>
             </div>
@@ -69,7 +69,7 @@
                         '/tags/' + ${tag.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
                 <form th:replace="~{fragments/buttons :: action(
                         '/tags/' + ${tag.id} + '/delete',
-                        '¿Eliminar este tag? Se moverá a la papelera.',
+                        #{confirm.delete.tag},
                         'Eliminar', 'trash', 'danger')}"></form>
             </div>
         </div>

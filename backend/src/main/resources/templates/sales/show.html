@@ -22,7 +22,7 @@
                         <div>
                             <h2 class="text-2xl font-bold text-gray-900" th:text="${sale.productName}"></h2>
                             <p class="mt-1 text-sm text-gray-500"
-                                th:text="'Registrada el ' + ${#temporals.format(sale.saleDate, 'dd/MM/yyyy')} + ' a las ' + ${#temporals.format(sale.saleDate, 'HH:mm')}">
+                                th:text="'Registrada el ' + ${@dates.day(sale.saleDate)} + ' a las ' + ${@dates.time(sale.saleDate)}">
                             </p>
                         </div>
                         <span class="px-4 py-2 text-lg font-bold bg-green-100 text-green-800 rounded-full"
@@ -47,7 +47,7 @@
                         <div class="bg-gray-50 px-4 py-3 rounded-lg">
                             <dt class="text-sm font-medium text-gray-500">Fecha de registro</dt>
                             <dd class="mt-1 text-lg font-semibold text-gray-900"
-                                th:text="${#temporals.format(sale.insertedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                                th:text="${@dates.format(sale.insertedAt)}"></dd>
                         </div>
                     </dl>
 

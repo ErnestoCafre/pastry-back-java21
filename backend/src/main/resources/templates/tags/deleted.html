@@ -39,7 +39,7 @@
                                      th:text="${tag.description} ?: '—'"></div>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
-                                th:text="${#temporals.format(tag.deletedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                th:text="${@dates.format(tag.deletedAt)}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
                                 th:text="${tag.deletedBy?.fullName} ?: 'Desconocido'"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-right">
@@ -50,7 +50,7 @@
                                             'Restaurar', 'restore', 'safe')}"></form>
                                     <form th:replace="~{fragments/buttons :: pill(
                                             '/tags/' + ${tag.id} + '/hard-delete',
-                                            '¿Eliminar PERMANENTEMENTE este tag? Esta acción no se puede deshacer.',
+                                            #{confirm.hardDelete.tag},
                                             'Eliminar', 'trash', 'danger')}"></form>
                                 </div>
                             </td>

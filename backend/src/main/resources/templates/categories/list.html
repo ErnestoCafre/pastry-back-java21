@@ -64,14 +64,14 @@
                                             '/categories/' + ${category.id} + '/edit', 'pencil', 'Editar categoría', 'edit')}"></a>
                                     <form th:replace="~{fragments/buttons :: iconDelete(
                                             '/categories/' + ${category.id} + '/delete',
-                                            '¿Eliminar esta categoría? Se moverá a la papelera.',
+                                            #{confirm.delete.category},
                                             'Eliminar categoría')}"></form>
                                 </div>
                             </td>
                         </tr>
 
                         <tr th:replace="~{fragments/table :: emptyRow(${categories.content}, 4, 'folder',
-                                ${#strings.isEmpty(search)} ? 'No hay categorías registradas' : 'Sin resultados',
+                                ${#strings.isEmpty(search)} ? 'No hay categorías registradas' : #{empty.results},
                                 'Las categorías agrupan productos en el catálogo.',
                                 '/categories/new', 'Crear categoría',
                                 ${#strings.isEmpty(search)} ? null : '/categories')}"></tr>

@@ -50,7 +50,7 @@
                         <div th:if="${product.basePrice}" class="text-3xl font-bold text-gray-900"
                              th:text="${@money.format(product.basePrice)}"></div>
                         <th:block th:unless="${product.basePrice}">
-                            <span th:replace="~{fragments/table :: muted('Sin precio')}"></span>
+                            <span th:replace="~{fragments/table :: muted(#{empty.price})}"></span>
                         </th:block>
                     </div>
                 </div>
@@ -71,12 +71,12 @@
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(product.insertedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(product.insertedAt)}"></dd>
                     </div>
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Última actualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(product.updatedAt)}"></dd>
                     </div>
                 </dl>
             </div>
@@ -90,7 +90,7 @@
                         '/products/' + ${product.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
                 <form th:replace="~{fragments/buttons :: action(
                         '/products/' + ${product.id} + '/delete',
-                        '¿Eliminar este producto? Se moverá a la papelera.',
+                        #{confirm.delete.product},
                         'Eliminar', 'trash', 'danger')}"></form>
             </div>
         </div>

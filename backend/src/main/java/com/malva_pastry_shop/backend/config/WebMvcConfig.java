@@ -1,5 +1,6 @@
 package com.malva_pastry_shop.backend.config;
 
+import com.malva_pastry_shop.backend.format.DateFormatter;
 import com.malva_pastry_shop.backend.format.MoneyFormatter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,5 +58,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Bean("money")
     public MoneyFormatter moneyFormatter() {
         return new MoneyFormatter();
+    }
+
+    /**
+     * Formateador de fechas, accesible como {@code ${@dates.format(x)}}.
+     *
+     * <p>Va acá por los mismos dos motivos que {@code money}, y además porque
+     * cómo se escribe una fecha en el panel es la misma decisión que el locale
+     * de arriba.
+     */
+    @Bean("dates")
+    public DateFormatter dateFormatter() {
+        return new DateFormatter();
     }
 }

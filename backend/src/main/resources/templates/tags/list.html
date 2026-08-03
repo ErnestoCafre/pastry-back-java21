@@ -57,7 +57,7 @@
                                             '/tags/' + ${tag.id} + '/edit', 'pencil', 'Editar tag', 'edit')}"></a>
                                     <form th:replace="~{fragments/buttons :: iconDelete(
                                             '/tags/' + ${tag.id} + '/delete',
-                                            '¿Eliminar este tag? Se moverá a la papelera.',
+                                            #{confirm.delete.tag},
                                             'Eliminar tag')}"></form>
                                 </div>
                             </td>
@@ -67,7 +67,7 @@
                                "ninguno coincide con la búsqueda": con filtro activo,
                                ofrecer "Crear tag" sería la acción equivocada. */-->
                         <tr th:replace="~{fragments/table :: emptyRow(${tags.content}, 4, 'tag',
-                                ${#strings.isEmpty(search)} ? 'No hay tags registrados' : 'Sin resultados',
+                                ${#strings.isEmpty(search)} ? 'No hay tags registrados' : #{empty.results},
                                 'Los tags permiten clasificar productos en la vitrina pública.',
                                 '/tags/new', 'Crear tag',
                                 ${#strings.isEmpty(search)} ? null : '/tags')}"></tr>

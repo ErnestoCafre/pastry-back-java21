@@ -37,19 +37,19 @@
                 <p th:if="${category.description}" class="mb-6 text-gray-600"
                    th:text="${category.description}"></p>
                 <th:block th:unless="${category.description}">
-                    <p class="mb-6"><span th:replace="~{fragments/table :: muted('Sin descripción')}"></span></p>
+                    <p class="mb-6"><span th:replace="~{fragments/table :: muted(#{empty.description})}"></span></p>
                 </th:block>
 
                 <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(category.insertedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(category.insertedAt)}"></dd>
                     </div>
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Última actualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(category.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(category.updatedAt)}"></dd>
                     </div>
                 </dl>
 
@@ -67,7 +67,7 @@
                         '/categories/' + ${category.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
                 <form th:replace="~{fragments/buttons :: action(
                         '/categories/' + ${category.id} + '/delete',
-                        '¿Eliminar esta categoría? Se moverá a la papelera.',
+                        #{confirm.delete.category},
                         'Eliminar', 'trash', 'danger')}"></form>
             </div>
         </div>
