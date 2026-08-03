@@ -8,20 +8,10 @@
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/sales}" class="text-gray-500 hover:text-primary-600">Ventas</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium">Nueva</span>
-                </li>
-            </ol>
-        </nav>
+        <!--/* Última miga escrita a mano del panel. El fragment agrega además el
+               aria-current="page" en el último ítem, que ninguna de las copias
+               manuales tenía. */-->
+        <nav th:replace="~{fragments/breadcrumb :: trail('Ventas', '/sales', 'Nueva')}"></nav>
 
         <!-- Form Card -->
         <div class="max-w-2xl bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -143,49 +133,9 @@
         </div>
     </div>
 
-    <div layout:fragment="scripts">
-        <script>
-            // Auto-fill price from selected product and calculate total.
-            //
-            // El precio sale de data-price, no de parsear el texto de la opción.
-            // Antes se hacía text.match(/\$([0-9]+\.?[0-9]*)/) sobre la etiqueta
-            // ya formateada, y ese formato depende del locale de la petición: en
-            // un navegador en español el separador decimal es coma, así que
-            // "Torta - $12,50" capturaba "12" y la venta se registraba sin los
-            // centavos.
-            document.getElementById('productId').addEventListener('change', function() {
-                const price = this.options[this.selectedIndex].dataset.price;
-
-                if (price) {
-                    document.getElementById('unitPrice').value = price;
-                    calculateTotal();
-                }
-            });
-
-            // Calculate total on quantity or price change
-            function calculateTotal() {
-                const quantity = parseFloat(document.getElementById('quantity').value) || 0;
-                const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
-                const total = quantity * unitPrice;
-
-                const preview = document.getElementById('totalPreview');
-                const totalAmount = document.getElementById('totalAmount');
-
-                if (quantity > 0 && unitPrice > 0) {
-                    preview.classList.remove('hidden');
-                    totalAmount.textContent = '$' + total.toFixed(2);
-                } else {
-                    preview.classList.add('hidden');
-                }
-            }
-
-            document.getElementById('quantity').addEventListener('input', calculateTotal);
-            document.getElementById('unitPrice').addEventListener('input', calculateTotal);
-
-            // Calculate on load if values exist
-            calculateTotal();
-        </script>
-    </div>
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/sale-form.js}" defer></script>
+    </th:block>
 </body>
 
 </html>

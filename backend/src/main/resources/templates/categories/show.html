@@ -2,97 +2,73 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layout/main}">
 
+<!--/*
+  Ficha de categoría.
+
+  El botón "Volver al listado" del pie salió: la miga de pan que está arriba ya
+  es el camino de vuelta, y tener dos controles para lo mismo con textos
+  distintos era justamente el problema. Entre las siete fichas convivían cuatro
+  redacciones ("Volver al listado", "Volver", "Volver a Ventas", "Volver a
+  usuarios"). Ahora el pie solo tiene lo que se le hace a la entidad.
+*/-->
+
 <head>
     <title th:text="${pageTitle}">Detalle de la Categoría</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/categories}" class="text-gray-500 hover:text-primary-600">Categorías</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium" th:text="${category.name}">Categoría</span>
-                </li>
-            </ol>
-        </nav>
 
-        <!-- Category Card -->
-        <div class="max-w-3xl bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Categorías', '/categories', ${category.name})}"></nav>
+
+        <div class="max-w-3xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <div class="p-6">
-                <div class="flex items-start justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900" th:text="${category.name}"></h2>
-                    </div>
-                    <div class="text-right">
-                        <div class="flex items-center gap-2 text-primary-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                            <span class="text-2xl font-bold" th:text="${productCount}">0</span>
-                            <span class="text-gray-500">productos</span>
-                        </div>
+                <div class="mb-6 flex items-start justify-between gap-4">
+                    <h2 class="text-2xl font-bold text-gray-900" th:text="${category.name}"></h2>
+                    <div class="flex flex-shrink-0 items-center gap-2 text-primary-600">
+                        <svg th:replace="~{fragments/icons :: icon('box', 'w-6 h-6')}"></svg>
+                        <span class="text-2xl font-bold" th:text="${productCount}">0</span>
+                        <span class="text-gray-500">productos</span>
                     </div>
                 </div>
 
-                <div class="prose max-w-none text-gray-600 mb-6" th:if="${category.description}">
-                    <p th:text="${category.description}"></p>
-                </div>
-                <div th:unless="${category.description}" class="text-gray-400 italic mb-6">
-                    Sin descripción
-                </div>
+                <p th:if="${category.description}" class="mb-6 text-gray-600"
+                   th:text="${category.description}"></p>
+                <th:block th:unless="${category.description}">
+                    <p class="mb-6"><span th:replace="~{fragments/table :: muted('Sin descripción')}"></span></p>
+                </th:block>
 
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
                             th:text="${#temporals.format(category.insertedAt, 'dd/MM/yyyy HH:mm')}"></dd>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Última actualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
                             th:text="${#temporals.format(category.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
                     </div>
                 </dl>
 
-                <!-- Quick Link to Products -->
                 <div th:if="${productCount > 0}" class="mt-6">
                     <a th:href="@{/categories/{id}/products(id=${category.id})}"
-                        class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-800">
+                       class="inline-flex items-center gap-2 text-primary-600 transition-colors hover:text-primary-800">
+                        <svg th:replace="~{fragments/icons :: icon('box', 'w-4 h-4')}"></svg>
                         <span>Ver productos de esta categoría</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5l7 7-7 7" />
-                        </svg>
                     </a>
                 </div>
             </div>
 
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between">
-                <a th:href="@{/categories}"
-                    class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    Volver al listado
-                </a>
-                <div class="flex gap-2">
-                    <a th:href="@{/categories/{id}/edit(id=${category.id})}"
-                        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                        Editar
-                    </a>
-                    <form th:action="@{/categories/{id}/delete(id=${category.id})}" method="post"
-                        onsubmit="return confirm('¿Estás seguro de eliminar esta categoría? Se moverá a la papelera.');">
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                            Eliminar
-                        </button>
-                    </form>
-                </div>
+            <div class="flex justify-end gap-2 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <a th:replace="~{fragments/buttons :: link(
+                        '/categories/' + ${category.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
+                <form th:replace="~{fragments/buttons :: action(
+                        '/categories/' + ${category.id} + '/delete',
+                        '¿Eliminar esta categoría? Se moverá a la papelera.',
+                        'Eliminar', 'trash', 'danger')}"></form>
             </div>
         </div>
     </div>

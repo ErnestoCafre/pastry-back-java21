@@ -112,6 +112,31 @@
       th:replace="~{:: iconSubmit(${action}, 'trash', ${label}, 'danger', ${message})}"></form>
 
 
+<!--
+  Acción POST con etiqueta y el mismo peso visual que `link`.
+
+  Es la que faltaba para los pies de las fichas de detalle, donde conviven un
+  "Editar" (GET, con link) y un "Eliminar" (POST, que además confirma). Con
+  `pill` quedaban de distinto tamaño uno al lado del otro, porque pill está
+  pensado para filas de tabla.
+
+  message puede ser null si la acción no destruye nada.
+-->
+<form th:fragment="action(url, message, label, icon, tone)" th:action="@{${url}}" method="post"
+      class="inline" th:data-confirm="${message}">
+    <button type="submit"
+            th:class="'inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ' +
+                      (${tone} == 'danger'  ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500' :
+                      (${tone} == 'primary' ? 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500' :
+                                              'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-400'))">
+        <th:block th:if="${icon}">
+            <svg th:replace="~{fragments/icons :: icon(${icon}, 'w-5 h-5')}"></svg>
+        </th:block>
+        <span th:text="${label}">Acción</span>
+    </button>
+</form>
+
+
 <!-- ---------- Acciones con etiqueta, para papeleras y footers ---------- -->
 
 <!-- message puede ser null: acciones no destructivas como "Restaurar" no confirman. -->

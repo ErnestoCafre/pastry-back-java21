@@ -274,14 +274,19 @@ class TemplateInvariantsTest {
     // ---------- 3. El JS inline no se expande ----------
 
     /**
-     * Plantillas que todavía tienen JavaScript embebido, con el detalle de por
-     * qué importa cada una. El número solo puede bajar: mientras haya una sola,
-     * el panel no puede servir una Content-Security-Policy sin 'unsafe-inline'.
+     * Ninguna. Ya no queda JavaScript embebido en ninguna plantilla: todo el
+     * comportamiento vive en archivos de {@code static/js/} enganchados por
+     * atributos {@code data-*}.
+     *
+     * <p>Eso deja al panel en condiciones de servir una Content-Security-Policy
+     * sin {@code 'unsafe-inline'}, que es el motivo de haber empezado por acá.
+     * <b>Falta configurar la cabecera</b>: mientras no exista, esto es una
+     * precondición cumplida y nada más.
+     *
+     * <p>El conjunto vacío es a propósito: si aparece un manejador inline
+     * nuevo, el test falla y nombra la plantilla.
      */
-    private static final Set<String> INLINE_JS_PENDING = Set.of(
-            "categories/show.html", "ingredients/show.html", "products/show.html",
-            "products/tags.html", "sales/create.html", "sections/products.html",
-            "sections/show.html", "tags/products.html", "tags/show.html");
+    private static final Set<String> INLINE_JS_PENDING = Set.of();
 
     @Test
     @DisplayName("el JavaScript inline solo puede desaparecer, nunca aparecer")
