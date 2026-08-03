@@ -7,11 +7,29 @@
   <img src="https://img.shields.io/badge/Thymeleaf-3.x-green?style=for-the-badge&logo=thymeleaf" alt="Thymeleaf">
 </p>
 
-## Descripcion
+## Que es este proyecto
 
-Sistema backend para la gestion de una pasteleria artesanal. Incluye un **panel de administracion** (Thymeleaf SSR) y una **API REST publica** para un futuro frontend React.
+Este repositorio es la **version demo** de un sistema de gestion para una pasteleria
+artesanal, desarrollado originalmente como **proyecto freelance**.
 
-Este proyecto es una **refactorizacion completa** de un sistema anterior, modernizando la arquitectura y actualizando todas las dependencias a sus versiones mas recientes.
+La demo no es el sistema entregado: es una **reescritura completa**, publicada para mostrar
+el trabajo, en la que se rehicieron dos cosas a la vez.
+
+1. **La plataforma tecnica**, actualizada por entero: Java 21, Spring Boot 4, Spring
+   Security 7, Hibernate 7.2 y migraciones versionadas con Flyway.
+2. **El diseno UX/UI, rehecho de cero.** Se abandono el tema generico de Bootstrap del
+   sistema original y se construyo un design system propio en Tailwind, con una libreria
+   de fragments Thymeleaf reutilizables. Ninguna pantalla quedo como estaba.
+
+Funcionalmente cubre el mismo terreno que el sistema original — catalogo, recetas con
+costeo, ventas con margen y vitrina publica — sobre dos interfaces: un **panel de
+administracion** (Thymeleaf SSR) y una **API REST publica** de solo lectura que alimenta
+el frontend de la vitrina.
+
+> **Sobre los datos:** todo lo que se ve en la demo es contenido de demostracion generado
+> para este repositorio: productos, precios, recetas, ventas y usuarios. **No hay datos
+> reales de operacion ni informacion de clientes.** Las credenciales de mas abajo son
+> publicas a proposito.
 
 ---
 
@@ -65,9 +83,11 @@ Gracias a las recetas y ventas, el dashboard, el calculo de costos y el detalle 
 
 ---
 
-## Cambios Principales en la Refactorizacion
+## Que cambio respecto del sistema original
 
-| Aspecto             | Version Anterior | Version Actual |
+### 1. Plataforma tecnica
+
+| Aspecto             | Sistema original | Version demo   |
 | ------------------- | ---------------- | -------------- |
 | **Java**            | 17               | **21** (LTS)   |
 | **Spring Boot**     | 3.x              | **4.0.1**      |
@@ -76,14 +96,38 @@ Gracias a las recetas y ventas, el dashboard, el calculo de costos y el detalle 
 | **Jakarta EE**      | 9                | **11**         |
 | **Migraciones**     | Solo Hibernate   | **Flyway**     |
 
-### Mejoras Implementadas
+Lo que eso habilito:
 
-- Migracion a Spring Boot 4.0 con las ultimas mejoras de rendimiento
-- Actualizacion a Java 21 con soporte para Virtual Threads y Pattern Matching
-- Nuevo sistema de autenticacion con Spring Security 7
-- Migraciones de base de datos con Flyway (produccion)
-- API REST publica con documentacion OpenAPI/Swagger
-- Soporte dual: panel admin (Thymeleaf) + API publica (REST JSON)
+- Java 21 (LTS) con Virtual Threads y pattern matching
+- Autenticacion reescrita sobre Spring Security 7, con **doble filter chain**: sesion y
+  CSRF para el panel, stateless y solo-GET para la API
+- Esquema versionado con Flyway en produccion, forward-only y validado por checksum
+- API REST publica documentada con OpenAPI/Swagger
+- Soporte dual desde un mismo despliegue: panel admin (Thymeleaf) + API publica (JSON)
+
+### 2. Diseno UX/UI
+
+El sistema original resolvia el panel con un tema generico de Bootstrap sobre plantillas
+server-side. **En la demo la capa de interfaz se rehizo entera**, no se adapto:
+
+| Aspecto | Version demo |
+|---|---|
+| **Estilos** | Tailwind CSS 3 **compilado** (`npm run css`), con paleta propia versionada en `tailwind.config.js` |
+| **Composicion** | Libreria de **9 archivos de fragments** con **34 fragments nombrados** (tablas, formularios, botones, alertas, paginacion, navegacion, breadcrumbs, iconos, toolbar) |
+| **Cobertura** | Las **46 plantillas** del panel (9 de ellas, la propia libreria) construidas sobre un layout unico |
+| **Formularios** | **Un unico `form.html` por entidad**: los 6 pares create/edit separados se fusionaron |
+| **Navegacion** | Sidebar agrupado por dominio (Inventario / Storefront / Sistema), estado activo derivado del nombre de vista, drawer propio en mobile |
+| **JavaScript** | **237 lineas propias, sin ninguna libreria de terceros** (confirmaciones, drawer mobile, modales, formularios dinamicos) |
+| **Regresiones** | **15 clases de test de renderizado** que fallan si una plantilla rompe: rutas inexistentes, propiedades del modelo que no existen, formato de moneda, invariantes de fragments |
+
+Dos decisiones del pipeline de assets, tomadas durante el desarrollo de la demo, que no
+son cosmeticas:
+
+- **Salio el Tailwind Play CDN.** Compilaba las clases en el navegador en cada carga y
+  obligaba a un `<script>` inline; el CSS ahora es un archivo estatico y el panel puede
+  servirse con una CSP sin `unsafe-inline`.
+- **Salio Flowbite.** Se usaba solo para el drawer mobile, que hoy resuelve
+  `/js/admin.js` en ~40 lineas.
 
 ---
 
@@ -141,7 +185,7 @@ Gracias a las recetas y ventas, el dashboard, el calculo de costos y el detalle 
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/c97Ernesto/pastry-back-java21.git
+git clone https://github.com/ErnestoCafre/pastry-back-java21.git
 cd pastry-back-java21/backend
 ```
 
@@ -180,7 +224,9 @@ spring.datasource.password=tu_password
 
 ## Documentacion
 
-- **[ARCHITECTURE.md](backend/ARCHITECTURE.md)** - Arquitectura del sistema, patrones de diseno, diagramas ER
+- **[backend/README.md](backend/README.md)** - Funcionalidades por modulo, roles y permisos, soft delete, snapshots de venta, API
+- **[backend/ARCHITECTURE.md](backend/ARCHITECTURE.md)** - Arquitectura del sistema, bounded contexts, patrones de diseno, diagramas ER
+- **[scripts/README.md](scripts/README.md)** - Keep-alive del despliegue en Render Free y sus limites
 
 ---
 

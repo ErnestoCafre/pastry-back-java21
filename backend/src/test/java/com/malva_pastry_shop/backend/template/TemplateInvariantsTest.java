@@ -359,6 +359,38 @@ class TemplateInvariantsTest {
                 .isEqualTo(INLINE_JS_PENDING);
     }
 
+    /**
+     * La otra mitad de la precondición de la CSP, y la que nadie estaba
+     * mirando: el ratchet de arriba cubre {@code script-src}, pero
+     * {@code style-src 'self'} exige que tampoco haya estilos embebidos.
+     *
+     * <p>Hoy no hay ninguno, así que la política los prohíbe. Un
+     * {@code style="..."} nuevo no rompería la página de forma visible: el
+     * navegador descarta el estilo en silencio y el elemento se dibuja sin él.
+     */
+    @Test
+    @DisplayName("tampoco hay estilos embebidos")
+    void noInlineStylesEither() {
+        Pattern inline = Pattern.compile("\\b(style=\"|th:style=)|<style[\\s>]");
+
+        Set<String> found = new LinkedHashSet<>();
+        for (Path p : templates()) {
+            if (inline.matcher(withoutComments(read(p))).find()) {
+                found.add(rel(p));
+            }
+        }
+
+        assertThat(found)
+                .as("""
+                        Apareció un estilo embebido, y la CSP del panel declara style-src 'self'.
+
+                        El navegador lo descarta sin avisar: el elemento se dibuja sin ese
+                        estilo y no queda rastro en ningún log. Movelo a una clase de Tailwind
+                        o a src/main/css/admin.css.
+                        """)
+                .isEmpty();
+    }
+
     // ---------- 4. Ninguna condición junto a un th:replace ----------
 
     /**
