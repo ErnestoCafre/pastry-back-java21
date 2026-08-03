@@ -83,34 +83,26 @@ public class CategoryController {
             @RequestParam(defaultValue = "50") int size,
             Model model) {
 
-        try {
-            Category category = categoryService.findById(id);
-            Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        Category category = categoryService.findById(id);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
 
-            model.addAttribute("category", category);
-            model.addAttribute("products", productService.findByCategoryId(id, pageable));
-            model.addAttribute("pageTitle", "Productos de " + category.getName());
-            return "categories/products";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/categories";
-        }
+        model.addAttribute("category", category);
+        model.addAttribute("products", productService.findByCategoryId(id, pageable));
+        model.addAttribute("pageTitle", "Productos de " + category.getName());
+        return "categories/products";
     }
 
     // ========== CRUD ==========
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
-        try {
-            Category category = categoryService.findById(id);
-            long productCount = categoryService.countProducts(id);
+        Category category = categoryService.findById(id);
+        long productCount = categoryService.countProducts(id);
 
-            model.addAttribute("category", category);
-            model.addAttribute("productCount", productCount);
-            model.addAttribute("pageTitle", category.getName());
-            return "categories/show";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/categories";
-        }
+        model.addAttribute("category", category);
+        model.addAttribute("productCount", productCount);
+        model.addAttribute("pageTitle", category.getName());
+        return "categories/show";
     }
 
     @GetMapping("/new")
@@ -145,20 +137,16 @@ public class CategoryController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        try {
-            Category category = categoryService.findById(id);
+        Category category = categoryService.findById(id);
 
-            CategoryRequest request = new CategoryRequest();
-            request.setName(category.getName());
-            request.setDescription(category.getDescription());
+        CategoryRequest request = new CategoryRequest();
+        request.setName(category.getName());
+        request.setDescription(category.getDescription());
 
-            model.addAttribute("category", request);
-            model.addAttribute("categoryId", id);
-            model.addAttribute("pageTitle", "Editar Categoría");
-            return "categories/form";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/categories";
-        }
+        model.addAttribute("category", request);
+        model.addAttribute("categoryId", id);
+        model.addAttribute("pageTitle", "Editar Categoría");
+        return "categories/form";
     }
 
     @PostMapping("/{id}")

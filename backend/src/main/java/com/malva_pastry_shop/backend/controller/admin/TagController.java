@@ -89,15 +89,11 @@ public class TagController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
-        try {
-            Tag tag = tagService.findById(id);
-            model.addAttribute("tag", tag);
-            model.addAttribute("usageCount", productService.countProductsByTag(id));
-            model.addAttribute("pageTitle", tag.getName());
-            return "tags/show";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/tags";
-        }
+        Tag tag = tagService.findById(id);
+        model.addAttribute("tag", tag);
+        model.addAttribute("usageCount", productService.countProductsByTag(id));
+        model.addAttribute("pageTitle", tag.getName());
+        return "tags/show";
     }
 
     @GetMapping("/new")
@@ -132,20 +128,16 @@ public class TagController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        try {
-            Tag tag = tagService.findById(id);
+        Tag tag = tagService.findById(id);
 
-            TagRequest request = new TagRequest();
-            request.setName(tag.getName());
-            request.setDescription(tag.getDescription());
+        TagRequest request = new TagRequest();
+        request.setName(tag.getName());
+        request.setDescription(tag.getDescription());
 
-            model.addAttribute("tag", request);
-            model.addAttribute("tagId", id);
-            model.addAttribute("pageTitle", "Editar Tag");
-            return "tags/form";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/tags";
-        }
+        model.addAttribute("tag", request);
+        model.addAttribute("tagId", id);
+        model.addAttribute("pageTitle", "Editar Tag");
+        return "tags/form";
     }
 
     @PostMapping("/{id}")
@@ -223,16 +215,12 @@ public class TagController {
 
     @GetMapping("/{id}/products")
     public String listProducts(@PathVariable Long id, Model model) {
-        try {
-            Tag tag = tagService.findById(id);
-            model.addAttribute("tag", tag);
-            model.addAttribute("products", productService.getProductsByTag(id));
-            model.addAttribute("availableProducts", productService.getAvailableProductsForTag(id));
-            model.addAttribute("pageTitle", "Productos con tag: " + tag.getName());
-            return "tags/products";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/tags";
-        }
+        Tag tag = tagService.findById(id);
+        model.addAttribute("tag", tag);
+        model.addAttribute("products", productService.getProductsByTag(id));
+        model.addAttribute("availableProducts", productService.getAvailableProductsForTag(id));
+        model.addAttribute("pageTitle", "Productos con tag: " + tag.getName());
+        return "tags/products";
     }
 
     @PostMapping("/{id}/products/{productId}")

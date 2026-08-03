@@ -28,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -204,7 +205,7 @@ class UserControllerTest {
             when(userService.findById(1L)).thenReturn(testUser);
             when(roleRepository.findAll()).thenReturn(roles);
 
-            String result = userController.showEditForm(1L, model, redirectAttributes);
+            String result = userController.showEditForm(1L, model);
 
             assertThat(result).isEqualTo("users/form");
             verify(model).addAttribute(eq("user"), any(UpdateUserRequest.class));
@@ -213,15 +214,19 @@ class UserControllerTest {
             verify(model).addAttribute("pageTitle", "Editar Usuario");
         }
 
+        /**
+         * Ya no redirige: deja pasar la excepción para que
+         * {@code AdminNotFoundAdvice} la convierta en un 404 de verdad. El
+         * redirect silencioso hacía que un id inexistente y un enlace viejo se
+         * vieran igual que una visita normal al listado.
+         */
         @Test
-        @DisplayName("Debe redirigir a lista cuando el usuario no existe")
-        void showEditForm_WithNonExistingUser_RedirectsToList() {
+        @DisplayName("Debe dejar pasar la excepcion cuando el usuario no existe")
+        void showEditForm_WithNonExistingUser_PropagatesNotFound() {
             when(userService.findById(99L)).thenThrow(new EntityNotFoundException("Usuario no encontrado"));
 
-            String result = userController.showEditForm(99L, model, redirectAttributes);
-
-            assertThat(result).isEqualTo("redirect:/users");
-            verify(redirectAttributes).addFlashAttribute("error", "Usuario no encontrado");
+            assertThatThrownBy(() -> userController.showEditForm(99L, model))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
     }
 
