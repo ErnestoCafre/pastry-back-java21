@@ -7,6 +7,12 @@ This document describes the system architecture, design patterns, and architectu
 **Deployment:** Monolithic Spring Boot application  
 **Strategy:** Dual-channel (Admin SSR + Public REST API)
 
+> **Context.** This repository is the demo rewrite of a system originally built as a
+> freelance project for an artisanal pastry shop. Both the technical platform and the
+> admin UI were rebuilt from scratch for this version — the structure documented here is
+> the rewrite's, not the delivered system's. See the [root README](../README.md) for the
+> before/after.
+
 ---
 
 ## Table of Contents
@@ -28,7 +34,7 @@ This document describes the system architecture, design patterns, and architectu
 graph TB
     subgraph "Frontend Layer"
         A1[Admin Panel<br/>Thymeleaf SSR]
-        A2[React Storefront<br/>Future]
+        A2[Public Storefront<br/>separate frontend]
     end
     
     subgraph "Backend - Spring Boot"
@@ -150,7 +156,7 @@ graph LR
 **Purpose:** Controls which products and content are displayed on the public frontend  
 **Entities:** StorefrontSection, StorefrontSectionProduct, Tag, ProductTag  
 **Services:** StorefrontSectionService, TagService  
-**Exposure:** Exposed via REST API to React frontend
+**Exposure:** Exposed via REST API to the public storefront frontend
 
 **Business Rules:**
 - StorefrontSections group products for public display
@@ -252,6 +258,18 @@ graph TD
 - **Admin Controllers** (`@Controller`): Return Thymeleaf view names
 - **API Controllers** (`@RestController`): Return JSON DTOs
 - **Validation**: `@Valid` on request DTOs
+- **View composition**: the admin UI is not a third-party theme. 46 templates compose a
+  single layout (`layout/main.html`) out of 34 named fragments in
+  `templates/fragments/` — table headers, form fields, buttons, alerts, pagination,
+  navigation, breadcrumbs, icons, toolbar. A visual change happens in the fragment, not
+  across 46 files
+- **Attribute precedence is part of the contract**: `th:replace` runs at precedence 100,
+  before `sec:authorize` (300) and `th:if`. On the same element the second attribute
+  never evaluates, so conditions wrap the replace in a `<th:block>` instead of sitting
+  beside it
+- **Asset pipeline**: Tailwind is compiled (`npm run css`) to a committed
+  `static/css/admin.css` — no CDN, no in-browser compilation, and no inline `<script>`
+  blocking a strict CSP. The Dockerfile regenerates it at image build
 
 #### Application Layer
 - **Services**: Business logic, orchestration, transactions
@@ -329,10 +347,8 @@ com.malva_pastry_shop.backend/
 ## Design Patterns
 
 The structural patterns below are the ones that shape the architecture — the
-reason the packages are split the way they are. They are listed here in one
-line each; the full catalogue, with the alternatives that were discarded and
-why, lives in
-[the technical dossier](../pastry-back-dosier-tecnico/dossier-tecnico/01-arquitectura-e-ingenieria/02-patrones-de-diseno.md).
+reason the packages are split the way they are. One line each; the rationale
+for each is in the code it names.
 
 | Pattern | Where | What it buys |
 |---|---|---|
@@ -346,6 +362,8 @@ why, lives in
 | **Derived identity, validated** | `SlugUtil` + the two storefront services | The slug comes from the name; because that mapping is not injective, the service validates the result before persisting |
 | **Cross-cutting advice with explicit scope** | `GlobalBindingAdvice` (unscoped), `ApiExceptionHandler` (`basePackages`) | Input normalisation applies everywhere; JSON error translation applies only to the API, so the panel keeps returning HTML |
 | **Environment seam** | `ImageUrlResolver` | One injectable component decides relative vs. absolute image URLs, driven by `app.public.base-url` |
+| **Fragment library as the UI's composition unit** | `templates/fragments/` (34 fragments) + `layout/main.html` | The panel's look is defined once and parameterised; the 46 page templates declare *what* to show, never *how* it is styled |
+| **Rendering invariants as tests** | 15 test classes in `template/` | Dead links, non-existent model properties, currency locale and filter-preserving pagination fail the build instead of the page |
 
 ---
 
@@ -384,7 +402,7 @@ graph LR
 
 ### Public API (REST)
 - **Technology:** Spring REST + JSON
-- **Audience:** React frontend (customers)
+- **Audience:** Public storefront frontend (customers), deployed separately
 - **Authentication:** None (public read-only)
 - **URL Pattern:** `/api/v1/products`, `/api/v1/sections`, `/api/v1/categories`, `/api/v1/tags`
 

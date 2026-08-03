@@ -13,6 +13,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -61,6 +67,51 @@ public class SecurityConfig {
         }
 
         /**
+         * Content-Security-Policy del panel.
+         *
+         * <p>Sin {@code 'unsafe-inline'}, que es lo que hace que valga la pena:
+         * un {@code onclick} inyectado en el nombre de un producto no se
+         * ejecuta. Es viable porque no queda JavaScript embebido en ninguna
+         * plantilla —todo el comportamiento vive en {@code static/js/}
+         * enganchado por atributos {@code data-*}— ni un solo atributo
+         * {@code style} ni bloque {@code <style>}, así que {@code style-src}
+         * puede ser igual de estricto. Las dos cosas las sostienen tests:
+         * {@code inlineJavaScriptDoesNotSpread} y {@code noInlineStylesEither}.
+         *
+         * <p>{@code img-src} es la única directiva laxa, a propósito:
+         * {@code Product.imageUrl} acepta cualquier URL de hasta 500 caracteres
+         * y un admin puede pegar una externa. Una imagen no ejecuta nada, así
+         * que el riesgo de permitir orígenes https no se parece al de permitir
+         * scripts.
+         */
+        private static final String ADMIN_CSP = String.join("; ",
+                        "default-src 'self'",
+                        "script-src 'self'",
+                        "style-src 'self'",
+                        "img-src 'self' data: https:",
+                        "font-src 'self'",
+                        "connect-src 'self'",
+                        "form-action 'self'",
+                        "frame-ancestors 'none'",
+                        "base-uri 'self'",
+                        "object-src 'none'");
+
+        /**
+         * Swagger UI se sirve por esta misma cadena y arma su página con
+         * scripts y estilos inline, así que la CSP de arriba la dejaría en
+         * blanco. Queda exceptuada en vez de relajar la política de todo el
+         * panel por una herramienta que en producción está apagada
+         * ({@code SWAGGER_ENABLED:false}).
+         */
+        private static RequestMatcher swaggerPaths() {
+                PathPatternRequestMatcher.Builder path = PathPatternRequestMatcher.withDefaults();
+                return new OrRequestMatcher(
+                                path.matcher("/swagger-ui/**"),
+                                path.matcher("/swagger-ui.html"),
+                                path.matcher("/api-docs/**"));
+        }
+
+        /**
          * Admin Security Filter Chain - prioridad baja (Order 2).
          * Maneja todo lo que no sea /api/** con form login + sesión.
          */
@@ -68,6 +119,10 @@ public class SecurityConfig {
         @Order(2)
         public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
                 http
+                                .headers(headers -> headers.addHeaderWriter(
+                                                new DelegatingRequestMatcherHeaderWriter(
+                                                                new NegatedRequestMatcher(swaggerPaths()),
+                                                                new ContentSecurityPolicyHeaderWriter(ADMIN_CSP))))
                                 .authorizeHttpRequests(auth -> auth
                                                 // Recursos estáticos públicos
                                                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**")
