@@ -26,11 +26,11 @@
       - Thymeleaf escapa el atributo solo, sin escapeJavaScript a mano;
       - cambiar confirm() por un <dialog> accesible pasa a ser un cambio
         de un solo archivo;
-      - es un paso hacia poder aplicar una CSP sin 'unsafe-inline'. Ojo:
-        todavía NO alcanza. Quedan 9 plantillas con JS inline: ocho fichas
-        de detalle y sublistados con manejadores en atributos (onclick,
-        onsubmit) y sales/create con un bloque <script> propio. Tampoco hay
-        ninguna cabecera CSP configurada todavía.
+      - habilita servir una CSP sin 'unsafe-inline'. Ya no queda JavaScript
+        embebido en ninguna plantilla: todo el comportamiento vive en
+        archivos de static/js/ enganchados por atributos data-*, y
+        TemplateInvariantsTest falla si vuelve a aparecer uno. Falta el
+        último paso, configurar la cabecera: hoy el panel no envía ninguna.
 
   Accesibilidad:
     - Los botones de solo icono llevan title Y <span class="sr-only">.
