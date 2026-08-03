@@ -77,17 +77,13 @@ public class IngredientController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
-        try {
-            Ingredient ingredient = ingredientService.findById(id);
-            long usageCount = ingredientService.countProductsUsingIngredient(id);
+        Ingredient ingredient = ingredientService.findById(id);
+        long usageCount = ingredientService.countProductsUsingIngredient(id);
 
-            model.addAttribute("ingredient", ingredient);
-            model.addAttribute("usageCount", usageCount);
-            model.addAttribute("pageTitle", ingredient.getName());
-            return "ingredients/show";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/ingredients";
-        }
+        model.addAttribute("ingredient", ingredient);
+        model.addAttribute("usageCount", usageCount);
+        model.addAttribute("pageTitle", ingredient.getName());
+        return "ingredients/show";
     }
 
     @GetMapping("/new")
@@ -125,23 +121,19 @@ public class IngredientController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        try {
-            Ingredient ingredient = ingredientService.findById(id);
+        Ingredient ingredient = ingredientService.findById(id);
 
-            IngredientRequest request = new IngredientRequest();
-            request.setName(ingredient.getName());
-            request.setDescription(ingredient.getDescription());
-            request.setUnitCost(ingredient.getUnitCost());
-            request.setUnitOfMeasure(ingredient.getUnitOfMeasure());
+        IngredientRequest request = new IngredientRequest();
+        request.setName(ingredient.getName());
+        request.setDescription(ingredient.getDescription());
+        request.setUnitCost(ingredient.getUnitCost());
+        request.setUnitOfMeasure(ingredient.getUnitOfMeasure());
 
-            model.addAttribute("ingredient", request);
-            model.addAttribute("ingredientId", id);
-            model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
-            model.addAttribute("pageTitle", "Editar Ingrediente");
-            return "ingredients/form";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/ingredients";
-        }
+        model.addAttribute("ingredient", request);
+        model.addAttribute("ingredientId", id);
+        model.addAttribute("unitsOfMeasure", UnitOfMeasure.values());
+        model.addAttribute("pageTitle", "Editar Ingrediente");
+        return "ingredients/form";
     }
 
     @PostMapping("/{id}")
