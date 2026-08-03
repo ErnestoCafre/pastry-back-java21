@@ -122,21 +122,21 @@
                                 <!--/* El th:if va afuera del th:replace: juntos, la condición no se
                                        evalúa (th:replace precede 100, th:if 300). */-->
                                 <th:block th:if="${product.category == null}">
-                                    <span th:replace="~{fragments/table :: muted('Sin categoría')}"></span>
+                                    <span th:replace="~{fragments/table :: muted(#{empty.category})}"></span>
                                 </th:block>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
                                 <span th:if="${product.basePrice != null}" class="text-sm font-semibold text-gray-900"
                                       th:text="${@money.format(product.basePrice)}"></span>
                                 <th:block th:if="${product.basePrice == null}">
-                                    <span th:replace="~{fragments/table :: muted('Sin precio')}"></span>
+                                    <span th:replace="~{fragments/table :: muted(#{empty.price})}"></span>
                                 </th:block>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
                                 <div th:if="${product.updatedAt != null}" class="flex items-center gap-1">
                                     <svg th:replace="~{fragments/icons :: icon('calendar', 'w-4 h-4 text-gray-400')}"></svg>
                                     <span class="text-sm text-gray-600"
-                                          th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                          th:text="${@dates.format(product.updatedAt)}"></span>
                                 </div>
                                 <span th:if="${product.updatedAt == null}" class="text-sm text-gray-400">—</span>
                             </td>
@@ -148,14 +148,14 @@
                                             '/products/' + ${product.id} + '/edit', 'pencil', 'Editar producto', 'edit')}"></a>
                                     <form th:replace="~{fragments/buttons :: iconDelete(
                                             '/products/' + ${product.id} + '/delete',
-                                            '¿Eliminar este producto? Se moverá a la papelera.',
+                                            #{confirm.delete.product},
                                             'Eliminar producto')}"></form>
                                 </div>
                             </td>
                         </tr>
 
                         <tr th:replace="~{fragments/table :: emptyRow(${products.content}, 5, 'box',
-                                ${filtered} ? 'Sin resultados' : 'No hay productos',
+                                ${filtered} ? #{empty.results} : 'No hay productos',
                                 'Aún no hay productos registrados en el sistema.',
                                 '/products/new', 'Crear primer producto',
                                 ${filtered} ? '/products' : null)}"></tr>

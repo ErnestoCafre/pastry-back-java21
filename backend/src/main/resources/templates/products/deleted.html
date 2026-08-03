@@ -38,11 +38,11 @@
                                       class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
                                       th:text="${product.category?.name}"></span>
                                 <th:block th:unless="${product.category}">
-                                    <span th:replace="~{fragments/table :: muted('Sin categoría')}"></span>
+                                    <span th:replace="~{fragments/table :: muted(#{empty.category})}"></span>
                                 </th:block>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
-                                th:text="${#temporals.format(product.deletedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                th:text="${@dates.format(product.deletedAt)}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
                                 th:text="${product.deletedBy?.fullName} ?: 'Desconocido'"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-right">
@@ -52,7 +52,7 @@
                                             'Restaurar', 'restore', 'safe')}"></form>
                                     <form th:replace="~{fragments/buttons :: pill(
                                             '/products/' + ${product.id} + '/hard-delete',
-                                            '¿Eliminar PERMANENTEMENTE este producto? Esta acción no se puede deshacer.',
+                                            #{confirm.hardDelete.product},
                                             'Eliminar', 'trash', 'danger')}"></form>
                                 </div>
                             </td>

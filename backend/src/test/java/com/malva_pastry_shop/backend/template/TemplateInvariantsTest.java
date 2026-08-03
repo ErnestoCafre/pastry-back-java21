@@ -567,6 +567,29 @@ class TemplateInvariantsTest {
     }
 
     @Test
+    @DisplayName("ninguna plantilla vuelve a formatear fechas a mano")
+    void noTemplateFormatsDatesByHand() {
+        List<String> offenders = new ArrayList<>();
+        for (Path p : templates()) {
+            if (withoutComments(read(p)).contains("#temporals.format")) {
+                offenders.add(rel(p));
+            }
+        }
+
+        assertThat(offenders)
+                .as("""
+                        Volvió #temporals.format. El patrón 'dd/MM/yyyy HH:mm' estaba escrito
+                        a mano en 21 lugares de 13 plantillas, y ya había divergido: 2 sitios
+                        protegían el nulo con un ternario y 16 no.
+
+                        Usá ${@dates.format(x)} para fecha y hora, ${@dates.day(x)} para el
+                        día y ${@dates.time(x)} para la hora. El guard de nulo es del
+                        formateador, así que no se puede olvidar.
+                        """)
+                .isEmpty();
+    }
+
+    @Test
     @DisplayName("ninguna plantilla vuelve a escribir su propia paginación")
     void noTemplateRollsItsOwnPagination() {
         List<String> offenders = new ArrayList<>();
@@ -586,7 +609,45 @@ class TemplateInvariantsTest {
                 .isEmpty();
     }
 
-    // ---------- 7. Los archivos de JS que se enlazan existen ----------
+    // ---------- 7. Las confirmaciones salen de messages.properties ----------
+
+    /**
+     * Toda confirmación viene de una clave, no de un literal.
+     *
+     * <p>Es la regla que sostiene el trabajo de copy: el diagnóstico inicial
+     * encontró <b>15 redacciones distintas para 5 acciones</b>, y la mitad
+     * estaban escritas dos veces —una en el listado y otra en la ficha—. Dos
+     * copias del mismo texto en archivos distintos no se rompen: se separan,
+     * porque cada una se ve bien por su cuenta.
+     *
+     * <p>Se detecta por el signo de apertura de pregunta, que es lo que tienen
+     * en común todas y solo ellas.
+     */
+    @Test
+    @DisplayName("ninguna confirmación está escrita como literal en una plantilla")
+    void confirmationsComeFromMessages() {
+        Map<String, Set<String>> literals = new TreeMap<>();
+
+        for (Path p : templates()) {
+            Matcher m = Pattern.compile("¿[^'\"<>]{4,120}\\?").matcher(withoutComments(read(p)));
+            while (m.find()) {
+                literals.computeIfAbsent(m.group(), k -> new LinkedHashSet<>()).add(rel(p));
+            }
+        }
+
+        assertThat(literals)
+                .as("""
+                        Hay confirmaciones escritas a mano en las plantillas.
+
+                        Van en messages.properties como confirm.*, y la plantilla las pide con
+                        #{clave}. El motivo no es la traducción: es que la misma acción se
+                        confirma desde el listado y desde la ficha, y con dos literales las dos
+                        redacciones se separan sin que falle nada.
+                        """)
+                .isEmpty();
+    }
+
+    // ---------- 8. Los archivos de JS que se enlazan existen ----------
 
     @Test
     @DisplayName("todo script enlazado por una plantilla existe en static/js")

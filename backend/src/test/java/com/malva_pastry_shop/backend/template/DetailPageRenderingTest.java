@@ -98,6 +98,10 @@ class DetailPageRenderingTest {
         assertThat(countOf(html, "<h1")).as("un solo <h1> por página").isEqualTo(1);
         assertThat(html).as("tiene miga de pan").contains("aria-label=\"Migas de pan\"");
         assertThat(html).as("sin botón de volver: la miga ya vuelve").doesNotContain(">Volver");
+        // Una clave que no existe no revienta: Thymeleaf dibuja ??clave_es_AR??
+        // y la página se sirve igual, así que sin esto el copy centralizado
+        // pasaría todos los tests estando roto.
+        assertThat(html).as("toda clave de messages.properties resolvió").doesNotContain("??");
     }
 
     private static int countOf(String haystack, String needle) {
@@ -196,7 +200,7 @@ class DetailPageRenderingTest {
             // Desactivar deja a alguien afuera del panel: ahora confirma. Antes
             // era un clic sin aviso.
             assertThat(html).contains("action=\"/users/6/toggle\"");
-            assertThat(html).contains("data-confirm=");
+            assertThat(html).contains("data-confirm=\"¿Desactivar este usuario? No va a poder iniciar sesión.\"");
         }
     }
 

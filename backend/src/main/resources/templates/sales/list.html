@@ -92,7 +92,7 @@
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
                                 <div class="text-sm text-gray-900"
-                                     th:text="${#temporals.format(sale.saleDate, 'dd/MM/yyyy HH:mm')}"></div>
+                                     th:text="${@dates.format(sale.saleDate)}"></div>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
                                 <div class="font-medium text-gray-900" th:text="${sale.productName}"></div>
@@ -119,7 +119,7 @@
                         </tr>
 
                         <tr th:replace="~{fragments/table :: emptyRow(${sales.content}, 8, 'cart',
-                                ${filtered} ? 'Sin resultados' : 'No hay ventas registradas',
+                                ${filtered} ? #{empty.results} : 'No hay ventas registradas',
                                 'Las ventas registradas acá alimentan los totales del panel.',
                                 '/sales/new', 'Registrar primera venta',
                                 ${filtered} ? '/sales' : null)}"></tr>

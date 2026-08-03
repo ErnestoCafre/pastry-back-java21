@@ -48,7 +48,7 @@
                                      th:text="${category.description} ?: '—'"></div>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
-                                th:text="${#temporals.format(category.deletedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                th:text="${@dates.format(category.deletedAt)}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
                                 th:text="${category.deletedBy?.fullName} ?: 'Desconocido'"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-right">
@@ -58,7 +58,7 @@
                                             'Restaurar', 'restore', 'safe')}"></form>
                                     <form th:replace="~{fragments/buttons :: pill(
                                             '/categories/' + ${category.id} + '/hard-delete',
-                                            '¿Eliminar PERMANENTEMENTE esta categoría? Esta acción no se puede deshacer.',
+                                            #{confirm.hardDelete.category},
                                             'Eliminar', 'trash', 'danger')}"></form>
                                 </div>
                             </td>

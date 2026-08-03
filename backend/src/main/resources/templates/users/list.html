@@ -87,7 +87,7 @@
                                             ${user.enabled} ? 'ban' : 'check-circle',
                                             ${user.enabled} ? 'Desactivar usuario' : 'Activar usuario',
                                             ${user.enabled} ? 'danger' : 'success',
-                                            ${user.enabled} ? '¿Desactivar este usuario? No va a poder iniciar sesión.' : null)}"></form>
+                                            ${user.enabled} ? #{confirm.disable.user} : null)}"></form>
                                 </div>
                             </td>
                         </tr>

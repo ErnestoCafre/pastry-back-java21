@@ -70,7 +70,7 @@
                         <form th:replace="~{fragments/buttons :: iconSubmit(
                                 '/sections/' + ${section.id} + '/products/' + ${sp.product.id} + '/remove',
                                 'x', 'Quitar de la sección', 'danger',
-                                '¿Quitar este producto de la sección?')}"></form>
+                                #{confirm.remove.productFromSection})}"></form>
                     </div>
 
                     <div th:if="${#lists.isEmpty(sectionProducts)}" class="px-6 py-8">

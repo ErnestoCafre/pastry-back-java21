@@ -78,12 +78,12 @@
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Creado</dt>
                         <dd class="mt-1 text-sm text-gray-900"
-                            th:text="${user.insertedAt != null ? #temporals.format(user.insertedAt, 'dd/MM/yyyy HH:mm') : '—'}">-</dd>
+                            th:text="${@dates.format(user.insertedAt)}">-</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Última actualización</dt>
                         <dd class="mt-1 text-sm text-gray-900"
-                            th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}">-</dd>
+                            th:text="${@dates.format(user.updatedAt)}">-</dd>
                     </div>
                 </dl>
             </div>
@@ -93,7 +93,7 @@
                         '/users/' + ${user.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
                 <form th:replace="~{fragments/buttons :: action(
                         '/users/' + ${user.id} + '/toggle',
-                        ${user.enabled} ? '¿Desactivar este usuario? No va a poder iniciar sesión.' : null,
+                        ${user.enabled} ? #{confirm.disable.user} : null,
                         ${user.enabled} ? 'Desactivar' : 'Activar',
                         ${user.enabled} ? 'ban' : 'check-circle',
                         ${user.enabled} ? 'danger' : 'secondary')}"></form>

@@ -61,14 +61,14 @@
                                             '/ingredients/' + ${ingredient.id} + '/edit', 'pencil', 'Editar ingrediente', 'edit')}"></a>
                                     <form th:replace="~{fragments/buttons :: iconDelete(
                                             '/ingredients/' + ${ingredient.id} + '/delete',
-                                            '¿Eliminar este ingrediente? Se moverá a la papelera.',
+                                            #{confirm.delete.ingredient},
                                             'Eliminar ingrediente')}"></form>
                                 </div>
                             </td>
                         </tr>
 
                         <tr th:replace="~{fragments/table :: emptyRow(${ingredients.content}, 5, 'beaker',
-                                ${#strings.isEmpty(search)} ? 'No hay ingredientes registrados' : 'Sin resultados',
+                                ${#strings.isEmpty(search)} ? 'No hay ingredientes registrados' : #{empty.results},
                                 'Los ingredientes son la base de las recetas de cada producto.',
                                 '/ingredients/new', 'Crear ingrediente',
                                 ${#strings.isEmpty(search)} ? null : '/ingredients')}"></tr>

@@ -58,7 +58,7 @@
                         <form th:replace="~{fragments/buttons :: iconSubmit(
                                 '/tags/' + ${tag.id} + '/products/' + ${product.id} + '/remove',
                                 'x', 'Quitar del tag', 'danger',
-                                '¿Quitar este producto del tag?')}"></form>
+                                #{confirm.remove.productFromTag})}"></form>
                     </div>
 
                     <div th:if="${#lists.isEmpty(products)}" class="px-6 py-8">

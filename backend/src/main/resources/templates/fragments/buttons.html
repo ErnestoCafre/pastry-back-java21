@@ -8,7 +8,7 @@
     <a th:replace="~{fragments/buttons :: link('/tags/new', 'Nuevo Tag', 'plus', 'primary')}"></a>
     <a th:replace="~{fragments/buttons :: iconLink('/tags/1', 'eye', 'Ver tag', 'neutral')}"></a>
     <form th:replace="~{fragments/buttons :: iconDelete('/tags/1/delete',
-            '¿Eliminar este tag? Se moverá a la papelera.', 'Eliminar')}"></form>
+            #{confirm.delete.tag}, 'Eliminar')}"></form>
 
   Por qué importa normalizar `tone`:
     el mismo "editar" era hover:text-amber-600 en tags, hover:text-blue-600

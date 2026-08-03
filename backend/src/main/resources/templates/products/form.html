@@ -55,7 +55,7 @@
 
                     <div class="md:col-span-2">
                         <div th:replace="~{fragments/form :: select('categoryId', 'Categoría', false,
-                                ${categories.content}, 'id', 'name', 'Sin categoría')}"></div>
+                                ${categories.content}, 'id', 'name', #{empty.category})}"></div>
                     </div>
 
                     <div class="md:col-span-2">
