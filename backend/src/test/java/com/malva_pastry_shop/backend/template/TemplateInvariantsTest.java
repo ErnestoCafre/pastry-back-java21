@@ -172,6 +172,59 @@ class TemplateInvariantsTest {
                 .isEmpty();
     }
 
+    /**
+     * El hueco que deja el test de arriba: compara <b>nombres</b> de clase, no
+     * valores.
+     *
+     * <p>Si alguien cambia un color en {@code tailwind.config.js} y no corre
+     * {@code npm run css}, la clase {@code bg-primary-600} sigue existiendo en
+     * el CSS —con el color viejo—. Nada falla, la página se sirve, y el panel
+     * queda pintado de la paleta anterior hasta el próximo build. Es el mismo
+     * modo de fallo que motivó todo este archivo: el defecto no rompe nada,
+     * solo espera a que alguien lo mire.
+     *
+     * <p>La etapa {@code css} del Dockerfile también lo corrige, pero recién en
+     * el deploy. Esto lo detecta al correr los tests.
+     */
+    @Test
+    @DisplayName("todo color declarado en tailwind.config.js está en el CSS compilado")
+    void everyDeclaredColorIsCompiled() {
+        String css = read(CSS);
+        List<String> missing = new ArrayList<>();
+
+        Matcher m = Pattern.compile("'(#[0-9a-fA-F]{6})'").matcher(read(TAILWIND_CONFIG));
+        while (m.find()) {
+            String hex = m.group(1).toLowerCase();
+            // Tailwind emite el hex en los gradientes y la terna rgb en el
+            // resto, según la utilidad. Con que aparezca de una forma alcanza.
+            if (!css.toLowerCase().contains(hex) && !css.contains(rgbTriplet(hex))) {
+                missing.add(hex);
+            }
+        }
+
+        assertThat(missing)
+                .as("""
+                        Hay colores declarados en tailwind.config.js que no están en el CSS
+                        compilado: el config cambió y el build no se volvió a correr.
+
+                            cd backend && npm run css
+
+                        Ningún otro test lo ve. everyClassUsedIsCompiled compara nombres de
+                        clase, y el nombre no cambia cuando cambia el color: bg-primary-600
+                        sigue existiendo, pintada del color anterior.
+                        """)
+                .isEmpty();
+    }
+
+    private static final Path TAILWIND_CONFIG = Path.of("tailwind.config.js");
+
+    /** {@code #7347af} -> {@code 115 71 175}, la forma que emite Tailwind. */
+    private static String rgbTriplet(String hex) {
+        return Integer.parseInt(hex.substring(1, 3), 16) + " "
+                + Integer.parseInt(hex.substring(3, 5), 16) + " "
+                + Integer.parseInt(hex.substring(5, 7), 16);
+    }
+
     // Se probó además comparar la fecha del CSS contra la de las plantillas, y
     // es un mal test: salta con un cambio de comentario, que no genera ninguna
     // clase, y git no preserva mtimes, así que sería intermitente después de
