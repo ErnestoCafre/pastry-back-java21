@@ -53,6 +53,20 @@ public class FragmentProbeController {
         return "probe/filters";
     }
 
+    /**
+     * Plantilla con una expresión que no existe, a mitad de página.
+     *
+     * <p>Reproduce el bug de {@code users/show} en condiciones controladas, que
+     * es lo que le da sentido a
+     * {@code spring.thymeleaf.servlet.produce-partial-output-while-processing}:
+     * ver {@code RenderCompletenessTest}.
+     */
+    @GetMapping("/probe/broken")
+    public String broken(Model model) {
+        model.addAttribute("user", new Object());
+        return "probe/broken";
+    }
+
     /** Estado vacío; clearUrl != null simula "hay filtros activos". */
     @GetMapping("/probe/empty")
     public String empty(@RequestParam(required = false) String clearUrl, Model model) {
