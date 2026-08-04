@@ -1,251 +1,135 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout/main}">
+    layout:decorate="~{layout/main}">
+
+<!--/*
+  Este listado es el que motivó partir form :: search en el paso previo.
+
+  Tiene TRES filtros —producto, desde y hasta— que viajan en un mismo
+  formulario, y la versión anterior del fragment traía su propio <form>. Los
+  formularios no se anidan, así que era imposible usarlo acá. Ahora los campos
+  vienen sueltos y el <form> lo pone esta plantilla.
+
+  Los tres <label> tampoco tenían `for`, así que ningún lector de pantalla los
+  asociaba a su campo; form :: filterField los asocia por construcción.
+
+  Acción de fila: solo Ver. Es la excepción al modelo Ver/Editar/Borrar del
+  resto del panel, y es deliberada: una venta es un asiento histórico. No se
+  edita ni se borra, porque la fila guarda el precio y el nombre del producto
+  tal como estaban al vender, y reescribirlos falsearía la historia.
+*/-->
 
 <head>
     <title th:text="${pageTitle}">Ventas</title>
 </head>
 
 <body>
-    <div layout:fragment="content">
+    <div layout:fragment="content"
+         th:with="filtered=${!#strings.isEmpty(search) or startDate != null or endDate != null}">
 
-        <!-- Alert Messages -->
-        <div th:if="${success}"
-            class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${success}"></span>
-        </div>
-        <div th:if="${error}"
-            class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${error}"></span>
-        </div>
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
 
-        <!-- Header Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
-            <!-- Unified Filter Form -->
-            <form th:action="@{/sales}" method="get" class="flex flex-wrap items-end gap-3 flex-1">
-                <!-- Search by product -->
-                <div class="flex-1 min-w-[180px]">
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Producto</label>
-                    <div class="relative">
-                        <input type="text" name="search" th:value="${search}" placeholder="Buscar por producto..."
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
-                        <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
+        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <form th:action="@{/sales}" method="get" class="flex flex-1 flex-wrap items-end gap-3">
+                <div class="min-w-[200px] flex-1">
+                    <div th:replace="~{fragments/form :: filterField(
+                            'search', 'search', 'Producto', 'text', ${search}, 'Buscar por producto...')}"></div>
                 </div>
-                <!-- Date range -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Desde</label>
-                    <input type="date" name="startDate" th:value="${startDate}"
-                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Hasta</label>
-                    <input type="date" name="endDate" th:value="${endDate}"
-                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
-                </div>
-                <!-- Buttons -->
+                <div th:replace="~{fragments/form :: filterField(
+                        'startDate', 'startDate', 'Desde', 'date', ${startDate}, null)}"></div>
+                <div th:replace="~{fragments/form :: filterField(
+                        'endDate', 'endDate', 'Hasta', 'date', ${endDate}, null)}"></div>
+
                 <div class="flex items-center gap-2">
-                    <button type="submit"
-                        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                        Filtrar
-                    </button>
-                    <a th:href="@{/sales}"
-                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                        Limpiar
-                    </a>
+                    <button th:replace="~{fragments/buttons :: submit('Filtrar', 'primary')}"></button>
+                    <a th:replace="~{fragments/buttons :: link('/sales', 'Limpiar', null, 'secondary')}"></a>
                 </div>
             </form>
-            <!-- New Sale button -->
-            <a th:href="@{/sales/new}"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Nueva Venta
-            </a>
+
+            <a th:replace="~{fragments/buttons :: link('/sales/new', 'Nueva Venta', 'plus', 'primary')}"></a>
         </div>
 
-        <!-- Sales Summary -->
-        <div th:if="${!sales.content.empty}" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3">
-                <div class="text-2xl">🛒</div>
+        <div th:if="${!sales.content.empty}" class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <span class="text-2xl" aria-hidden="true">🛒</span>
                 <div>
                     <div class="text-xl font-bold text-gray-800" th:text="${sales.totalElements}">0</div>
                     <div class="text-sm text-gray-500">Ventas encontradas</div>
                 </div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3">
-                <div class="text-2xl">💰</div>
+            <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <span class="text-2xl" aria-hidden="true">💰</span>
                 <div>
-                    <div class="text-xl font-bold text-green-600" th:text="'$' + ${#numbers.formatDecimal(totalSalesAmount, 1, 2)}">$0.00</div>
+                    <div class="text-xl font-bold text-green-600"
+                         th:text="${@money.format(totalSalesAmount)}">$0,00</div>
                     <div class="text-sm text-gray-500">Ingreso total del filtro</div>
                 </div>
             </div>
         </div>
 
-        <!-- Sales Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
+                    <caption class="sr-only">Listado de ventas registradas</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Fecha</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Producto</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Cliente</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Cantidad</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Precio Unit.</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Total</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Acciones</th>
+                            <th th:replace="~{fragments/table :: th('ID')}"></th>
+                            <th th:replace="~{fragments/table :: th('Fecha')}"></th>
+                            <th th:replace="~{fragments/table :: th('Producto')}"></th>
+                            <th th:replace="~{fragments/table :: th('Cliente')}"></th>
+                            <th th:replace="~{fragments/table :: thCenter('Cantidad')}"></th>
+                            <th th:replace="~{fragments/table :: th('Precio Unit.')}"></th>
+                            <th th:replace="~{fragments/table :: th('Total')}"></th>
+                            <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200 bg-white">
                         <tr th:each="sale : ${sales.content}" class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm font-medium text-gray-900" th:text="'#' + ${sale.id}"></span>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <a th:href="@{/sales/{id}(id=${sale.id})}"
+                                   class="text-sm font-medium text-gray-900 transition-colors hover:text-primary-600"
+                                   th:text="'#' + ${sale.id}"></a>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap px-6 py-4">
                                 <div class="text-sm text-gray-900"
-                                    th:text="${#temporals.format(sale.saleDate, 'dd/MM/yyyy HH:mm')}"></div>
+                                     th:text="${@dates.format(sale.saleDate)}"></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap px-6 py-4">
                                 <div class="font-medium text-gray-900" th:text="${sale.productName}"></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900" th:text="${sale.customerName ?: '-'}"></div>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <div class="text-sm text-gray-900" th:text="${sale.customerName} ?: '—'"></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap px-6 py-4 text-center">
                                 <div class="text-sm text-gray-900" th:text="${sale.quantity}"></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900"
-                                    th:text="'' + ${#numbers.formatDecimal(sale.unitPrice, 1, 2)}"></div>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <div class="text-sm text-gray-900" th:text="${@money.format(sale.unitPrice)}"></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="whitespace-nowrap px-6 py-4">
                                 <div class="text-sm font-semibold text-green-600"
-                                    th:text="'' + ${#numbers.formatDecimal(sale.totalAmount, 1, 2)}"></div>
+                                     th:text="${@money.format(sale.totalAmount)}"></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a th:href="@{/sales/{id}(id=${sale.id})}"
-                                        class="p-2 text-gray-500 hover:text-primary-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                        title="Ver detalle">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </a>
+                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
+                                <div class="flex items-center justify-end gap-1">
+                                    <a th:replace="~{fragments/buttons :: iconLink(
+                                            '/sales/' + ${sale.id}, 'eye', 'Ver detalle de la venta', 'neutral')}"></a>
                                 </div>
                             </td>
                         </tr>
-                        <!-- Empty sales -->
-                        <tr th:if="${sales.content.empty}">
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                                <p class="mt-2">No hay ventas registradas</p>
-                                <a th:href="@{/sales/new}"
-                                    class="mt-2 inline-block text-primary-600 hover:text-primary-800">
-                                    Registrar primera venta
-                                </a>
-                            </td>
-                        </tr>
+
+                        <tr th:replace="~{fragments/table :: emptyRow(${sales.content}, 8, 'cart',
+                                ${filtered} ? #{empty.results} : 'No hay ventas registradas',
+                                'Las ventas registradas acá alimentan los totales del panel.',
+                                '/sales/new', 'Registrar primera venta',
+                                ${filtered} ? '/sales' : null)}"></tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Pagination -->
-            <div th:if="${!sales.content.empty}" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <!-- Info -->
-                    <div class="text-sm text-gray-500">
-                        Mostrando
-                        <span class="font-medium" th:text="${sales.number * sales.size + 1}"></span>
-                        -
-                        <span class="font-medium"
-                            th:text="${sales.number * sales.size + sales.numberOfElements}"></span>
-                        de
-                        <span class="font-medium" th:text="${sales.totalElements}"></span>
-                        ventas
-                    </div>
-
-                    <!-- Navigation -->
-                    <nav th:if="${sales.totalPages > 1}" class="flex items-center gap-1">
-                        <!-- Previous -->
-                        <a th:if="${sales.hasPrevious()}"
-                            th:href="@{/sales(page=${sales.number - 1}, size=${sales.size}, search=${search}, startDate=${startDate}, endDate=${endDate})}"
-                            class="px-3 py-2 text-sm text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </a>
-                        <span th:if="${!sales.hasPrevious()}"
-                            class="px-3 py-2 text-sm text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </span>
-
-                        <!-- Page Numbers -->
-                        <th:block th:each="i : ${#numbers.sequence(0, sales.totalPages - 1)}">
-                            <a th:if="${i != sales.number}"
-                                th:href="@{/sales(page=${i}, size=${sales.size}, search=${search}, startDate=${startDate}, endDate=${endDate})}"
-                                th:text="${i + 1}"
-                                class="px-3 py-2 text-sm text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"></a>
-                            <span th:if="${i == sales.number}" th:text="${i + 1}"
-                                class="px-3 py-2 text-sm text-white bg-primary-600 border border-primary-600 rounded-lg"></span>
-                        </th:block>
-
-                        <!-- Next -->
-                        <a th:if="${sales.hasNext()}"
-                            th:href="@{/sales(page=${sales.number + 1}, size=${sales.size}, search=${search}, startDate=${startDate}, endDate=${endDate})}"
-                            class="px-3 py-2 text-sm text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                        <span th:if="${!sales.hasNext()}"
-                            class="px-3 py-2 text-sm text-gray-300 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
-                    </nav>
-                </div>
-            </div>
+            <div th:replace="~{fragments/pagination :: bar(${sales}, '/sales', 'ventas',
+                    ${ {'search': search, 'startDate': startDate, 'endDate': endDate} })}"></div>
         </div>
-
     </div>
 </body>
 

@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/Spring%20Boot-4.0.1-brightgreen?style=for-the-badge&logo=spring" alt="Spring Boot">
   <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk" alt="Java">
   <img src="https://img.shields.io/badge/PostgreSQL-13+-blue?style=for-the-badge&logo=postgresql" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Tailwind%20CSS-CDN-06B6D4?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-3.4%20compilado-06B6D4?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS">
 </p>
 
 Sistema de gestion integral para una pasteleria artesanal. Permite administrar el catalogo de productos, recetas con costos de ingredientes, ventas con calculo de margen de ganancia, y una vitrina publica organizada por secciones y etiquetas.
@@ -12,6 +12,16 @@ Sistema de gestion integral para una pasteleria artesanal. Permite administrar e
 El sistema expone dos interfaces:
 - **Panel de Administracion** (Thymeleaf SSR): gestion interna del negocio con autenticacion por sesion
 - **API REST publica** (JSON, solo lectura): endpoints para alimentar un frontend de clientes
+
+> **Version demo.** Este repositorio es la reescritura demostrativa de un sistema
+> desarrollado como proyecto freelance: se actualizo por completo el stack tecnico y se
+> rehizo de cero el diseno UX/UI del panel. Los datos que trae sembrados son de
+> demostracion, no de operacion real. El detalle del antes/despues esta en el
+> [README principal](../README.md).
+
+Este documento describe **que hace** el sistema. Para **como esta construido** —
+bounded contexts, capas, patrones y diagrama ER — ver
+[ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
@@ -170,3 +180,67 @@ El dashboard muestra metricas en tiempo real:
 - Ingreso del mes (suma de montos)
 
 Ademas incluye accesos rapidos agrupados por seccion: Inventario, Storefront y Sistema.
+
+---
+
+## Interfaz del Panel
+
+El panel se rediseno por completo en esta version demo. La capa de vistas no es un tema
+de terceros adaptado, sino una libreria propia sobre la que se construyen las 46
+plantillas.
+
+### Libreria de fragments
+
+`templates/fragments/` reune 34 fragments nombrados en 9 archivos:
+
+| Archivo | Fragments | Resuelve |
+|---|---|---|
+| `table.html` | `th`, `thCenter`, `thRight`, `emptyRow`, `emptyBody`, `muted` | Encabezados alineados y estados vacios de los listados |
+| `form.html` | `text`, `number`, `textarea`, `select`, `checkbox`, `actions`, `searchField`, `filterField` | Campos con label, error de validacion y filtros |
+| `buttons.html` | `link`, `submit`, `iconLink`, `iconSubmit`, `iconDelete`, `action`, `pill` | Acciones de fila y de formulario |
+| `alerts.html` | `flash`, `successBox`, `errorBox`, `formErrors` | Mensajes flash y bloques de error |
+| `nav.html` | `item`, `group` | Sidebar con estado activo y agrupacion por dominio |
+| `breadcrumb.html` | `trail`, `trailDeep`, `back` | Navegacion de vuelta desde fichas y sublistados |
+| `pagination.html` | `bar` | Paginado que conserva los filtros activos |
+| `icons.html` | `icon`, `solid` | Iconos SVG inline, sin icon font |
+| `toolbar.html` | `listBar` | Barra de busqueda, filtros y alta de cada listado |
+
+### Decisiones de la capa de vistas
+
+- **CSS compilado, no CDN.** `npm run css` genera `static/css/admin.css` desde
+  `src/main/css/admin.css`. El compilado se commitea a proposito, para que
+  `mvn spring-boot:run` y los tests de renderizado funcionen sin instalar Node; el
+  Dockerfile lo regenera al construir la imagen, asi que produccion no depende de que
+  alguien se haya acordado de correrlo.
+- **Un formulario por entidad.** Alta y edicion comparten `form.html`; los 6 pares
+  `create`/`edit` separados se fusionaron.
+- **JavaScript propio.** 237 lineas en `static/js/`, sin librerias externas:
+  confirmaciones `data-confirm`, drawer mobile, modales `<dialog>` nativos y los
+  formularios dinamicos de receta y venta.
+- **Precedencia de Thymeleaf.** `th:replace` (100) se procesa antes que `sec:authorize`
+  (300) y que `th:if`; en el mismo elemento, el segundo atributo no llega a evaluarse.
+  Por eso las condiciones van en un `<th:block>` envolvente.
+
+### Tests de renderizado
+
+15 clases de test cubren los invariantes que no fallan al compilar: enlaces a rutas que
+ningun controller sirve, propiedades del modelo inexistentes, formato de moneda en es-AR,
+paginacion que pierde filtros y contratos de los fragments. Rompen el build antes de que
+la pagina rompa en el navegador.
+
+### Paridad de esquema
+
+Prod y dev no comparten camino de esquema: prod corre Flyway con `ddl-auto=none`, dev deja
+que Hibernate lo genere con `ddl-auto=create`. Los dos arrancan bien por separado, asi que
+pueden separarse sin que nada falle hasta el deploy — un campo nuevo en una entidad lo
+levanta dev solo, y no existe en ninguna migracion.
+
+`migration/SchemaParityTest` cierra eso: aplica V1..V6 sobre un Postgres virgen y compara
+el resultado contra el metamodelo de Hibernate, que es la misma fuente de la que sale el
+SQL en runtime.
+
+- **Necesita Docker.** Usa Testcontainers con `postgres:13-alpine`, el piso que declara el
+  README raiz. No sirve H2 ni en modo PostgreSQL: V5 es un bloque PL/pgSQL, V2 usa
+  `ON CONFLICT` y V6 aliasea la tabla en un `DELETE`.
+- **Sin Docker se saltea, no falla.** `mvn test` sigue en verde y surefire reporta los
+  cinco casos como `Skipped`. Un skip se ve; un verde falso, no.

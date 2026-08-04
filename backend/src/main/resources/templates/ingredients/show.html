@@ -2,91 +2,75 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layout/main}">
 
+<!--/*
+  Ficha de ingrediente. El "Volver" del pie salió: la miga ya es el camino de
+  vuelta (ver categories/show).
+
+  El borrado solo aparece si el ingrediente no está en uso, y cuando lo está se
+  explica por qué no se puede. Eso ya estaba y se conserva: es una regla de
+  negocio, no una inconsistencia.
+
+  Acentos: el aviso decía "esta en uso" y la confirmación "¿Estas seguro...?".
+*/-->
+
 <head>
-    <title th:text="${pageTitle}">Detalle Ingrediente</title>
+    <title th:text="${pageTitle}">Detalle del Ingrediente</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/ingredients}" class="text-gray-500 hover:text-primary-600">Ingredientes</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium" th:text="${ingredient.name}">Ingrediente</span>
-                </li>
-            </ol>
-        </nav>
 
-        <!-- Detail Card -->
-        <div class="max-w-2xl bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Ingredientes', '/ingredients', ${ingredient.name})}"></nav>
+
+        <div class="max-w-2xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <div class="p-6">
-                <div class="flex items-start justify-between mb-6">
+                <div class="mb-6 flex items-start justify-between gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900" th:text="${ingredient.name}"></h2>
                         <p th:if="${ingredient.description}" class="mt-1 text-gray-500"
-                            th:text="${ingredient.description}"></p>
+                           th:text="${ingredient.description}"></p>
                     </div>
-                    <span class="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full"
-                        th:text="${ingredient.unitOfMeasure.displayName}"></span>
+                    <span class="flex-shrink-0 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
+                          th:text="${ingredient.unitOfMeasure.displayName}"></span>
                 </div>
 
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-gray-50 px-4 py-3 rounded-lg">
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="rounded-lg bg-gray-50 px-4 py-3">
                         <dt class="text-sm font-medium text-gray-500">Costo Unitario</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="'' + ${#numbers.formatDecimal(ingredient.unitCost, 1, 2)}"></dd>
+                            th:text="${@money.format(ingredient.unitCost)}"></dd>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 px-4 py-3">
                         <dt class="text-sm font-medium text-gray-500">Unidad de Medida</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${ingredient.unitOfMeasure.toString()}">
-                        </dd>
+                            th:text="${ingredient.unitOfMeasure.toString()}"></dd>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 px-4 py-3">
                         <dt class="text-sm font-medium text-gray-500">Usado en productos</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900" th:text="${usageCount}"></dd>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 px-4 py-3">
                         <dt class="text-sm font-medium text-gray-500">Fecha de registro</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(ingredient.insertedAt, 'dd/MM/yyyy')}"></dd>
+                            th:text="${@dates.day(ingredient.insertedAt)}"></dd>
                     </div>
                 </dl>
             </div>
 
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center gap-3">
-                <a th:href="@{/ingredients/{id}/edit(id=${ingredient.id})}"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Editar
-                </a>
-                <form th:if="${usageCount == 0}" th:action="@{/ingredients/{id}/delete(id=${ingredient.id})}"
-                    method="post" onsubmit="return confirm('¿Estas seguro de eliminar este ingrediente?');">
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Eliminar
-                    </button>
-                </form>
-                <span th:if="${usageCount > 0}" class="text-sm text-gray-500">
-                    No se puede eliminar porque esta en uso
+            <div class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <span th:if="${usageCount > 0}" class="mr-auto text-sm text-gray-500">
+                    No se puede eliminar porque está en uso
                 </span>
-                <a th:href="@{/ingredients}"
-                    class="ml-auto px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                    Volver
-                </a>
+                <a th:replace="~{fragments/buttons :: link(
+                        '/ingredients/' + ${ingredient.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
+                <th:block th:if="${usageCount == 0}">
+                    <form th:replace="~{fragments/buttons :: action(
+                            '/ingredients/' + ${ingredient.id} + '/delete',
+                            #{confirm.delete.ingredient},
+                            'Eliminar', 'trash', 'danger')}"></form>
+                </th:block>
             </div>
         </div>
     </div>

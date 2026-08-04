@@ -2,178 +2,108 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layout/main}">
 
+<!--/*
+  Productos de un tag. Estrena breadcrumb :: trailDeep, que estaba escrito y
+  sin ningún consumidor: acá la miga tiene tres niveles (Tags › el tag ›
+  Productos) y hasta ahora se armaba a mano en cada una de las cuatro páginas
+  que la necesitan.
+
+  Se quita el <h1> propio: el layout ya dibuja uno con pageTitle ("Productos
+  con tag: X"), así que la página tenía dos y el lector de pantalla anunciaba
+  dos títulos de nivel 1. El del layout además dice más.
+
+  El "Volver a Tags" también sale: la miga es el camino de vuelta, igual que en
+  las fichas de detalle.
+*/-->
+
 <head>
     <title th:text="${pageTitle}">Productos del Tag</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/tags}" class="text-gray-500 hover:text-primary-600">Tags</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <a th:href="@{/tags/{id}(id=${tag.id})}" class="text-gray-500 hover:text-primary-600"
-                        th:text="${tag.name}">Tag</a>
-                </li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium">Productos</span>
-                </li>
-            </ol>
-        </nav>
 
-        <!-- Alert Messages -->
-        <div th:if="${success}"
-            class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${success}"></span>
-        </div>
-        <div th:if="${error}"
-            class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${error}"></span>
-        </div>
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
 
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <span
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-800 rounded-full text-lg font-medium">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                    <span th:text="${tag.name}"></span>
-                </span>
-                <span class="text-gray-500">-</span>
-                <h1 class="text-xl font-semibold text-gray-900">Productos</h1>
-            </div>
-            <a th:href="@{/tags}"
-                class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                Volver a Tags
-            </a>
-        </div>
+        <nav th:replace="~{fragments/breadcrumb :: trailDeep(
+                'Tags', '/tags', ${tag.name}, '/tags/' + ${tag.id}, 'Productos')}"></nav>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Productos actuales -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
                     <h2 class="text-lg font-semibold text-gray-900">Productos con este tag</h2>
-                    <p class="text-sm text-gray-500" th:text="${#lists.size(products) + ' producto(s)'}"></p>
+                    <p class="text-sm text-gray-500" th:text="${#lists.size(products)} + ' producto(s)'"></p>
                 </div>
                 <div class="divide-y divide-gray-200">
                     <div th:each="product : ${products}"
-                        class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+                         class="flex items-center justify-between px-6 py-4 hover:bg-gray-50">
                         <div class="flex items-center gap-3">
-                            <div class="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-primary-100">
+                            <div class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-primary-100">
                                 <img th:if="${product.imageUrl != null}" th:src="${product.imageUrl}"
-                                    th:alt="${product.name}" class="w-full h-full object-cover">
+                                     th:alt="${product.name}" class="h-full w-full object-cover">
                                 <div th:if="${product.imageUrl == null}"
-                                    class="w-full h-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
+                                     class="flex h-full w-full items-center justify-center text-primary-600">
+                                    <svg th:replace="~{fragments/icons :: icon('box', 'w-5 h-5')}"></svg>
                                 </div>
                             </div>
                             <div>
                                 <a th:href="@{/products/{id}(id=${product.id})}"
-                                    class="font-medium text-gray-900 hover:text-primary-600"
-                                    th:text="${product.name}"></a>
-                                <p class="text-sm text-gray-500" th:if="${product.category}"
-                                    th:text="${product.category?.name}"></p>
+                                   class="font-medium text-gray-900 transition-colors hover:text-primary-600"
+                                   th:text="${product.name}"></a>
+                                <p th:if="${product.category}" class="text-sm text-gray-500"
+                                   th:text="${product.category?.name}"></p>
                             </div>
                         </div>
-                        <form
-                            th:action="@{/tags/{tagId}/products/{productId}/remove(tagId=${tag.id}, productId=${product.id})}"
-                            method="post">
-                            <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Quitar del tag" onclick="return confirm('Quitar este producto del tag?');">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </form>
+                        <form th:replace="~{fragments/buttons :: iconSubmit(
+                                '/tags/' + ${tag.id} + '/products/' + ${product.id} + '/remove',
+                                'x', 'Quitar del tag', 'danger',
+                                #{confirm.remove.productFromTag})}"></form>
                     </div>
-                    <div th:if="${#lists.isEmpty(products)}" class="px-6 py-8 text-center text-gray-500">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                        <p class="mt-2">No hay productos con este tag</p>
+
+                    <div th:if="${#lists.isEmpty(products)}" class="px-6 py-8">
+                        <div th:replace="~{fragments/table :: emptyBody('box',
+                                'No hay productos con este tag',
+                                'Agregá alguno desde el panel de la derecha.',
+                                null, null, null)}"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Agregar productos -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
                     <h2 class="text-lg font-semibold text-gray-900">Agregar producto</h2>
-                    <p class="text-sm text-gray-500" th:text="${#lists.size(availableProducts) + ' disponible(s)'}"></p>
+                    <p class="text-sm text-gray-500"
+                       th:text="${#lists.size(availableProducts)} + ' disponible(s)'"></p>
                 </div>
-                <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+                <div class="max-h-96 divide-y divide-gray-200 overflow-y-auto">
                     <div th:each="product : ${availableProducts}"
-                        class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+                         class="flex items-center justify-between px-6 py-4 hover:bg-gray-50">
                         <div class="flex items-center gap-3">
-                            <div class="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-gray-100">
+                            <div class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
                                 <img th:if="${product.imageUrl != null}" th:src="${product.imageUrl}"
-                                    th:alt="${product.name}" class="w-full h-full object-cover">
+                                     th:alt="${product.name}" class="h-full w-full object-cover">
                                 <div th:if="${product.imageUrl == null}"
-                                    class="w-full h-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
+                                     class="flex h-full w-full items-center justify-center text-gray-500">
+                                    <svg th:replace="~{fragments/icons :: icon('box', 'w-5 h-5')}"></svg>
                                 </div>
                             </div>
                             <div>
                                 <span class="font-medium text-gray-900" th:text="${product.name}"></span>
-                                <p class="text-sm text-gray-500" th:if="${product.category}"
-                                    th:text="${product.category?.name}"></p>
+                                <p th:if="${product.category}" class="text-sm text-gray-500"
+                                   th:text="${product.category?.name}"></p>
                             </div>
                         </div>
-                        <form
-                            th:action="@{/tags/{tagId}/products/{productId}(tagId=${tag.id}, productId=${product.id})}"
-                            method="post">
-                            <button type="submit"
-                                class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                title="Agregar al tag">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                            </button>
-                        </form>
+                        <!--/* Agregar no destruye nada: no confirma. */-->
+                        <form th:replace="~{fragments/buttons :: iconSubmit(
+                                '/tags/' + ${tag.id} + '/products/' + ${product.id},
+                                'plus', 'Agregar al tag', 'success', null)}"></form>
                     </div>
-                    <div th:if="${#lists.isEmpty(availableProducts)}" class="px-6 py-8 text-center text-gray-500">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="mt-2">Todos los productos ya tienen este tag</p>
+
+                    <div th:if="${#lists.isEmpty(availableProducts)}" class="px-6 py-8">
+                        <div th:replace="~{fragments/table :: emptyBody('check-circle',
+                                'Todos los productos ya tienen este tag',
+                                null, null, null, null)}"></div>
                     </div>
                 </div>
             </div>

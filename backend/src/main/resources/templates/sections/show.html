@@ -2,114 +2,82 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layout/main}">
 
+<!--/*
+  Ficha de sección de vitrina. El "Volver al listado" del pie salió
+  (ver categories/show).
+
+  Acentos: "Sin descripcion" y "Ultima actualización" venían sin tilde.
+*/-->
+
 <head>
-    <title th:text="${pageTitle}">Detalle de Sección</title>
+    <title th:text="${pageTitle}">Detalle de la Sección</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/sections}" class="text-gray-500 hover:text-primary-600">Secciones</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium" th:text="${section.name}">Sección</span>
-                </li>
-            </ol>
-        </nav>
 
-        <!-- Section Card -->
-        <div class="max-w-3xl bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Secciones', '/sections', ${section.name})}"></nav>
+
+        <div class="max-w-3xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <div class="p-6">
-                <div class="flex items-start justify-between mb-6">
-                    <div>
-                        <span
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-800 rounded-full text-lg font-medium">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 6h16M4 12h16M4 18h7" />
-                            </svg>
+                <div class="mb-6 flex items-start justify-between gap-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-primary-100 px-4 py-2 text-lg font-medium text-primary-800">
+                            <svg th:replace="~{fragments/icons :: icon('list', 'w-5 h-5')}"></svg>
                             <span th:text="${section.name}"></span>
                         </span>
                         <span th:if="${section.visible}"
-                            class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Visible
-                        </span>
+                              class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Visible</span>
                         <span th:unless="${section.visible}"
-                            class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            Oculta
-                        </span>
+                              class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">Oculta</span>
                     </div>
-                    <div class="text-right">
-                        <div class="flex items-center gap-2 text-primary-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                            <span class="text-2xl font-bold" th:text="${productCount}">0</span>
-                            <span class="text-gray-500">productos</span>
-                        </div>
+                    <div class="flex flex-shrink-0 items-center gap-2 text-primary-600">
+                        <svg th:replace="~{fragments/icons :: icon('box', 'w-6 h-6')}"></svg>
+                        <span class="text-2xl font-bold" th:text="${productCount}">0</span>
+                        <span class="text-gray-500">productos</span>
                     </div>
                 </div>
 
-                <div class="prose max-w-none text-gray-600 mb-6" th:if="${section.description}">
-                    <p th:text="${section.description}"></p>
-                </div>
-                <div th:unless="${section.description}" class="text-gray-400 italic mb-6">
-                    Sin descripcion
-                </div>
+                <p th:if="${section.description}" class="mb-6 text-gray-600" th:text="${section.description}"></p>
+                <th:block th:unless="${section.description}">
+                    <p class="mb-6"><span th:replace="~{fragments/table :: muted(#{empty.description})}"></span></p>
+                </th:block>
 
-                <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                    <dt class="text-sm font-medium text-gray-500 mb-1">Slug (identificador)</dt>
+                <div class="mb-6 rounded-lg bg-gray-50 p-4">
+                    <dt class="mb-1 text-sm font-medium text-gray-500">Slug (identificador)</dt>
                     <dd class="font-mono text-sm text-gray-900" th:text="${section.slug}"></dd>
                 </div>
 
-                <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Orden de visualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${section.displayOrder ?: 'Sin orden'}"></dd>
+                            th:text="${section.displayOrder} ?: 'Sin orden'"></dd>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(section.insertedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(section.insertedAt)}"></dd>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <dt class="text-sm font-medium text-gray-500">Ultima actualización</dt>
+                    <div class="rounded-lg bg-gray-50 p-4">
+                        <dt class="text-sm font-medium text-gray-500">Última actualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(section.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(section.updatedAt)}"></dd>
                     </div>
                 </dl>
             </div>
 
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between">
-                <a th:href="@{/sections}"
-                    class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    Volver al listado
-                </a>
-                <div class="flex gap-2">
-                    <a th:href="@{/sections/{id}/products(id=${section.id})}"
-                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                        Productos
-                    </a>
-                    <a th:href="@{/sections/{id}/edit(id=${section.id})}"
-                        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                        Editar
-                    </a>
-                    <form th:action="@{/sections/{id}/delete(id=${section.id})}" method="post"
-                        onsubmit="return confirm('¿Estas seguro de eliminar esta sección? Se movera a la papelera.');">
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                            Eliminar
-                        </button>
-                    </form>
-                </div>
+            <div class="flex justify-end gap-2 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <a th:replace="~{fragments/buttons :: link(
+                        '/sections/' + ${section.id} + '/products', 'Ver productos', 'box', 'secondary')}"></a>
+                <a th:replace="~{fragments/buttons :: link(
+                        '/sections/' + ${section.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
+                <form th:replace="~{fragments/buttons :: action(
+                        '/sections/' + ${section.id} + '/delete',
+                        #{confirm.delete.section},
+                        'Eliminar', 'trash', 'danger')}"></form>
             </div>
         </div>
     </div>

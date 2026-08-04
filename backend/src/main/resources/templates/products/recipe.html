@@ -8,49 +8,11 @@
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/products}" class="text-gray-500 hover:text-primary-600">Productos</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <a th:href="@{/products/{id}(id=${product.id})}" class="text-gray-500 hover:text-primary-600"
-                        th:text="${product.name}">Producto</a>
-                </li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium">Receta</span>
-                </li>
-            </ol>
-        </nav>
+        <nav th:replace="~{fragments/breadcrumb :: trailDeep(
+                'Productos', '/products', ${product.name},
+                '/products/' + ${product.id}, 'Receta')}"></nav>
 
-        <!-- Alert Messages -->
-        <div th:if="${success}"
-            class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${success}"></span>
-        </div>
-        <div th:if="${error}"
-            class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span th:text="${error}"></span>
-        </div>
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
@@ -61,21 +23,15 @@
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                 </div>
-                <div>
-                    <h1 class="text-xl font-semibold text-gray-900" th:text="${product.name}">Producto</h1>
-                    <p class="text-sm text-gray-500">Gestionar receta (ingredientes)</p>
-                </div>
+                <!--/* El <h1> con el nombre del producto salió: el layout ya dibuja uno
+                       con pageTitle ("Receta: X"), así que la página tenía dos y un
+                       lector de pantalla anunciaba dos títulos de nivel 1. El
+                       "Volver a Productos" también, porque la miga ya vuelve. */-->
+                <p class="text-sm text-gray-500">Gestionar receta (ingredientes)</p>
             </div>
-            <div class="flex items-center gap-2">
-                <!-- Costo total de la receta -->
-                <div class="px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
-                    <span class="text-sm text-green-700">Costo receta: </span>
-                    <span class="font-semibold text-green-800" th:text="${'' + #numbers.formatDecimal(recipeCost, 1, 2)}">$0.00</span>
-                </div>
-                <a th:href="@{/products}"
-                    class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    Volver a Productos
-                </a>
+            <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-2">
+                <span class="text-sm text-green-700">Costo receta: </span>
+                <span class="font-semibold text-green-800" th:text="${@money.format(recipeCost)}">$0,00</span>
             </div>
         </div>
 
@@ -98,22 +54,24 @@
                                 </div>
                                 <div class="mt-1 text-sm text-gray-500">
                                     <span>Cantidad: </span>
-                                    <span class="font-medium" th:text="${#numbers.formatDecimal(pi.quantity, 1, 4)}"></span>
+                                    <span class="font-medium" th:text="${@money.quantity(pi.quantity)}"></span>
                                     <span class="mx-2">|</span>
                                     <span>Costo unitario: </span>
-                                    <span th:text="${'' + #numbers.formatDecimal(pi.ingredient.unitCost, 1, 2)}"></span>
+                                    <span th:text="${@money.format(pi.ingredient.unitCost)}"></span>
                                     <span class="mx-2">|</span>
                                     <span>Subtotal: </span>
                                     <span class="font-medium text-green-600"
-                                        th:text="${'' + #numbers.formatDecimal(pi.quantity * pi.ingredient.unitCost, 1, 2)}"></span>
+                                        th:text="${@money.format(pi.quantity * pi.ingredient.unitCost)}"></span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1">
                                 <!-- Editar cantidad -->
+                                <!--/* data-action lo arma Thymeleaf con @{...}, no el JS concatenando
+                                     '/products/' + id: así la URL respeta el context-path. */-->
                                 <button type="button"
                                     class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors edit-btn"
                                     title="Editar cantidad"
-                                    th:data-ingredient-id="${pi.ingredient.id}"
+                                    th:data-action="@{/products/{productId}/recipe/ingredients/{ingredientId}/update(productId=${product.id}, ingredientId=${pi.ingredient.id})}"
                                     th:data-ingredient-name="${pi.ingredient.name}"
                                     th:data-quantity="${pi.quantity}"
                                     th:data-unit="${pi.ingredient.unitOfMeasure}">
@@ -124,11 +82,11 @@
                                 </button>
                                 <!-- Quitar ingrediente -->
                                 <form th:action="@{/products/{productId}/recipe/ingredients/{ingredientId}/remove(productId=${product.id}, ingredientId=${pi.ingredient.id})}"
-                                    method="post">
+                                    method="post"
+                                    th:data-confirm="#{confirm.remove.ingredientFromRecipe}">
                                     <button type="submit"
                                         class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Quitar ingrediente"
-                                        onclick="return confirm('Quitar este ingrediente de la receta?');">
+                                        title="Quitar ingrediente">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M6 18L18 6M6 6l12 12" />
@@ -166,7 +124,7 @@
                                         th:text="${ingredient.unitOfMeasure}"></span>
                                 </div>
                                 <p class="text-sm text-gray-500"
-                                    th:text="${'Costo: $' + #numbers.formatDecimal(ingredient.unitCost, 1, 2) + ' por ' + ingredient.unitOfMeasure}"></p>
+                                    th:text="${'Costo: ' + @money.format(ingredient.unitCost) + ' por ' + ingredient.unitOfMeasure}"></p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" name="quantity" step="0.0001" min="0.0001" required
@@ -197,78 +155,62 @@
             </div>
         </div>
 
-        <!-- Modal para editar cantidad -->
-        <div id="editModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-                <!-- Overlay -->
-                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onclick="closeEditModal()"></div>
+        <!--/*
+          Modal para editar cantidad.
 
-                <!-- Modal content -->
-                <div class="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Editar cantidad</h3>
-                        <p class="mt-1 text-sm text-gray-500" id="modalIngredientName"></p>
-                    </div>
-                    <form id="editForm" method="post">
-                        <div class="mb-4">
-                            <label for="editQuantity" class="block text-sm font-medium text-gray-700">
-                                Cantidad (<span id="modalUnit"></span>)
-                            </label>
-                            <input type="number" name="quantity" id="editQuantity" step="0.0001" min="0.0001" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                        </div>
-                        <div class="flex justify-end gap-3">
-                            <button type="button" onclick="closeEditModal()"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                                Cancelar
-                            </button>
-                            <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700">
-                                Guardar
-                            </button>
-                        </div>
-                    </form>
-                </div>
+          <dialog> nativo abierto con showModal(). El bloque anterior era un
+          <div class="hidden"> a mano: sin role="dialog", sin aria-modal, sin
+          atrapado del foco (se podía tabular a la página de atrás) y sin
+          devolver el foco al botón al cerrar. El elemento nativo trae las
+          cuatro cosas, más el overlay como ::backdrop, sin ninguna librería.
+        */-->
+        <dialog id="editQuantityDialog" aria-labelledby="editQuantityTitle"
+            class="w-[calc(100%-2rem)] max-w-lg rounded-lg bg-white p-6 text-left shadow-xl">
+            <div class="mb-4">
+                <h2 id="editQuantityTitle" class="text-lg font-medium text-gray-900">Editar cantidad</h2>
+                <p class="mt-1 text-sm text-gray-500" data-dialog-ingredient></p>
             </div>
-        </div>
+            <form id="editQuantityForm" method="post">
+                <!--/*
+                  El token CSRF va explícito porque este form es el único del
+                  panel sin th:action: la URL la fija el JS al abrir el modal,
+                  según qué ingrediente se esté editando. Y es justamente
+                  th:action lo que dispara el RequestDataValueProcessor de
+                  Spring Security que inyecta el hidden en todos los demás.
 
-        <!-- Script para el modal -->
-        <script th:inline="javascript">
-            const productId = [[${product.id}]];
-
-            function openEditModal(ingredientId, ingredientName, currentQuantity, unit) {
-                document.getElementById('modalIngredientName').textContent = ingredientName;
-                document.getElementById('modalUnit').textContent = unit;
-                document.getElementById('editQuantity').value = currentQuantity;
-                document.getElementById('editForm').action = '/products/' + productId + '/recipe/ingredients/' + ingredientId + '/update';
-                document.getElementById('editModal').classList.remove('hidden');
-            }
-
-            function closeEditModal() {
-                document.getElementById('editModal').classList.add('hidden');
-            }
-
-            // Event listeners para botones de editar (usando data attributes para evitar problemas con caracteres especiales)
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.edit-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        const ingredientId = this.dataset.ingredientId;
-                        const ingredientName = this.dataset.ingredientName;
-                        const quantity = this.dataset.quantity;
-                        const unit = this.dataset.unit;
-                        openEditModal(ingredientId, ingredientName, quantity, unit);
-                    });
-                });
-            });
-
-            // Cerrar modal con Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeEditModal();
-                }
-            });
-        </script>
+                  Sin esto el POST salía sin token y la cadena de seguridad del
+                  panel lo rechazaba con 403: "editar cantidad" mostraba la
+                  página de "Tu sesión expiró" en vez de guardar. Estaba así
+                  desde antes de migrar el modal a <dialog>.
+                */-->
+                <input th:if="${_csrf}" type="hidden"
+                    th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="mb-4">
+                    <label for="editQuantity" class="block text-sm font-medium text-gray-700">
+                        Cantidad (<span data-dialog-unit></span>)
+                    </label>
+                    <input type="number" name="quantity" id="editQuantity" step="0.0001" min="0.0001" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" data-dialog-close
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </dialog>
     </div>
+
+    <!--/* El JS vive en un archivo aparte, no en un <script th:inline>: sin JS
+         inline el panel puede servir una CSP sin 'unsafe-inline'. */-->
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/recipe.js}" defer></script>
+    </th:block>
 </body>
 
 </html>

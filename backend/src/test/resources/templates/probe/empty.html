@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+  Banco de pruebas del estado vacío. `clearUrl` llega del test para poder
+  ejercitar las dos ramas sin depender de un listado migrado.
+*/-->
+<head>
+    <title>Probe vacío</title>
+</head>
+<body>
+<table>
+    <tbody>
+    <tr th:replace="~{fragments/table :: emptyRow(${items}, 4, 'tag',
+            'No hay tags registrados',
+            'Los tags permiten clasificar productos.',
+            '/tags/new', 'Crear tag', ${clearUrl})}"></tr>
+    </tbody>
+</table>
+</body>
+</html>

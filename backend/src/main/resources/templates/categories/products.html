@@ -2,119 +2,79 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layout/main}">
 
+<!--/*
+  Productos de una categoría. Es el único listado en grilla de tarjetas y no en
+  tabla, así que usa table :: emptyBody en vez de emptyRow: es exactamente el
+  caso para el que existe el primero (mismo estado vacío, fuera de una tabla).
+
+  La paginación sí es la misma que el resto: el bloque anterior era una tercera
+  variante, distinta de las otras dos que ya convivían en el proyecto.
+*/-->
+
 <head>
     <title th:text="${pageTitle}">Productos de la Categoría</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/categories}" class="text-gray-500 hover:text-primary-600">Categorías</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium" th:text="${category.name}">Categoría</span>
-                </li>
-            </ol>
-        </nav>
 
-        <!-- Category Info -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="flex items-start justify-between">
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Categorías', '/categories', ${category.name})}"></nav>
+
+        <div class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900" th:text="${category.name}"></h2>
-                    <p class="mt-1 text-gray-500" th:text="${category.description ?: 'Sin descripción'}"></p>
+                    <p class="mt-1 text-gray-500" th:text="${category.description} ?: #{empty.description}"></p>
                 </div>
-                <span
-                    class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary-100 text-primary-800">
-                    <span th:text="${products.totalElements}"></span> productos
+                <span class="inline-flex flex-shrink-0 items-center rounded-full bg-primary-100 px-4 py-2 text-sm font-medium text-primary-800">
+                    <span th:text="${products.totalElements}"></span>&nbsp;productos
                 </span>
             </div>
         </div>
 
-        <!-- Products Grid -->
         <div th:if="${!products.content.empty}"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+             class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <div th:each="product : ${products.content}"
-                class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <!-- Product Image -->
-                <div class="w-full h-40 bg-gray-100 overflow-hidden">
+                 class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div class="h-40 w-full overflow-hidden bg-gray-100">
                     <img th:if="${product.imageUrl != null}" th:src="${product.imageUrl}"
-                        th:alt="${product.name}" class="w-full h-full object-cover">
+                         th:alt="${product.name}" class="h-full w-full object-cover">
                     <div th:if="${product.imageUrl == null}"
-                        class="w-full h-full flex items-center justify-center">
-                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                         class="flex h-full w-full items-center justify-center text-gray-300">
+                        <svg th:replace="~{fragments/icons :: icon('image', 'w-12 h-12')}"></svg>
                     </div>
                 </div>
                 <div class="p-5">
-                    <h3 class="font-semibold text-gray-900 text-lg mb-2" th:text="${product.name}"></h3>
-                    <p class="text-gray-500 text-sm mb-4 line-clamp-2"
-                        th:text="${product.description ?: 'Sin descripción'}"></p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xl font-bold text-gray-900" th:if="${product.basePrice}"
-                            th:text="${'' + #numbers.formatDecimal(product.basePrice, 1, 2)}"></span>
-                        <span class="text-gray-400" th:unless="${product.basePrice}">Sin precio</span>
-                    </div>
+                    <h3 class="mb-2 text-lg font-semibold text-gray-900" th:text="${product.name}"></h3>
+                    <p class="mb-4 text-sm text-gray-500"
+                       th:text="${product.description} ?: #{empty.description}"></p>
+                    <span th:if="${product.basePrice}" class="text-xl font-bold text-gray-900"
+                          th:text="${@money.format(product.basePrice)}"></span>
+                    <th:block th:unless="${product.basePrice}">
+                        <span th:replace="~{fragments/table :: muted(#{empty.price})}"></span>
+                    </th:block>
                 </div>
-                <div class="px-5 py-3 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
-                    <a th:href="@{/products/{id}(id=${product.id})}"
-                        class="p-2 text-gray-500 hover:text-primary-600 hover:bg-white rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    </a>
-                    <a th:href="@{/products/{id}/edit(id=${product.id})}"
-                        class="p-2 text-gray-500 hover:text-primary-600 hover:bg-white rounded-lg transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </a>
+                <div class="flex justify-end gap-1 border-t border-gray-200 bg-gray-50 px-5 py-3">
+                    <a th:replace="~{fragments/buttons :: iconLink(
+                            '/products/' + ${product.id}, 'eye', 'Ver producto', 'neutral')}"></a>
+                    <a th:replace="~{fragments/buttons :: iconLink(
+                            '/products/' + ${product.id} + '/edit', 'pencil', 'Editar producto', 'edit')}"></a>
                 </div>
             </div>
         </div>
 
-        <!-- Empty State -->
-        <div th:if="${products.content.empty}" class="text-center py-12 bg-white rounded-xl border border-gray-200">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-            <p class="mt-2 text-gray-500">No hay productos en esta categoría</p>
-            <a th:href="@{/products/new}" class="mt-2 inline-block text-primary-600 hover:text-primary-800">Crear
-                producto</a>
+        <div th:if="${products.content.empty}" class="rounded-xl border border-gray-200 bg-white py-12">
+            <div th:replace="~{fragments/table :: emptyBody('box',
+                    'No hay productos en esta categoría',
+                    'Los productos que asignes a esta categoría van a aparecer acá.',
+                    '/products/new', 'Crear producto', null)}"></div>
         </div>
 
-        <!-- Pagination -->
-        <div th:if="${products.totalPages > 1}" class="mt-8 flex items-center justify-between">
-            <p class="text-sm text-gray-700">
-                Mostrando <span th:text="${products.number * products.size + 1}"></span> -
-                <span th:text="${products.number * products.size + products.numberOfElements}"></span>
-                de <span th:text="${products.totalElements}"></span> productos
-            </p>
-            <div class="flex gap-2">
-                <a th:href="@{/categories/{id}/products(id=${category.id}, page=${products.number - 1})}"
-                    th:classappend="${products.first} ? 'pointer-events-none opacity-50' : ''"
-                    class="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                    Anterior
-                </a>
-                <a th:href="@{/categories/{id}/products(id=${category.id}, page=${products.number + 1})}"
-                    th:classappend="${products.last} ? 'pointer-events-none opacity-50' : ''"
-                    class="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                    Siguiente
-                </a>
-            </div>
+        <div class="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div th:replace="~{fragments/pagination :: bar(
+                    ${products}, '/categories/' + ${category.id} + '/products', 'productos', null)}"></div>
         </div>
     </div>
 </body>

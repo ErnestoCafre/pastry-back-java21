@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  Paginación única. Reemplaza las DOS variantes que convivían:
+    - numerada  (7 listados, ~62 líneas cada uno)
+    - prev/next (6 papeleras, ~20 líneas cada una)
+
+  Uso sin filtros:
+    <div th:replace="~{fragments/pagination :: bar(${tags}, '/tags/deleted', 'tags', null)}"></div>
+
+  Uso con filtros (se preservan al cambiar de página):
+    <div th:replace="~{fragments/pagination :: bar(${products}, '/products', 'productos',
+           ${ {'search': search, 'categoryId': categoryId} })}"></div>
+
+  Los parámetros nulos o vacíos se descartan solos, así que el llamador pasa
+  el mapa completo sin preocuparse por cuáles están activos. Aguanta cualquier
+  tipo de valor: hay filtros String (search), Long (categoryId) y LocalDate
+  (startDate/endDate en ventas).
+
+  Por qué `value.toString()` y no `value` a secas:
+    con `value`, SpEL convierte el valor a String usando el ConversionService
+    de Spring, que es sensible al locale. Con el panel fijado en es-AR, un
+    LocalDate salía como "1/3/26" en vez de "2026-03-01": ilegible, ambiguo
+    (¿1 de marzo o 3 de enero?) y atado a que el locale nunca cambie.
+    toString() da ISO-8601 para los tipos de java.time, que es justo lo que
+    espera el binding de vuelta en @RequestParam LocalDate.
+
+  Dos arreglos respecto del código anterior:
+   1. Ventana deslizante de 5 páginas. Antes se hacía
+      #numbers.sequence(0, totalPages - 1), o sea que con 4.000 productos
+      se renderizaban 200 botones de página.
+   2. Los valores se escapan con #uris.escapeQueryParam. Antes una búsqueda
+      con "&" o "#" rompía el enlace de la página siguiente.
+
+  Sobre la construcción del href — @{...} + ${qs}, no @{|...${qs}|}:
+    @{...} aplica su propia codificación a lo que tenga adentro. Si los
+    filtros ya escapados se meten dentro de la expresión de enlace, se
+    codifican dos veces: "torta & miel" termina como
+    "torta%2520%2526%2520miel" en vez de "torta%20%26%20miel". Por eso
+    @{...} se ocupa solo del path y de page/size, y el sufijo de filtros
+    —escapado una única vez con #uris.escapeQueryParam— se concatena
+    afuera. Hay un test que fija este comportamiento.
+-->
+
+<body>
+
+<div th:fragment="bar(page, url, itemLabel, params)"
+     th:if="${page != null and !page.content.empty}"
+     class="flex flex-col items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row"
+     th:with="qs=${params == null ? '' :
+                   #strings.listJoin(
+                     params.entrySet().?[!#strings.isEmpty(value)]
+                                      .!['&' + key + '=' + #uris.escapeQueryParam(value.toString())], '')},
+              lastIdx=${page.totalPages - 1},
+              winStart=${page.number - 2 &lt; 0 ? 0 : page.number - 2},
+              winEnd=${winStart + 4 &gt; lastIdx ? lastIdx : winStart + 4},
+              winFrom=${winEnd - 4 &lt; 0 ? 0 : winEnd - 4}">
+
+    <!-- Resumen del rango visible -->
+    <p class="text-sm text-gray-500">
+        Mostrando
+        <span class="font-medium text-gray-700" th:text="${page.number * page.size + 1}">1</span>–<span
+            class="font-medium text-gray-700"
+            th:text="${page.number * page.size + page.numberOfElements}">20</span>
+        de <span class="font-medium text-gray-700" th:text="${page.totalElements}">0</span>
+        <span th:text="${itemLabel}">resultados</span>
+    </p>
+
+    <nav th:if="${page.totalPages > 1}" th:aria-label="'Paginación de ' + ${itemLabel}">
+        <ul class="flex items-center gap-1">
+
+            <!-- Anterior -->
+            <li>
+                <a th:if="${page.hasPrevious()}" th:href="@{${url}(size=${page.size}, page=${page.number - 1})} + ${qs}"
+                   class="flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                   aria-label="Página anterior">
+                    <svg th:replace="~{fragments/icons :: icon('chevron-left', 'w-5 h-5')}"></svg>
+                </a>
+                <span th:unless="${page.hasPrevious()}" aria-disabled="true"
+                      class="flex items-center rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-gray-300">
+                    <svg th:replace="~{fragments/icons :: icon('chevron-left', 'w-5 h-5')}"></svg>
+                </span>
+            </li>
+
+            <!-- Salto a la primera + elipsis, si la ventana no la incluye -->
+            <th:block th:if="${winFrom > 0}">
+                <li>
+                    <a th:href="@{${url}(size=${page.size}, page=0)} + ${qs}" aria-label="Primera página"
+                       class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">1</a>
+                </li>
+                <li th:if="${winFrom > 1}" class="px-1 text-gray-400" aria-hidden="true">…</li>
+            </th:block>
+
+            <!-- Ventana de páginas -->
+            <li th:each="i : ${#numbers.sequence(winFrom, winEnd)}">
+                <a th:if="${i != page.number}" th:href="@{${url}(size=${page.size}, page=${i})} + ${qs}" th:text="${i + 1}"
+                   th:aria-label="'Página ' + ${i + 1}"
+                   class="block rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">1</a>
+                <span th:if="${i == page.number}" th:text="${i + 1}" aria-current="page"
+                      th:aria-label="'Página ' + ${i + 1} + ', página actual'"
+                      class="block rounded-lg border border-primary-600 bg-primary-600 px-3 py-2 text-sm font-medium text-white">1</span>
+            </li>
+
+            <!-- Elipsis + salto a la última -->
+            <th:block th:if="${winEnd < lastIdx}">
+                <li th:if="${winEnd < lastIdx - 1}" class="px-1 text-gray-400" aria-hidden="true">…</li>
+                <li>
+                    <a th:href="@{${url}(size=${page.size}, page=${lastIdx})} + ${qs}" th:text="${page.totalPages}"
+                       aria-label="Última página"
+                       class="block rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">9</a>
+                </li>
+            </th:block>
+
+            <!-- Siguiente -->
+            <li>
+                <a th:if="${page.hasNext()}" th:href="@{${url}(size=${page.size}, page=${page.number + 1})} + ${qs}"
+                   class="flex items-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                   aria-label="Página siguiente">
+                    <svg th:replace="~{fragments/icons :: icon('chevron-right', 'w-5 h-5')}"></svg>
+                </a>
+                <span th:unless="${page.hasNext()}" aria-disabled="true"
+                      class="flex items-center rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-gray-300">
+                    <svg th:replace="~{fragments/icons :: icon('chevron-right', 'w-5 h-5')}"></svg>
+                </span>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>

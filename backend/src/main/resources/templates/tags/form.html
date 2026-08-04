@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<!--/*
+  Alta y edición de tag. Reemplaza a tags/create.html y tags/edit.html, que
+  diferían en cuatro líneas: el título, el texto de la miga, el th:action y la
+  etiqueta del botón.
+
+  El modo sale de `tagId`, que el controller ya publicaba en todas las rutas de
+  edición y en ninguna de alta.
+
+  Acentos: el original escribía "Descripcion" y "Organico" sin tilde.
+*/-->
+
+<head>
+    <title th:text="${pageTitle}">Tag</title>
+</head>
+
+<body>
+    <div layout:fragment="content" th:with="editing=${tagId != null}">
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Tags', '/tags',
+                ${editing} ? 'Editar' : 'Nuevo')}"></nav>
+
+        <div class="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div th:replace="~{fragments/alerts :: errorBox(${error})}"></div>
+
+            <form th:action="${editing} ? @{/tags/{id}(id=${tagId})} : @{/tags}"
+                  th:object="${tag}" method="post" class="space-y-6">
+                <div th:replace="~{fragments/alerts :: formErrors}"></div>
+
+                <div th:replace="~{fragments/form :: text(
+                        'name', 'Nombre', true, 'Ej: Vegano, Sin Gluten, Orgánico', null)}"></div>
+
+                <div th:replace="~{fragments/form :: textarea(
+                        'description', 'Descripción', false, 'Descripción opcional del tag')}"></div>
+
+                <div th:replace="~{fragments/form :: actions(
+                        ${editing} ? 'Actualizar Tag' : 'Guardar Tag', '/tags')}"></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  Página de acceso denegado.
+
+  Deliberadamente NO decora layout/main: llega tanto con sesión válida
+  (un EMPLOYEE entrando por URL a /users) como sin ella (token CSRF de una
+  sesión que ya expiró). El sidebar necesita un usuario autenticado, así que
+  usar el layout la rompería justo en el segundo caso.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${staleForm} ? 'Sesión expirada - Malva Pastry Shop'
+                                 : 'Acceso denegado - Malva Pastry Shop'">Acceso denegado</title>
+
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <main class="w-full max-w-md text-center">
+        <div class="rounded-2xl bg-white p-10 shadow-xl">
+
+            <!-- Sesión expirada / formulario viejo -->
+            <div th:if="${staleForm}">
+                <div class="mb-4 text-5xl" aria-hidden="true">⏳</div>
+                <h1 class="mb-2 text-2xl font-bold text-gray-900">Tu sesión expiró</h1>
+                <p class="mb-8 text-gray-500">
+                    El formulario que enviaste ya no era válido. Suele pasar si la página
+                    estuvo abierta mucho tiempo o si el servidor se reinició.
+                    Iniciá sesión de nuevo y volvé a intentarlo.
+                </p>
+                <a th:href="@{/login}"
+                   class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                    Ir al inicio de sesión
+                </a>
+            </div>
+
+            <!-- Falta de permisos -->
+            <div th:unless="${staleForm}">
+                <div class="mb-4 text-5xl" aria-hidden="true">🔒</div>
+                <h1 class="mb-2 text-2xl font-bold text-gray-900">No tenés permiso</h1>
+                <p class="mb-8 text-gray-500">
+                    Tu cuenta no puede acceder a esta sección. Si creés que se trata
+                    de un error, pedile a un administrador que revise tu rol.
+                </p>
+                <div class="flex items-center justify-center gap-3">
+                    <a th:href="@{/dashboard}"
+                       class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                        Volver al panel
+                    </a>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit"
+                                class="rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

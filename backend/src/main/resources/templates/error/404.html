@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  Pagina de "no existe", servida con status 404 por AdminNotFoundAdvice.
+
+  Como error/403, NO decora layout/main. El motivo no es el mismo -aca siempre
+  hay sesion, porque sin ella la cadena de seguridad manda al login antes- sino
+  que una pagina de error no deberia depender del layout: si lo que falla es el
+  layout, decorarlo hace que el error se rompa dentro del manejo del error.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No encontrado - Malva Pastry Shop</title>
+
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <main class="w-full max-w-md text-center">
+        <div class="rounded-2xl bg-white p-10 shadow-xl">
+            <div class="mb-4 text-5xl" aria-hidden="true">🔍</div>
+            <h1 class="mb-2 text-2xl font-bold text-gray-900">No encontramos eso</h1>
+            <p class="mb-8 text-gray-500">
+                El elemento que buscabas no existe o fue eliminado. Puede que el
+                enlace sea viejo, o que alguien lo haya borrado desde otra pantalla.
+            </p>
+
+            <div class="flex items-center justify-center gap-3">
+                <a th:if="${listUrl != null}" th:href="${listUrl}"
+                   class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                    Volver al listado
+                </a>
+                <a th:href="@{/dashboard}"
+                   class="rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                    Ir al panel
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

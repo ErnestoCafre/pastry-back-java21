@@ -1,0 +1,13 @@
+{
+  "name": "malva-admin-css",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build de Tailwind para el panel de administracion. Reemplaza el Play CDN, que compilaba en el navegador en cada carga.",
+  "scripts": {
+    "css": "tailwindcss -i ./src/main/css/admin.css -o ./src/main/resources/static/css/admin.css --minify",
+    "css:watch": "tailwindcss -i ./src/main/css/admin.css -o ./src/main/resources/static/css/admin.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

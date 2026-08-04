@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+  Banco de pruebas de pagination :: bar. Deliberadamente NO decora layout/main:
+  acá interesa el fragment, no el cascarón del panel.
+
+  El mapa de filtros llega del test (ver FragmentProbeController), que es la
+  única forma de pasar nulos, Longs y un orden controlado.
+*/-->
+<head>
+    <title>Probe</title>
+</head>
+<body>
+<div th:replace="~{fragments/pagination :: bar(${page}, '/probe/pagination', 'ítems', ${params})}"></div>
+</body>
+</html>

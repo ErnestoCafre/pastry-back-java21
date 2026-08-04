@@ -6,47 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Malva Pastry Shop</title>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#fdf2f8',
-                            100: '#fce7f3',
-                            200: '#fbcfe8',
-                            300: '#f9a8d4',
-                            400: '#f472b6',
-                            500: '#ec4899',
-                            600: '#db2777',
-                            700: '#be185d',
-                            800: '#9d174d',
-                            900: '#831843',
-                        }
-                    },
-                    animation: {
-                        'fadeInUp': 'fadeInUp 0.5s ease-out',
-                        'logoFloat': 'logoFloat 2s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        logoFloat: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Flowbite CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+    <!--/* Esta página no decora layout/main (el sidebar necesita sesión), así
+         que enlaza el CSS compilado por su cuenta. La paleta y las animaciones
+         fadeInUp/logoFloat que antes se definían acá inline ahora viven en
+         backend/tailwind.config.js, compartidas con el resto del panel. */-->
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-100 to-primary-200 p-4">
@@ -121,8 +85,8 @@
         </div>
     </div>
 
-    <!-- Flowbite JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <!--/* Sin JS: el login es un formulario y nada más. Flowbite se cargaba acá
+         sin que esta página usara un solo componente suyo. */-->
 </body>
 
 </html>

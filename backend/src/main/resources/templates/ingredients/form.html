@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/main}">
+
+<!--/*
+  Alta y edición de ingrediente. Reemplaza a ingredients/create.html y
+  ingredients/edit.html.
+
+  El select de unidad de medida NO usa form :: select y queda escrito acá a
+  propósito: agrupa las opciones en <optgroup> (Peso / Volumen / Unidades) y el
+  fragment solo sabe hacer listas planas. Darle soporte a optgroups para un
+  único consumidor sería complicar el átomo para todos los demás; si algún día
+  aparece un segundo caso, ahí sí conviene extraerlo.
+
+  Acentos: el original escribía "Descripcion" y "Azucar" sin tilde.
+*/-->
+
+<head>
+    <title th:text="${pageTitle}">Ingrediente</title>
+</head>
+
+<body>
+    <div layout:fragment="content" th:with="editing=${ingredientId != null}">
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Ingredientes', '/ingredients',
+                ${editing} ? 'Editar' : 'Nuevo')}"></nav>
+
+        <div class="max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div th:replace="~{fragments/alerts :: errorBox(${error})}"></div>
+
+            <form th:action="${editing} ? @{/ingredients/{id}(id=${ingredientId})} : @{/ingredients}"
+                  th:object="${ingredient}" method="post" class="space-y-6">
+                <div th:replace="~{fragments/alerts :: formErrors}"></div>
+
+                <div th:replace="~{fragments/form :: text(
+                        'name', 'Nombre', true, 'Ej: Harina, Azúcar, Mantequilla', null)}"></div>
+
+                <div th:replace="~{fragments/form :: textarea(
+                        'description', 'Descripción', false, 'Descripción opcional del ingrediente')}"></div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div th:replace="~{fragments/form :: number(
+                            'unitCost', 'Costo Unitario', true, '0.00', '$', '0.01', '0')}"></div>
+
+                    <div>
+                        <label for="unitOfMeasure" class="mb-1 block text-sm font-medium text-gray-700">
+                            <span>Unidad de Medida</span>
+                            <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <select id="unitOfMeasure" th:field="*{unitOfMeasure}" required
+                                th:errorclass="border-red-500 focus:border-red-500 focus:ring-red-500"
+                                th:aria-invalid="${#fields.hasErrors('unitOfMeasure')} ? 'true' : null"
+                                th:aria-describedby="${#fields.hasErrors('unitOfMeasure')} ? 'unitOfMeasure-error' : null"
+                                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 focus:border-primary-500 focus:ring-primary-500">
+                            <option value="">Seleccionar...</option>
+                            <optgroup label="Peso">
+                                <option th:each="unit : ${unitsOfMeasure}"
+                                        th:if="${unit.name().matches('GRAMO|KILOGRAMO|MILIGRAMO|LIBRA|ONZA')}"
+                                        th:value="${unit.name()}"
+                                        th:text="${unit.toString()}"></option>
+                            </optgroup>
+                            <optgroup label="Volumen">
+                                <option th:each="unit : ${unitsOfMeasure}"
+                                        th:if="${unit.name().matches('MILILITRO|LITRO|TAZA|CUCHARADA|CUCHARADITA')}"
+                                        th:value="${unit.name()}"
+                                        th:text="${unit.toString()}"></option>
+                            </optgroup>
+                            <optgroup label="Unidades">
+                                <option th:each="unit : ${unitsOfMeasure}"
+                                        th:if="${unit.name().matches('UNIDAD|DOCENA|PAQUETE|PIEZA')}"
+                                        th:value="${unit.name()}"
+                                        th:text="${unit.toString()}"></option>
+                            </optgroup>
+                        </select>
+                        <p th:if="${#fields.hasErrors('unitOfMeasure')}" id="unitOfMeasure-error"
+                           class="mt-1 text-sm text-red-600" th:errors="*{unitOfMeasure}"></p>
+                    </div>
+                </div>
+
+                <div th:replace="~{fragments/form :: actions(
+                        ${editing} ? 'Actualizar Ingrediente' : 'Guardar Ingrediente', '/ingredients')}"></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

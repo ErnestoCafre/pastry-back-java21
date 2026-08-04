@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+  Banco de pruebas de los campos de filtro.
+
+  Reproduce la forma exacta que necesita sales/list y que la versión anterior
+  de form :: search hacía imposible: TRES campos dentro de UN SOLO formulario.
+  Antes el fragment traía el suyo propio, y no se pueden anidar.
+
+  Va como comentario de parser y no HTML: los comentarios HTML se sirven al
+  navegador, y este menciona las mismas etiquetas que los tests cuentan.
+*/-->
+<head>
+    <title>Probe filtros</title>
+</head>
+<body>
+<form action="/probe/filters" method="get">
+    <div th:replace="~{fragments/form :: searchField('q', 'search', 'Buscar por producto...', ${search})}"></div>
+    <div th:replace="~{fragments/form :: filterField('startDate', 'startDate', 'Desde', 'date', ${startDate}, null)}"></div>
+    <div th:replace="~{fragments/form :: filterField('endDate', 'endDate', 'Hasta', 'date', ${endDate}, null)}"></div>
+</form>
+</body>
+</html>

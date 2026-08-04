@@ -46,16 +46,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public String show(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            User user = userService.findById(id);
-            model.addAttribute("user", user);
-            model.addAttribute("pageTitle", "Usuario: " + user.getFullName());
-            return "users/show";
-        } catch (EntityNotFoundException e) {
-            redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
-            return "redirect:/users";
-        }
+    public String show(@PathVariable Long id, Model model) {
+        User user = userService.findById(id);
+        model.addAttribute("user", user);
+        model.addAttribute("pageTitle", "Usuario: " + user.getFullName());
+        return "users/show";
     }
 
     @GetMapping("/new")
@@ -63,7 +58,7 @@ public class UserController {
         model.addAttribute("user", new CreateUserRequest());
         model.addAttribute("roles", roleRepository.findAll());
         model.addAttribute("pageTitle", "Nuevo Usuario");
-        return "users/create";
+        return "users/form";
     }
 
     @PostMapping
@@ -76,7 +71,7 @@ public class UserController {
         if (result.hasErrors()) {
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Nuevo Usuario");
-            return "users/create";
+            return "users/form";
         }
 
         try {
@@ -87,31 +82,26 @@ public class UserController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Nuevo Usuario");
-            return "users/create";
+            return "users/form";
         }
     }
 
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            User user = userService.findById(id);
+    public String showEditForm(@PathVariable Long id, Model model) {
+        User user = userService.findById(id);
 
-            UpdateUserRequest request = new UpdateUserRequest();
-            request.setName(user.getName());
-            request.setLastName(user.getLastName());
-            request.setEmail(user.getEmail());
-            request.setRoleId(user.getRole().getId());
-            request.setEnabled(user.getEnabled());
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setName(user.getName());
+        request.setLastName(user.getLastName());
+        request.setEmail(user.getEmail());
+        request.setRoleId(user.getRole().getId());
+        request.setEnabled(user.getEnabled());
 
-            model.addAttribute("user", request);
-            model.addAttribute("userId", id);
-            model.addAttribute("roles", roleRepository.findAll());
-            model.addAttribute("pageTitle", "Editar Usuario");
-            return "users/edit";
-        } catch (EntityNotFoundException e) {
-            redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
-            return "redirect:/users";
-        }
+        model.addAttribute("user", request);
+        model.addAttribute("userId", id);
+        model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("pageTitle", "Editar Usuario");
+        return "users/form";
     }
 
     @PostMapping("/{id}")
@@ -126,7 +116,7 @@ public class UserController {
             model.addAttribute("userId", id);
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Editar Usuario");
-            return "users/edit";
+            return "users/form";
         }
 
         try {
@@ -138,7 +128,7 @@ public class UserController {
             model.addAttribute("userId", id);
             model.addAttribute("roles", roleRepository.findAll());
             model.addAttribute("pageTitle", "Editar Usuario");
-            return "users/edit";
+            return "users/form";
         } catch (EntityNotFoundException e) {
             return "redirect:/users";
         }

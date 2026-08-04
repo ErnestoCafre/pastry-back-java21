@@ -76,24 +76,20 @@ public class StorefrontSectionController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
-        try {
-            StorefrontSection section = sectionService.findById(id);
-            long productCount = sectionService.countProducts(id);
+        StorefrontSection section = sectionService.findById(id);
+        long productCount = sectionService.countProducts(id);
 
-            model.addAttribute("section", section);
-            model.addAttribute("productCount", productCount);
-            model.addAttribute("pageTitle", section.getName());
-            return "sections/show";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/sections";
-        }
+        model.addAttribute("section", section);
+        model.addAttribute("productCount", productCount);
+        model.addAttribute("pageTitle", section.getName());
+        return "sections/show";
     }
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("section", new StorefrontSectionRequest());
         model.addAttribute("pageTitle", "Nueva Sección");
-        return "sections/create";
+        return "sections/form";
     }
 
     @PostMapping
@@ -105,7 +101,7 @@ public class StorefrontSectionController {
 
         if (result.hasErrors()) {
             model.addAttribute("pageTitle", "Nueva Sección");
-            return "sections/create";
+            return "sections/form";
         }
 
         try {
@@ -115,28 +111,24 @@ public class StorefrontSectionController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("pageTitle", "Nueva Sección");
-            return "sections/create";
+            return "sections/form";
         }
     }
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        try {
-            StorefrontSection section = sectionService.findById(id);
+        StorefrontSection section = sectionService.findById(id);
 
-            StorefrontSectionRequest request = new StorefrontSectionRequest();
-            request.setName(section.getName());
-            request.setDescription(section.getDescription());
-            request.setDisplayOrder(section.getDisplayOrder());
-            request.setVisible(section.getVisible());
+        StorefrontSectionRequest request = new StorefrontSectionRequest();
+        request.setName(section.getName());
+        request.setDescription(section.getDescription());
+        request.setDisplayOrder(section.getDisplayOrder());
+        request.setVisible(section.getVisible());
 
-            model.addAttribute("section", request);
-            model.addAttribute("sectionId", id);
-            model.addAttribute("pageTitle", "Editar Sección");
-            return "sections/edit";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/sections";
-        }
+        model.addAttribute("section", request);
+        model.addAttribute("sectionId", id);
+        model.addAttribute("pageTitle", "Editar Sección");
+        return "sections/form";
     }
 
     @PostMapping("/{id}")
@@ -150,7 +142,7 @@ public class StorefrontSectionController {
         if (result.hasErrors()) {
             model.addAttribute("sectionId", id);
             model.addAttribute("pageTitle", "Editar Sección");
-            return "sections/edit";
+            return "sections/form";
         }
 
         try {
@@ -161,7 +153,7 @@ public class StorefrontSectionController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("sectionId", id);
             model.addAttribute("pageTitle", "Editar Sección");
-            return "sections/edit";
+            return "sections/form";
         }
     }
 
@@ -214,16 +206,12 @@ public class StorefrontSectionController {
 
     @GetMapping("/{id}/products")
     public String listProducts(@PathVariable Long id, Model model) {
-        try {
-            StorefrontSection section = sectionService.findById(id);
-            model.addAttribute("section", section);
-            model.addAttribute("sectionProducts", sectionService.getSectionProducts(id));
-            model.addAttribute("availableProducts", sectionService.getAvailableProductsForSection(id));
-            model.addAttribute("pageTitle", "Productos de: " + section.getName());
-            return "sections/products";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/sections";
-        }
+        StorefrontSection section = sectionService.findById(id);
+        model.addAttribute("section", section);
+        model.addAttribute("sectionProducts", sectionService.getSectionProducts(id));
+        model.addAttribute("availableProducts", sectionService.getAvailableProductsForSection(id));
+        model.addAttribute("pageTitle", "Productos de: " + section.getName());
+        return "sections/products";
     }
 
     @PostMapping("/{id}/products/{productId}")

@@ -87,15 +87,11 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
-        try {
-            Product product = productService.findById(id);
-            model.addAttribute("product", product);
-            model.addAttribute("productTags", productService.getProductTags(id));
-            model.addAttribute("pageTitle", product.getName());
-            return "products/show";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/products";
-        }
+        Product product = productService.findById(id);
+        model.addAttribute("product", product);
+        model.addAttribute("productTags", productService.getProductTags(id));
+        model.addAttribute("pageTitle", product.getName());
+        return "products/show";
     }
 
     @GetMapping("/new")
@@ -103,7 +99,7 @@ public class ProductController {
         model.addAttribute("product", new ProductRequest());
         model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
         model.addAttribute("pageTitle", "Nuevo Producto");
-        return "products/create";
+        return "products/form";
     }
 
     @PostMapping
@@ -117,7 +113,7 @@ public class ProductController {
         if (result.hasErrors()) {
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Nuevo Producto");
-            return "products/create";
+            return "products/form";
         }
 
         try {
@@ -128,31 +124,27 @@ public class ProductController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Nuevo Producto");
-            return "products/create";
+            return "products/form";
         }
     }
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        try {
-            Product product = productService.findById(id);
+        Product product = productService.findById(id);
 
-            ProductRequest request = new ProductRequest();
-            request.setName(product.getName());
-            request.setDescription(product.getDescription());
-            request.setPreparationDays(product.getPreparationDays());
-            request.setBasePrice(product.getBasePrice());
-            request.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
-            request.setImageUrl(product.getImageUrl());
+        ProductRequest request = new ProductRequest();
+        request.setName(product.getName());
+        request.setDescription(product.getDescription());
+        request.setPreparationDays(product.getPreparationDays());
+        request.setBasePrice(product.getBasePrice());
+        request.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        request.setImageUrl(product.getImageUrl());
 
-            model.addAttribute("product", request);
-            model.addAttribute("productId", id);
-            model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
-            model.addAttribute("pageTitle", "Editar Producto");
-            return "products/edit";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/products";
-        }
+        model.addAttribute("product", request);
+        model.addAttribute("productId", id);
+        model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
+        model.addAttribute("pageTitle", "Editar Producto");
+        return "products/form";
     }
 
     @PostMapping("/{id}")
@@ -167,7 +159,7 @@ public class ProductController {
             model.addAttribute("productId", id);
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Editar Producto");
-            return "products/edit";
+            return "products/form";
         }
 
         try {
@@ -179,7 +171,7 @@ public class ProductController {
             model.addAttribute("productId", id);
             model.addAttribute("categories", categoryService.findAllActive(Pageable.unpaged()));
             model.addAttribute("pageTitle", "Editar Producto");
-            return "products/edit";
+            return "products/form";
         }
     }
 
@@ -230,16 +222,12 @@ public class ProductController {
 
     @GetMapping("/{id}/tags")
     public String listTags(@PathVariable Long id, Model model) {
-        try {
-            Product product = productService.findById(id);
-            model.addAttribute("product", product);
-            model.addAttribute("tags", productService.getProductTags(id));
-            model.addAttribute("availableTags", productService.getAvailableTagsForProduct(id));
-            model.addAttribute("pageTitle", "Tags de: " + product.getName());
-            return "products/tags";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/products";
-        }
+        Product product = productService.findById(id);
+        model.addAttribute("product", product);
+        model.addAttribute("tags", productService.getProductTags(id));
+        model.addAttribute("availableTags", productService.getAvailableTagsForProduct(id));
+        model.addAttribute("pageTitle", "Tags de: " + product.getName());
+        return "products/tags";
     }
 
     @PostMapping("/{id}/tags/{tagId}")
@@ -276,17 +264,13 @@ public class ProductController {
 
     @GetMapping("/{id}/recipe")
     public String showRecipe(@PathVariable Long id, Model model) {
-        try {
-            Product product = productService.findById(id);
-            model.addAttribute("product", product);
-            model.addAttribute("ingredients", productService.getProductIngredients(id));
-            model.addAttribute("availableIngredients", productService.getAvailableIngredientsForProduct(id));
-            model.addAttribute("recipeCost", productService.calculateRecipeCost(id));
-            model.addAttribute("pageTitle", "Receta: " + product.getName());
-            return "products/recipe";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/products";
-        }
+        Product product = productService.findById(id);
+        model.addAttribute("product", product);
+        model.addAttribute("ingredients", productService.getProductIngredients(id));
+        model.addAttribute("availableIngredients", productService.getAvailableIngredientsForProduct(id));
+        model.addAttribute("recipeCost", productService.calculateRecipeCost(id));
+        model.addAttribute("pageTitle", "Receta: " + product.getName());
+        return "products/recipe";
     }
 
     @PostMapping("/{id}/recipe/ingredients/{ingredientId}")

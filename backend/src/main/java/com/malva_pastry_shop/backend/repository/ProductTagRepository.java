@@ -16,8 +16,13 @@ public interface ProductTagRepository extends JpaRepository<ProductTag, Long> {
     @EntityGraph(attributePaths = {"tag"})
     List<ProductTag> findByProductId(Long productId);
 
-    // Productos de un tag (con fetch de product para evitar N+1)
-    @EntityGraph(attributePaths = {"product"})
+    // Productos de un tag. Trae tambien product.category: la vista
+    // tags/products.html la muestra en cada fila y, con open-in-view=false, sin
+    // este fetch salta LazyInitializationException a mitad del render. Como la
+    // respuesta ya se empezo a enviar, el resultado era una pagina cortada con
+    // HTTP 200 en vez de un error. Mismo criterio que
+    // StorefrontSectionProductRepository.
+    @EntityGraph(attributePaths = {"product", "product.category"})
     List<ProductTag> findByTagId(Long tagId);
 
     boolean existsByProductIdAndTagId(Long productId, Long tagId);

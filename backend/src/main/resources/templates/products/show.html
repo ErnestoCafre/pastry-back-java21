@@ -2,128 +2,96 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layout/main}">
 
+<!--/*
+  Ficha de producto. El "Volver al listado" del pie salió (ver categories/show).
+
+  Es la ficha que sostiene el modelo de acciones de fila: al unificar los
+  listados, Receta y Tags salieron de la fila porque son sub-recursos y no
+  cosas que se le hagan al producto. Siguen entrando por acá, que es donde
+  corresponde y donde ya estaban.
+*/-->
+
 <head>
     <title th:text="${pageTitle}">Detalle del Producto</title>
 </head>
 
 <body>
     <div layout:fragment="content">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a th:href="@{/products}" class="text-gray-500 hover:text-primary-600">Productos</a></li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400 mx-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <span class="text-gray-700 font-medium" th:text="${product.name}">Producto</span>
-                </li>
-            </ol>
-        </nav>
 
-        <!-- Product Card -->
-        <div class="max-w-3xl bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <!-- Product Image -->
-            <div th:if="${product.imageUrl != null}" class="w-full h-64 bg-gray-100 overflow-hidden">
-                <img th:src="${product.imageUrl}" th:alt="${product.name}" class="w-full h-full object-cover">
+        <th:block th:replace="~{fragments/alerts :: flash(${success}, ${error})}"></th:block>
+
+        <nav th:replace="~{fragments/breadcrumb :: trail('Productos', '/products', ${product.name})}"></nav>
+
+        <div class="max-w-3xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div th:if="${product.imageUrl != null}" class="h-64 w-full overflow-hidden bg-gray-100">
+                <img th:src="${product.imageUrl}" th:alt="${product.name}" class="h-full w-full object-cover">
             </div>
-            <div th:if="${product.imageUrl == null}" class="w-full h-40 bg-gray-100 flex items-center justify-center">
-                <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+            <div th:if="${product.imageUrl == null}"
+                 class="flex h-40 w-full items-center justify-center bg-gray-100 text-gray-300">
+                <svg th:replace="~{fragments/icons :: icon('image', 'w-16 h-16')}"></svg>
             </div>
 
             <div class="p-6">
-                <div class="flex items-start justify-between mb-6">
+                <div class="mb-6 flex items-start justify-between gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900" th:text="${product.name}"></h2>
-                        <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
                             <span th:if="${product.category}"
-                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800"
-                                th:text="${product.category?.name}"></span>
-                            <!-- Tags -->
+                                  class="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-800"
+                                  th:text="${product.category?.name}"></span>
                             <span th:each="tag : ${productTags}"
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
+                                  class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+                                <svg th:replace="~{fragments/icons :: icon('tag', 'w-3 h-3')}"></svg>
                                 <span th:text="${tag.name}"></span>
                             </span>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="text-3xl font-bold text-gray-900" th:if="${product.basePrice}"
-                            th:text="${'' + #numbers.formatDecimal(product.basePrice, 1, 2)}"></div>
-                        <span class="text-gray-400" th:unless="${product.basePrice}">Sin precio</span>
+                    <div class="flex-shrink-0 text-right">
+                        <div th:if="${product.basePrice}" class="text-3xl font-bold text-gray-900"
+                             th:text="${@money.format(product.basePrice)}"></div>
+                        <th:block th:unless="${product.basePrice}">
+                            <span th:replace="~{fragments/table :: muted(#{empty.price})}"></span>
+                        </th:block>
                     </div>
                 </div>
 
-                <div class="prose max-w-none text-gray-600 mb-6" th:if="${product.description}">
-                    <p th:text="${product.description}"></p>
-                </div>
+                <p th:if="${product.description}" class="mb-6 text-gray-600" th:text="${product.description}"></p>
 
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Días de Preparación</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${product.preparationDays ?: 'No especificado'}"></dd>
+                            th:text="${product.preparationDays} ?: 'No especificado'"></dd>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Creado por</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${product.createdBy?.fullName ?: 'Desconocido'}"></dd>
+                            th:text="${product.createdBy?.fullName} ?: 'Desconocido'"></dd>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(product.insertedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(product.insertedAt)}"></dd>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Última actualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                            th:text="${@dates.format(product.updatedAt)}"></dd>
                     </div>
                 </dl>
             </div>
 
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between">
-                <a th:href="@{/products}"
-                    class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    Volver al listado
-                </a>
-                <div class="flex gap-2">
-                    <a th:href="@{/products/{id}/tags(id=${product.id})}"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
-                        Tags (<span th:text="${#lists.size(productTags)}">0</span>)
-                    </a>
-                    <a th:href="@{/products/{id}/recipe(id=${product.id})}"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                        </svg>
-                        Receta
-                    </a>
-                    <a th:href="@{/products/{id}/edit(id=${product.id})}"
-                        class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                        Editar
-                    </a>
-                    <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post"
-                        onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
-                        <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                            Eliminar
-                        </button>
-                    </form>
-                </div>
+            <div class="flex flex-wrap justify-end gap-2 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <a th:replace="~{fragments/buttons :: link(
+                        '/products/' + ${product.id} + '/tags', 'Tags', 'tag', 'secondary')}"></a>
+                <a th:replace="~{fragments/buttons :: link(
+                        '/products/' + ${product.id} + '/recipe', 'Receta', 'clipboard', 'secondary')}"></a>
+                <a th:replace="~{fragments/buttons :: link(
+                        '/products/' + ${product.id} + '/edit', 'Editar', 'pencil', 'primary')}"></a>
+                <form th:replace="~{fragments/buttons :: action(
+                        '/products/' + ${product.id} + '/delete',
+                        #{confirm.delete.product},
+                        'Eliminar', 'trash', 'danger')}"></form>
             </div>
         </div>
     </div>

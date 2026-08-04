@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  Piezas de tabla: encabezados y estados vacíos.
+
+  El shell (card + overflow-x-auto + <table>) NO se fragmenta: envolver
+  contenido arbitrario obliga a th:insert con markup partido en dos
+  fragments, que se lee peor que las 4 líneas que ahorra. Lo que sí se
+  fragmenta es todo lo repetitivo y propenso a divergir.
+
+  Uso:
+    <th th:replace="~{fragments/table :: th('Nombre')}"></th>
+    <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
+    <tr th:replace="~{fragments/table :: emptyRow(4, 'tag', 'No hay tags registrados',
+                       'Creá el primero para empezar a clasificar productos.',
+                       '/tags/new', 'Crear tag')}"></tr>
+
+  scope="col" en los <th>: ninguna de las 12 tablas del proyecto lo tenía.
+  Sin scope, un lector de pantalla no puede asociar celda ↔ encabezado.
+-->
+
+<body>
+
+<th th:fragment="th(label)" scope="col" th:text="${label}"
+    class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Columna</th>
+
+<th th:fragment="thCenter(label)" scope="col" th:text="${label}"
+    class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Columna</th>
+
+<th th:fragment="thRight(label)" scope="col" th:text="${label}"
+    class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Columna</th>
+
+
+<!--
+  Estado vacío dentro de una tabla.
+
+  `items` es la lista que se está iterando: la condición vive ACÁ, sobre el
+  elemento que lleva th:fragment, no en el llamador. Si se pusiera
+  th:if junto al th:replace en el <tr> que llama, el th:if nunca correría
+  (th:replace precede 100, th:if 300) y el estado vacío se dibujaría
+  siempre, incluso con filas.
+
+  ctaUrl/ctaLabel son opcionales: pasá null en las papeleras, donde
+  "crear" no tiene sentido.
+
+  clearUrl distingue los DOS estados vacíos que no son el mismo:
+
+    clearUrl == null  -> "todavía no hay nada": se muestran title/subtitle y
+                         el CTA de crear.
+    clearUrl != null  -> "no hay nada CON ESTOS FILTROS": texto fijo y
+                         "Limpiar filtros" apuntando a clearUrl. Se ignoran
+                         subtitle y el CTA, porque "Crear el primero" es la
+                         acción equivocada cuando lo que falla es el filtro:
+                         puede haber cien productos y ninguno coincidir.
+
+  El llamador pasa `${filtrosActivos} ? '/products' : null`, y el texto del
+  caso filtrado vive en un solo lugar en vez de reescribirse por listado
+  (products/list y sales/list ya lo redactaban distinto entre sí).
+-->
+<tr th:fragment="emptyRow(items, colspan, icon, title, subtitle, ctaUrl, ctaLabel, clearUrl)"
+    th:if="${#lists.isEmpty(items)}">
+    <td th:colspan="${colspan}" class="px-6 py-12 text-center">
+        <div th:replace="~{:: emptyBody(${icon}, ${title}, ${subtitle}, ${ctaUrl}, ${ctaLabel}, ${clearUrl})}"></div>
+    </td>
+</tr>
+
+
+<!-- Mismo estado vacío fuera de una tabla (paneles, listas en tarjetas). -->
+<div th:fragment="emptyBody(icon, title, subtitle, ctaUrl, ctaLabel, clearUrl)" class="text-center text-gray-500">
+    <svg th:replace="~{fragments/icons :: icon(${icon}, 'mx-auto h-12 w-12 text-gray-300')}"></svg>
+
+    <p class="mt-2 font-medium text-gray-900" th:text="${title}">Sin resultados</p>
+
+    <!--/* `and` de SpEL exige Booleanos: la verdad-idad laxa de Thymeleaf solo
+           se aplica al resultado entero de th:if, no adentro de la expresión.
+           Con `${clearUrl == null and subtitle}` intentaba convertir el texto
+           del subtítulo a Boolean y reventaba el render. */-->
+    <p th:if="${clearUrl}" class="mt-1 text-sm">Ningún resultado coincide con los filtros aplicados.</p>
+    <p th:if="${clearUrl == null and subtitle != null}" class="mt-1 text-sm" th:text="${subtitle}"></p>
+
+    <a th:if="${clearUrl}" th:href="@{${clearUrl}}"
+       class="mt-4 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+        <svg th:replace="~{fragments/icons :: icon('x', 'w-5 h-5')}"></svg>
+        <span>Limpiar filtros</span>
+    </a>
+    <a th:if="${clearUrl == null and ctaUrl != null}" th:href="@{${ctaUrl}}"
+       class="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+        <svg th:replace="~{fragments/icons :: icon('plus', 'w-5 h-5')}"></svg>
+        <span th:text="${ctaLabel}">Crear</span>
+    </a>
+</div>
+
+
+<!--
+  Celda "sin dato". El proyecto alternaba entre '-', 'Sin descripcion',
+  'Sin categoria' y texto en itálica gris según el archivo. Esos textos ahora
+  viven en messages.properties como empty.*; este fragment es el envoltorio.
+-->
+<!-- SIN USO TODAVÍA: preparado para la migración pendiente, no lo cubre
+     FragmentRenderingTest. Verificalo al migrar el primer template que lo use. -->
+<span th:fragment="muted(text)" class="text-sm italic text-gray-400" th:text="${text} ?: '—'">—</span>
+
+</body>
+</html>

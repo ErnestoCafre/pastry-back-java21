@@ -89,22 +89,18 @@ public class TagController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) {
-        try {
-            Tag tag = tagService.findById(id);
-            model.addAttribute("tag", tag);
-            model.addAttribute("usageCount", productService.countProductsByTag(id));
-            model.addAttribute("pageTitle", tag.getName());
-            return "tags/show";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/tags";
-        }
+        Tag tag = tagService.findById(id);
+        model.addAttribute("tag", tag);
+        model.addAttribute("usageCount", productService.countProductsByTag(id));
+        model.addAttribute("pageTitle", tag.getName());
+        return "tags/show";
     }
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("tag", new TagRequest());
         model.addAttribute("pageTitle", "Nuevo Tag");
-        return "tags/create";
+        return "tags/form";
     }
 
     @PostMapping
@@ -116,7 +112,7 @@ public class TagController {
 
         if (result.hasErrors()) {
             model.addAttribute("pageTitle", "Nuevo Tag");
-            return "tags/create";
+            return "tags/form";
         }
 
         try {
@@ -126,26 +122,22 @@ public class TagController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("pageTitle", "Nuevo Tag");
-            return "tags/create";
+            return "tags/form";
         }
     }
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
-        try {
-            Tag tag = tagService.findById(id);
+        Tag tag = tagService.findById(id);
 
-            TagRequest request = new TagRequest();
-            request.setName(tag.getName());
-            request.setDescription(tag.getDescription());
+        TagRequest request = new TagRequest();
+        request.setName(tag.getName());
+        request.setDescription(tag.getDescription());
 
-            model.addAttribute("tag", request);
-            model.addAttribute("tagId", id);
-            model.addAttribute("pageTitle", "Editar Tag");
-            return "tags/edit";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/tags";
-        }
+        model.addAttribute("tag", request);
+        model.addAttribute("tagId", id);
+        model.addAttribute("pageTitle", "Editar Tag");
+        return "tags/form";
     }
 
     @PostMapping("/{id}")
@@ -159,7 +151,7 @@ public class TagController {
         if (result.hasErrors()) {
             model.addAttribute("tagId", id);
             model.addAttribute("pageTitle", "Editar Tag");
-            return "tags/edit";
+            return "tags/form";
         }
 
         try {
@@ -170,7 +162,7 @@ public class TagController {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("tagId", id);
             model.addAttribute("pageTitle", "Editar Tag");
-            return "tags/edit";
+            return "tags/form";
         }
     }
 
@@ -223,16 +215,12 @@ public class TagController {
 
     @GetMapping("/{id}/products")
     public String listProducts(@PathVariable Long id, Model model) {
-        try {
-            Tag tag = tagService.findById(id);
-            model.addAttribute("tag", tag);
-            model.addAttribute("products", productService.getProductsByTag(id));
-            model.addAttribute("availableProducts", productService.getAvailableProductsForTag(id));
-            model.addAttribute("pageTitle", "Productos con tag: " + tag.getName());
-            return "tags/products";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/tags";
-        }
+        Tag tag = tagService.findById(id);
+        model.addAttribute("tag", tag);
+        model.addAttribute("products", productService.getProductsByTag(id));
+        model.addAttribute("availableProducts", productService.getAvailableProductsForTag(id));
+        model.addAttribute("pageTitle", "Productos con tag: " + tag.getName());
+        return "tags/products";
     }
 
     @PostMapping("/{id}/products/{productId}")
