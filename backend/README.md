@@ -227,3 +227,20 @@ plantillas.
 ningun controller sirve, propiedades del modelo inexistentes, formato de moneda en es-AR,
 paginacion que pierde filtros y contratos de los fragments. Rompen el build antes de que
 la pagina rompa en el navegador.
+
+### Paridad de esquema
+
+Prod y dev no comparten camino de esquema: prod corre Flyway con `ddl-auto=none`, dev deja
+que Hibernate lo genere con `ddl-auto=create`. Los dos arrancan bien por separado, asi que
+pueden separarse sin que nada falle hasta el deploy — un campo nuevo en una entidad lo
+levanta dev solo, y no existe en ninguna migracion.
+
+`migration/SchemaParityTest` cierra eso: aplica V1..V6 sobre un Postgres virgen y compara
+el resultado contra el metamodelo de Hibernate, que es la misma fuente de la que sale el
+SQL en runtime.
+
+- **Necesita Docker.** Usa Testcontainers con `postgres:13-alpine`, el piso que declara el
+  README raiz. No sirve H2 ni en modo PostgreSQL: V5 es un bloque PL/pgSQL, V2 usa
+  `ON CONFLICT` y V6 aliasea la tabla en un `DELETE`.
+- **Sin Docker se saltea, no falla.** `mvn test` sigue en verde y surefire reporta los
+  cinco casos como `Skipped`. Un skip se ve; un verde falso, no.
