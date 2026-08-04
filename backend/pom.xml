@@ -108,6 +108,29 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!--
+			Testcontainers: lo pide SchemaParityTest, que corre las migraciones
+			de Flyway sobre un Postgres real. No sirve H2 ni siquiera en modo
+			PostgreSQL: V5 es un bloque PL/pgSQL (DO $$ ... $$), V2 usa
+			ON CONFLICT y V6 aliasea la tabla en un DELETE. Verificar las
+			migraciones contra otro motor seria verificar otra cosa.
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
