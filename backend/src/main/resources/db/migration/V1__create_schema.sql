@@ -1,8 +1,23 @@
 -- ============================================================
 -- V1: Schema completo inicial — Malva Pastry Shop
 -- Generado a partir de entidades JPA con Hibernate 7 / Spring Boot 4
--- Este script es marcado como BASELINE en prod (no se ejecuta).
--- Se usa para crear desde cero en staging y CI.
+--
+-- Este script SI se ejecuta, tambien en prod: sobre una base vacia Flyway
+-- aplica V1..V6 de corrido y el baseline ni interviene, porque solo se activa
+-- si el schema ya tiene tablas y falta flyway_schema_history.
+--
+-- Los CREATE TABLE llevan IF NOT EXISTS, asi que V1 por si sola es
+-- re-ejecutable. La cadena completa NO lo es, y conviene saberlo antes de
+-- confiar en el baseline automatico. Medido sobre una base ya migrada a la que
+-- se le borro el historial —el unico caso en que baseline-on-migrate hace
+-- algo—: V1 pasa como no-op y el arranque muere en V2 con
+--     ERROR: column "system_admin" of relation "users" does not exist
+-- porque V2 inserta esa columna y V4 la elimina. V6 falla despues, por
+-- uk_product_ingredient ya existente.
+--
+-- No se arregla editando V2 ni V6: estan aplicadas y validate-on-migrate
+-- compara checksums. Una base existente sin historial se recupera con un
+-- baseline manual a su version real. Ver application-prod.properties.
 -- ============================================================
 
 -- 1. roles (sin FKs propias)
