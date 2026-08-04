@@ -668,10 +668,12 @@ class TemplateInvariantsTest {
      * Toda confirmación viene de una clave, no de un literal.
      *
      * <p>Es la regla que sostiene el trabajo de copy: el diagnóstico inicial
-     * encontró <b>15 redacciones distintas para 5 acciones</b>, y la mitad
-     * estaban escritas dos veces —una en el listado y otra en la ficha—. Dos
-     * copias del mismo texto en archivos distintos no se rompen: se separan,
-     * porque cada una se ve bien por su cuenta.
+     * encontró <b>15 redacciones distintas para 14 pares (acción, entidad)</b>.
+     * El par de más es la demostración: el borrado de tag se confirmaba en
+     * {@code tags/list.html} y otra vez en {@code tags/show.html}, y las dos
+     * copias ya habían divergido en tildes cuando se midió. Dos copias del
+     * mismo texto en archivos distintos no se rompen: se separan, porque cada
+     * una se ve bien por su cuenta.
      *
      * <p>Se detecta por el signo de apertura de pregunta, que es lo que tienen
      * en común todas y solo ellas.
