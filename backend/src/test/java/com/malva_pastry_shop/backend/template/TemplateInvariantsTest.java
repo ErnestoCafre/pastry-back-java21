@@ -1041,4 +1041,131 @@ class TemplateInvariantsTest {
         // El fragment `th` queda ensombrecido por los <th> de thCenter y thRight.
         assertThat(shadowedFragments("table.html", broken)).hasSize(2);
     }
+
+    // ---------- 12. La unidad de medida se lee igual en todo el panel ----------
+
+    /**
+     * Plantillas donde {@code unitOfMeasure} no es el enum y por lo tanto no
+     * elige nada al renderizarse sola.
+     *
+     * <p>{@code SaleIngredient.unitOfMeasure} es un {@code String}: la venta
+     * congela la unidad al vender, y lo que guarda es {@code getDisplayName()}
+     * —ver {@code SaleService}—. Ahí {@code ${ing.unitOfMeasure}} imprime ese
+     * texto, no un {@code toString()} de enum, y ya coincide con el resto.
+     */
+    private static final Map<String, String> UNIT_IS_NOT_THE_ENUM = Map.of(
+            "sales/show.html", "SaleIngredient.unitOfMeasure es el String congelado en la venta");
+
+    /**
+     * Nadie renderiza {@code UnitOfMeasure} dejándolo caer en su
+     * {@code toString()}.
+     *
+     * <p>El enum tiene dos lecturas —{@code displayName} "Kilogramo" y
+     * {@code toString()} "Kilogramo (kg)"— y una expresión pelada
+     * {@code ${x.unitOfMeasure}} toma la segunda sin decirlo. Así divergieron:
+     * la misma píldora gris junto al nombre del ingrediente decía "Kilogramo" en
+     * {@code ingredients/*} y "Kilogramo (kg)" en {@code products/recipe}.
+     *
+     * <p>El caso que lo vuelve visible es el diálogo de cantidad: su etiqueta ya
+     * dice {@code Cantidad (...)} y recibía el {@code toString()} por
+     * {@code data-unit}, así que se leía <b>"Cantidad (Kilogramo (kg))"</b>, con
+     * el paréntesis anidado.
+     *
+     * <p>La regla no es qué forma usar sino <b>elegirla</b>: píldora y token
+     * llevan {@code displayName}, la unidad inline dentro de un paréntesis o
+     * después de "por" lleva {@code abbreviation}, y el campo de detalle
+     * etiquetado y las {@code <option>} del select llevan {@code toString()},
+     * que es donde enseñar la abreviatura sirve.
+     */
+    @Test
+    @DisplayName("ninguna plantilla renderiza la unidad de medida por toString implícito")
+    void unitOfMeasureIsNeverRenderedImplicitly() {
+        List<String> offenders = new ArrayList<>();
+        for (Path p : templates()) {
+            if (UNIT_IS_NOT_THE_ENUM.containsKey(rel(p))) {
+                continue;
+            }
+            offenders.addAll(implicitUnitRenderings(rel(p), withoutComments(read(p))));
+        }
+
+        assertThat(offenders)
+                .as("""
+                        Hay una unidad de medida que se renderiza sola y cae en el toString()
+                        del enum ("Kilogramo (kg)") sin haberlo elegido. Es como divergieron
+                        la píldora de ingredients/* y la de products/recipe, y como el diálogo
+                        de cantidad terminó diciendo "Cantidad (Kilogramo (kg))".
+
+                        Elegí la lectura y escribila: .displayName para una píldora o token,
+                        .abbreviation para la unidad inline (dentro de un paréntesis o después
+                        de "por"), .toString() para el campo de detalle y las <option>.
+                        """)
+                .isEmpty();
+    }
+
+    /**
+     * Una expresión que termina en {@code .unitOfMeasure} sin pedir una lectura.
+     *
+     * <p>El punto antes del nombre es lo que hace de filtro: deja afuera
+     * {@code th:field="*{unitOfMeasure}"} y {@code #fields.hasErrors('unitOfMeasure')},
+     * que nombran el campo del formulario en vez de imprimirlo. Por eso alcanza
+     * con exigirlo y se pueden cubrir las dos clases de expresión —variable
+     * {@code ${...}} y selección {@code *{...}}—, que imprimen igual.
+     */
+    private static final Pattern IMPLICIT_UNIT = Pattern.compile("[$*]\\{[^}]*\\.unitOfMeasure\\}");
+
+    private static List<String> implicitUnitRenderings(String file, String html) {
+        List<String> found = new ArrayList<>();
+        Matcher m = IMPLICIT_UNIT.matcher(html);
+        while (m.find()) {
+            found.add(file + ": " + m.group());
+        }
+        return found;
+    }
+
+    /**
+     * Control negativo fijo: las cuatro expresiones de recipe.html como estaban,
+     * más una de selección, que imprime igual y también hay que ver.
+     */
+    @Test
+    @DisplayName("el detector de unidad implícita realmente detecta")
+    void theUnitDetectorActuallyDetects() {
+        String broken = """
+                <span th:text="${pi.ingredient.unitOfMeasure}"></span>
+                <button th:data-unit="${pi.ingredient.unitOfMeasure}"></button>
+                <span th:text="${ingredient.unitOfMeasure}"></span>
+                <p th:text="${'Costo: ' + @money.format(ingredient.unitCost) + ' por ' + ingredient.unitOfMeasure}"></p>
+                <span th:text="*{ingredient.unitOfMeasure}"></span>
+                """;
+
+        assertThat(implicitUnitRenderings("sintetico.html", broken)).hasSize(5);
+
+        // Y las formas explícitas no se reportan, incluida la del formulario.
+        String fine = """
+                <span th:text="${ingredient.unitOfMeasure.displayName}"></span>
+                <span th:text="${ingredient.unitOfMeasure.abbreviation}"></span>
+                <dd th:text="${ingredient.unitOfMeasure.toString()}"></dd>
+                <select th:field="*{unitOfMeasure}"></select>
+                <p th:if="${#fields.hasErrors('unitOfMeasure')}"></p>
+                """;
+
+        assertThat(implicitUnitRenderings("sintetico.html", fine)).isEmpty();
+    }
+
+    /**
+     * La excepción de {@link #UNIT_IS_NOT_THE_ENUM} tiene que seguir haciendo
+     * falta, por la misma simetría que {@link #noExceptionOutlivesItsReason()}:
+     * si la plantilla dejó de nombrar la unidad, la excepción no filtra nada y
+     * deja pasar sin aviso lo que vuelva a aparecer ahí.
+     */
+    @Test
+    @DisplayName("la excepción de la unidad sigue haciendo falta")
+    void theUnitExceptionStillApplies() {
+        for (String file : UNIT_IS_NOT_THE_ENUM.keySet()) {
+            Path p = TEMPLATES.resolve(file);
+            assertThat(implicitUnitRenderings(file, withoutComments(read(p))))
+                    .as("%s ya no renderiza unitOfMeasure: sacá la excepción (%s)",
+                            file, UNIT_IS_NOT_THE_ENUM.get(file))
+                    .isNotEmpty();
+        }
+    }
 }

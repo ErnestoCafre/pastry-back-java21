@@ -50,7 +50,7 @@
                                 <div class="flex items-center gap-2">
                                     <span class="font-medium text-gray-900" th:text="${pi.ingredient.name}"></span>
                                     <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
-                                        th:text="${pi.ingredient.unitOfMeasure}"></span>
+                                        th:text="${pi.ingredient.unitOfMeasure.displayName}"></span>
                                 </div>
                                 <div class="mt-1 text-sm text-gray-500">
                                     <span>Cantidad: </span>
@@ -67,14 +67,18 @@
                             <div class="flex items-center gap-1">
                                 <!-- Editar cantidad -->
                                 <!--/* data-action lo arma Thymeleaf con @{...}, no el JS concatenando
-                                     '/products/' + id: así la URL respeta el context-path. */-->
+                                     '/products/' + id: así la URL respeta el context-path.
+
+                                     data-unit lleva la abreviatura y no el nombre: el diálogo lo
+                                     inserta dentro de "Cantidad (...)", que ya pone el paréntesis.
+                                     Con el toString() del enum se leía "Cantidad (Kilogramo (kg))". */-->
                                 <button type="button"
                                     class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors edit-btn"
                                     title="Editar cantidad"
                                     th:data-action="@{/products/{productId}/recipe/ingredients/{ingredientId}/update(productId=${product.id}, ingredientId=${pi.ingredient.id})}"
                                     th:data-ingredient-name="${pi.ingredient.name}"
                                     th:data-quantity="${pi.quantity}"
-                                    th:data-unit="${pi.ingredient.unitOfMeasure}">
+                                    th:data-unit="${pi.ingredient.unitOfMeasure.abbreviation}">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -121,10 +125,12 @@
                                 <div class="flex items-center gap-2">
                                     <span class="font-medium text-gray-900 truncate" th:text="${ingredient.name}"></span>
                                     <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded flex-shrink-0"
-                                        th:text="${ingredient.unitOfMeasure}"></span>
+                                        th:text="${ingredient.unitOfMeasure.displayName}"></span>
                                 </div>
+                                <!--/* La abreviatura después de "por": "por kg", no
+                                     "por Kilogramo (kg)". */-->
                                 <p class="text-sm text-gray-500"
-                                    th:text="${'Costo: ' + @money.format(ingredient.unitCost) + ' por ' + ingredient.unitOfMeasure}"></p>
+                                    th:text="${'Costo: ' + @money.format(ingredient.unitCost) + ' por ' + ingredient.unitOfMeasure.abbreviation}"></p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" name="quantity" step="0.0001" min="0.0001" required
