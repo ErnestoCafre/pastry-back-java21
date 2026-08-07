@@ -5,6 +5,7 @@ import com.malva_pastry_shop.backend.controller.admin.IngredientController;
 import com.malva_pastry_shop.backend.controller.admin.ProductController;
 import com.malva_pastry_shop.backend.controller.admin.SaleController;
 import com.malva_pastry_shop.backend.controller.admin.StorefrontSectionController;
+import com.malva_pastry_shop.backend.controller.admin.TagController;
 import com.malva_pastry_shop.backend.controller.admin.UserController;
 import com.malva_pastry_shop.backend.domain.sales.Sale;
 import com.malva_pastry_shop.backend.repository.RoleRepository;
@@ -17,12 +18,15 @@ import com.malva_pastry_shop.backend.domain.auth.RoleType;
 import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.Category;
 import com.malva_pastry_shop.backend.domain.inventory.Ingredient;
+import com.malva_pastry_shop.backend.domain.inventory.Product;
 import com.malva_pastry_shop.backend.domain.inventory.UnitOfMeasure;
 import com.malva_pastry_shop.backend.domain.storefront.StorefrontSection;
+import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.service.inventory.CategoryService;
 import com.malva_pastry_shop.backend.service.inventory.IngredientService;
 import com.malva_pastry_shop.backend.service.inventory.ProductService;
 import com.malva_pastry_shop.backend.service.storefront.StorefrontSectionService;
+import com.malva_pastry_shop.backend.service.storefront.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -61,7 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(controllers = { CategoryController.class, IngredientController.class,
         StorefrontSectionController.class, UserController.class, SaleController.class,
-        ProductController.class })
+        ProductController.class, TagController.class })
 @DisplayName("Renderizado de listados")
 class ListRenderingTest {
 
@@ -76,6 +80,9 @@ class ListRenderingTest {
 
     @MockitoBean
     private StorefrontSectionService sectionService;
+
+    @MockitoBean
+    private TagService tagService;
 
     @MockitoBean
     private ProductService productService;
@@ -167,12 +174,60 @@ class ListRenderingTest {
     @Nested
     @DisplayName("Encabezados")
     class Headers {
+
+        /**
+         * Los 12 listados del panel: 7 activos y 5 papeleras. Es la misma
+         * población que midió el diagnóstico —"13 celdas para una tabla de 5
+         * columnas, en los 12 listados"—, así que la lista está completa
+         * cuando tiene 12 y {@link #everyListIsCovered()} lo fija.
+         */
+        private static final List<String> EVERY_LIST = List.of(
+                "/categories", "/ingredients", "/products", "/sections", "/tags", "/users", "/sales",
+                "/categories/deleted", "/ingredients/deleted", "/products/deleted",
+                "/sections/deleted", "/tags/deleted");
+
         @Test
         @DisplayName("cada listado dibuja tantos encabezados como celdas por fila")
         void headerCountMatchesBodyCellCount() throws Exception {
+            seedEveryList();
+
+            for (String url : EVERY_LIST) {
+                String html = render(url);
+                assertThat(headers(html))
+                        .as("encabezados de " + url)
+                        // Sin filas, bodyCellCount cuenta la única celda del
+                        // estado vacío y la comparación deja de significar algo.
+                        // isNotEmpty() descarta además el empate en cero, que es
+                        // como un detector roto se disfraza de verde.
+                        .isNotEmpty()
+                        .hasSize(bodyCellCount(html));
+            }
+        }
+
+        /**
+         * El defecto estaba en {@code fragments/table}, o sea en las 12 tablas a
+         * la vez. Un test que recorre 4 URLs y dice "los listados" invita a
+         * creer que las otras 8 están miradas.
+         */
+        @Test
+        @DisplayName("la lista cubre los 12 listados del panel")
+        void everyListIsCovered() {
+            assertThat(EVERY_LIST).hasSize(12).doesNotHaveDuplicates();
+        }
+
+        /**
+         * Una fila en cada listado. Las papeleras usan instancias propias: si
+         * compartieran la del listado activo, marcarles {@code deletedAt} dejaría
+         * a la vista de activos devolviendo algo ya borrado.
+         */
+        private void seedEveryList() {
+            LocalDateTime deletedOn = LocalDateTime.of(2026, 3, 14, 10, 30);
+
             Category category = new Category();
             category.setId(3L);
             category.setName("Tortas");
+            // Sirve dos veces: el listado de categorías y, sin paginar, el
+            // desplegable de filtro de /products.
             when(categoryService.findAllActive(any(Pageable.class))).thenReturn(onePage(category));
 
             Ingredient ingredient = new Ingredient();
@@ -182,6 +237,12 @@ class ListRenderingTest {
             ingredient.setUnitOfMeasure(UnitOfMeasure.KILOGRAMO);
             when(ingredientService.findAllActive(any(Pageable.class))).thenReturn(onePage(ingredient));
 
+            Product product = new Product();
+            product.setId(8L);
+            product.setName("Cheesecake");
+            product.setBasePrice(new BigDecimal("12500.00"));
+            when(productService.findAllActive(any(Pageable.class))).thenReturn(onePage(product));
+
             StorefrontSection section = new StorefrontSection();
             section.setId(2L);
             section.setName("Más vendidos");
@@ -189,14 +250,52 @@ class ListRenderingTest {
             section.setVisible(true);
             when(sectionService.findAllActive(any(Pageable.class))).thenReturn(onePage(section));
 
+            Tag tag = new Tag("Sin TACC");
+            tag.setId(6L);
+            when(tagService.findAllActive(any(Pageable.class))).thenReturn(onePage(tag));
+
             when(userService.findAll(any(Pageable.class))).thenReturn(onePage(admin));
 
-            for (String url : List.of("/categories", "/ingredients", "/sections", "/users")) {
-                String html = render(url);
-                assertThat(headers(html))
-                        .as("encabezados de " + url)
-                        .hasSize(bodyCellCount(html));
-            }
+            Sale sale = new Sale();
+            sale.setId(9L);
+            sale.setProductName("Torta de chocolate");
+            sale.setQuantity(2);
+            sale.setUnitPrice(new BigDecimal("30.00"));
+            sale.setTotalAmount(new BigDecimal("60.00"));
+            sale.setSaleDate(deletedOn);
+            when(saleService.findAll(any(Pageable.class))).thenReturn(onePage(sale));
+            when(saleService.sumTotalAmount()).thenReturn(new BigDecimal("60.00"));
+
+            Category deletedCategory = new Category();
+            deletedCategory.setId(4L);
+            deletedCategory.setName("Descontinuadas");
+            deletedCategory.setDeletedAt(deletedOn);
+            when(categoryService.findDeleted(any(Pageable.class))).thenReturn(onePage(deletedCategory));
+
+            Ingredient deletedIngredient = new Ingredient();
+            deletedIngredient.setId(7L);
+            deletedIngredient.setName("Colorante rojo");
+            deletedIngredient.setUnitCost(new BigDecimal("800.00"));
+            deletedIngredient.setUnitOfMeasure(UnitOfMeasure.GRAMO);
+            deletedIngredient.setDeletedAt(deletedOn);
+            when(ingredientService.findDeleted(any(Pageable.class))).thenReturn(onePage(deletedIngredient));
+
+            Product deletedProduct = new Product();
+            deletedProduct.setId(10L);
+            deletedProduct.setName("Torta descontinuada");
+            deletedProduct.setDeletedAt(deletedOn);
+            when(productService.findDeleted(any(Pageable.class))).thenReturn(onePage(deletedProduct));
+
+            StorefrontSection deletedSection = new StorefrontSection();
+            deletedSection.setId(11L);
+            deletedSection.setName("Temporada pasada");
+            deletedSection.setDeletedAt(deletedOn);
+            when(sectionService.findDeleted(any(Pageable.class))).thenReturn(onePage(deletedSection));
+
+            Tag deletedTag = new Tag("Promo vieja");
+            deletedTag.setId(12L);
+            deletedTag.setDeletedAt(deletedOn);
+            when(tagService.findDeleted(any(Pageable.class))).thenReturn(onePage(deletedTag));
         }
     }
 
@@ -517,7 +616,7 @@ class ListRenderingTest {
     }
 
     /**
-     * Las cuatro papeleras comparten patrón: volver, restaurar, eliminar
+     * Las cinco papeleras comparten patrón: volver, restaurar, eliminar
      * definitivo y estado vacío sin CTA. Antes cada una redactaba su propio
      * texto de confirmación —había cinco variantes del mismo aviso, algunas
      * sin tildes—, y ninguna asociaba el aviso al hecho de ser irreversible.
@@ -550,8 +649,7 @@ class ListRenderingTest {
         @Test
         @DisplayName("productos: muestra la categoría o el marcador de vacío")
         void productsTrash() throws Exception {
-            com.malva_pastry_shop.backend.domain.inventory.Product deleted =
-                    new com.malva_pastry_shop.backend.domain.inventory.Product();
+            Product deleted = new Product();
             deleted.setId(8L);
             deleted.setName("Torta descontinuada");
             deleted.setDeletedAt(LocalDateTime.of(2026, 3, 14, 10, 30));
@@ -621,17 +719,21 @@ class ListRenderingTest {
             section.setDeletedAt(deletedOn);
             when(sectionService.findDeleted(any(Pageable.class))).thenReturn(onePage(section));
 
-            com.malva_pastry_shop.backend.domain.inventory.Product product =
-                    new com.malva_pastry_shop.backend.domain.inventory.Product();
+            Product product = new Product();
             product.setId(8L);
             product.setName("Torta descontinuada");
             product.setDeletedAt(deletedOn);
             when(productService.findDeleted(any(Pageable.class))).thenReturn(onePage(product));
 
-            // tags/deleted usa la misma clave y lo cubre FragmentRenderingTest:
-            // TagController no entra en el slice de este test.
+            Tag tag = new Tag("Promo vieja");
+            tag.setId(12L);
+            tag.setDeletedAt(deletedOn);
+            when(tagService.findDeleted(any(Pageable.class))).thenReturn(onePage(tag));
+
+            // Las cinco papeleras, tags incluida desde que TagController entró al
+            // slice para el conteo de encabezados.
             for (String url : List.of("/categories/deleted", "/ingredients/deleted",
-                    "/sections/deleted", "/products/deleted")) {
+                    "/sections/deleted", "/products/deleted", "/tags/deleted")) {
                 assertThat(render(url)).as(url)
                         .contains("Desconocido")
                         .doesNotContain("??");
