@@ -1,5 +1,9 @@
 package com.malva_pastry_shop.backend.service.inventory;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -8,6 +12,7 @@ import com.malva_pastry_shop.backend.domain.auth.User;
 import com.malva_pastry_shop.backend.domain.inventory.Category;
 import com.malva_pastry_shop.backend.dto.request.CategoryRequest;
 import com.malva_pastry_shop.backend.repository.CategoryRepository;
+import com.malva_pastry_shop.backend.repository.IdCount;
 import com.malva_pastry_shop.backend.repository.ProductRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -133,6 +138,26 @@ public class CategoryService {
 
     public long countProducts(Long categoryId) {
         return productRepository.countByCategoryIdAndDeletedAtIsNull(categoryId);
+    }
+
+    /**
+     * Lo mismo para varias categorías a la vez, en una sola consulta.
+     *
+     * <p>El listado lo necesita por fila. Llamarlo dentro del bucle que arma el
+     * modelo convierte una página de 50 filas en 51 consultas, que es lo que
+     * hacía el listado de tags antes de existir esta variante.
+     *
+     * <p>Una categoría sin productos <b>no aparece</b> en el mapa: un
+     * {@code GROUP BY} no devuelve filas para los grupos vacíos. La plantilla
+     * trata la ausencia como cero.
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countProductsByCategories(Collection<Long> categoryIds) {
+        if (categoryIds.isEmpty()) {
+            return Map.of();
+        }
+        return productRepository.countActiveByCategoryIds(categoryIds).stream()
+                .collect(Collectors.toMap(IdCount::getId, IdCount::getTotal));
     }
 
     // ========== Validaciones ==========
