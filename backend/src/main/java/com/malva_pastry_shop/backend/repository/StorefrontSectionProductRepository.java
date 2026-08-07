@@ -1,5 +1,6 @@
 package com.malva_pastry_shop.backend.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,16 @@ public interface StorefrontSectionProductRepository extends JpaRepository<Storef
     Optional<StorefrontSectionProduct> findByStorefrontSectionIdAndProductId(Long storefrontSectionId, Long productId);
 
     long countByStorefrontSectionIdAndProductDeletedAtIsNull(Long storefrontSectionId);
+
+    // Lo mismo para todas las secciones de una pagina de una sola vez. Las
+    // secciones sin productos NO salen en el resultado: la ausencia es cero.
+    @Query("""
+            select sp.storefrontSection.id as id, count(sp) as total
+            from StorefrontSectionProduct sp
+            where sp.storefrontSection.id in :sectionIds and sp.product.deletedAt is null
+            group by sp.storefrontSection.id
+            """)
+    List<IdCount> countActiveProductsBySectionIds(@Param("sectionIds") Collection<Long> sectionIds);
 
     // Todos los productos asociados, incluidos los de la papelera
     // (para validar el borrado permanente de la seccion)

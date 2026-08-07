@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -376,10 +377,12 @@ class TemplateInvariantsTest {
      * comportamiento vive en archivos de {@code static/js/} enganchados por
      * atributos {@code data-*}.
      *
-     * <p>Eso deja al panel en condiciones de servir una Content-Security-Policy
-     * sin {@code 'unsafe-inline'}, que es el motivo de haber empezado por acá.
-     * <b>Falta configurar la cabecera</b>: mientras no exista, esto es una
-     * precondición cumplida y nada más.
+     * <p>Eso es lo que permite servir una Content-Security-Policy sin
+     * {@code 'unsafe-inline'}, que es el motivo de haber empezado por acá. La
+     * cabecera ya se envía: {@code ADMIN_CSP} en {@code SecurityConfig}. O sea
+     * que este test dejó de ser una precondición y pasó a sostener algo que
+     * está en producción: si vuelve un manejador inline, la CSP lo descarta en
+     * silencio y el comportamiento simplemente no ocurre.
      *
      * <p>El conjunto vacío es a propósito: si aparece un manejador inline
      * nuevo, el test falla y nombra la plantilla.
@@ -722,5 +725,320 @@ class TemplateInvariantsTest {
         // Un 404 de script no rompe la página: simplemente el comportamiento
         // desaparece, que es peor porque no deja rastro.
         assertThat(missing).isEmpty();
+    }
+
+    // ---------- 9. Las columnas de dinero se alinean a la derecha ----------
+
+    /**
+     * Un importe alineado a la izquierda no se puede comparar de un vistazo:
+     * {@code $1.200,00} y {@code $980,50} quedan con las comas en distinta
+     * columna y hay que leer los dos números enteros para saber cuál es mayor.
+     *
+     * <p>El proyecto tenía {@code thRight} desde el principio y lo usaba
+     * <b>solo</b> para "Acciones": las cinco columnas de importe iban con
+     * {@code th}, o sea a la izquierda. No es un defecto que se vea como error
+     * —la tabla se dibuja perfecta— y por eso sobrevivió a doce migraciones.
+     *
+     * <p>Comprueba las dos mitades a la vez, que es lo que hace útil el test:
+     * el {@code <th>} de la columna y el {@code <td>} de la celda. Arreglar una
+     * sola deja la tabla peor que antes.
+     */
+    @Test
+    @DisplayName("toda columna que formatea dinero está alineada a la derecha, encabezado y celda")
+    void moneyColumnsAreRightAligned() {
+        List<String> problems = new ArrayList<>();
+        for (Path p : templates()) {
+            problems.addAll(moneyAlignmentProblems(rel(p), withoutComments(read(p))));
+        }
+
+        assertThat(problems)
+                .as("""
+                        Hay importes que no se alinean a la derecha.
+
+                        La columna va con fragments/table :: thRight y la celda con text-right.
+                        Las dos: con una sola, el título y los números quedan en bordes opuestos.
+                        """)
+                .isEmpty();
+    }
+
+    private static final Pattern THEAD = Pattern.compile("(?s)<thead\\b.*?</thead>");
+    private static final Pattern TH_CALL =
+            Pattern.compile("fragments/table\\s*::\\s*(thLeft|thCenter|thRight)\\s*\\(");
+    private static final Pattern BODY_ROW = Pattern.compile("<tr\\s[^>]*th:each=");
+
+    /**
+     * Empareja la columna k del {@code <thead>} con la celda k de la fila de
+     * datos. Paquete-privado para que el control negativo lo alimente con un
+     * caso sintético.
+     *
+     * <p>Da por sentado que la plantilla tiene una sola tabla y una sola fila
+     * {@code th:each} —cierto en las 12 del panel—. Si eso cambia, el
+     * emparejamiento deja de valer, así que lo <b>reporta</b> en vez de callar:
+     * un detector que se rinde en silencio es peor que no tenerlo.
+     */
+    static List<String> moneyAlignmentProblems(String where, String html) {
+        List<String> out = new ArrayList<>();
+
+        List<String> heads = THEAD.matcher(html).results().map(MatchResult::group).toList();
+        if (heads.isEmpty() || !html.contains("@money.format")) {
+            return out;
+        }
+        if (heads.size() > 1) {
+            out.add(where + " tiene " + heads.size() + " <thead>: el emparejamiento"
+                    + " columna↔celda de este test ya no aplica y hay que extenderlo");
+            return out;
+        }
+
+        List<String> alignment = TH_CALL.matcher(heads.get(0)).results()
+                .map(m -> m.group(1)).toList();
+
+        Matcher row = BODY_ROW.matcher(html);
+        if (!row.find()) {
+            return out;
+        }
+        int end = html.indexOf("</tr>", row.start());
+        List<String> cells = splitCells(html.substring(row.start(), end < 0 ? html.length() : end));
+
+        if (cells.size() != alignment.size()) {
+            out.add(where + " tiene " + alignment.size() + " columnas en el <thead> y "
+                    + cells.size() + " celdas en la fila de datos");
+            return out;
+        }
+
+        for (int i = 0; i < cells.size(); i++) {
+            String cell = cells.get(i);
+            if (!cell.contains("@money.format")) {
+                continue;
+            }
+            String openTag = cell.substring(0, Math.max(cell.indexOf('>') + 1, 1));
+            if (!"thRight".equals(alignment.get(i))) {
+                out.add(where + ": la columna " + (i + 1) + " formatea dinero y su encabezado"
+                        + " usa " + alignment.get(i) + " en vez de thRight");
+            }
+            if (!openTag.contains("text-right")) {
+                out.add(where + ": la celda de la columna " + (i + 1)
+                        + " formatea dinero y no lleva text-right");
+            }
+        }
+        return out;
+    }
+
+    /** Parte una fila en celdas. Las 12 tablas no anidan tablas, así que alcanza. */
+    private static List<String> splitCells(String rowHtml) {
+        List<String> cells = new ArrayList<>();
+        Matcher m = Pattern.compile("<td[\\s>]").matcher(rowHtml);
+        int start = -1;
+        while (m.find()) {
+            if (start >= 0) {
+                cells.add(rowHtml.substring(start, m.start()));
+            }
+            start = m.start();
+        }
+        if (start >= 0) {
+            cells.add(rowHtml.substring(start));
+        }
+        return cells;
+    }
+
+    /**
+     * Un detector que devuelve la lista vacía es indistinguible de uno roto,
+     * así que este caso sintético tiene que reportar siempre. Mismo contrato
+     * que {@code ModelPropertyIntegrityTest#theDetectorActuallyDetects}.
+     */
+    @Test
+    @DisplayName("el detector de alineación realmente detecta")
+    void theAlignmentDetectorActuallyDetects() {
+        String broken = """
+                <table><thead><tr>
+                  <th th:replace="~{fragments/table :: thLeft('Nombre')}"></th>
+                  <th th:replace="~{fragments/table :: thLeft('Precio')}"></th>
+                </tr></thead>
+                <tbody>
+                  <tr th:each="p : ${products.content}">
+                    <td class="px-6 py-4"><span th:text="${p.name}"></span></td>
+                    <td class="px-6 py-4"><span th:text="${@money.format(p.basePrice)}"></span></td>
+                  </tr>
+                </tbody></table>
+                """;
+
+        // Dos hallazgos: el th no es thRight y el td no lleva text-right.
+        assertThat(moneyAlignmentProblems("sintetico.html", broken)).hasSize(2);
+    }
+
+    // ---------- 10. El estado vacío abarca todas las columnas ----------
+
+    /**
+     * {@code emptyRow} recibe el colspan como número literal y nada lo ata al
+     * {@code <thead>}: agregar o quitar un {@code <th>} no lo actualiza. La
+     * fila de "no hay nada" queda abarcando de menos y el resto de la tabla
+     * vacío al lado.
+     *
+     * <p>No falla, no se loguea, y solo se ve cuando la tabla queda sin filas
+     * —o sea casi nunca en desarrollo y siempre en una instalación nueva—.
+     *
+     * <p>Los 12 coincidían al escribir este test. Existe porque el PR que
+     * reordenó {@code ingredients/deleted} de 6 a 7 columnas es exactamente el
+     * momento en que se olvida.
+     */
+    @Test
+    @DisplayName("el colspan del estado vacío coincide con las columnas del thead")
+    void everyEmptyRowSpansItsHeaders() {
+        List<String> problems = new ArrayList<>();
+        for (Path p : templates()) {
+            problems.addAll(emptyRowMismatches(rel(p), withoutComments(read(p))));
+        }
+
+        assertThat(problems)
+                .as("""
+                        El estado vacío de una tabla no abarca todas sus columnas.
+
+                        El colspan de fragments/table :: emptyRow es un literal, así que
+                        agregar o quitar un <th> no lo actualiza: hay que tocarlo a mano.
+                        """)
+                .isEmpty();
+    }
+
+    // <th[\s>] no matchea <thead> —la 'e' impide el corte de \b— ni <th:block>,
+    // que sí matchearía con <th\b porque ':' no es carácter de palabra.
+    private static final Pattern TH_TAG = Pattern.compile("<th[\\s>]");
+    private static final Pattern EMPTY_ROW_CALL = Pattern.compile(
+            "fragments/table\\s*::\\s*emptyRow\\(((?:[^()]|\\([^()]*\\))*)\\)", Pattern.DOTALL);
+
+    /** Paquete-privado para que el control negativo lo alimente con un caso sintético. */
+    static List<String> emptyRowMismatches(String where, String html) {
+        List<String> out = new ArrayList<>();
+
+        List<String> heads = THEAD.matcher(html).results().map(MatchResult::group).toList();
+        if (heads.isEmpty()) {
+            return out;
+        }
+        if (heads.size() > 1) {
+            out.add(where + " tiene " + heads.size() + " <thead>: el emparejamiento"
+                    + " thead↔emptyRow de este test ya no aplica y hay que extenderlo");
+            return out;
+        }
+
+        int columns = (int) TH_TAG.matcher(heads.get(0)).results().count();
+
+        Matcher call = EMPTY_ROW_CALL.matcher(html);
+        while (call.find()) {
+            List<String> args = splitArgs(call.group(1));
+            if (args.size() < 2) {
+                continue;   // lo reporta everyFragmentCallMatchesItsSignature
+            }
+            String colspan = args.get(1).trim();
+            if (!colspan.equals(String.valueOf(columns))) {
+                out.add(where + ": el thead tiene " + columns
+                        + " columnas y el estado vacío declara colspan=" + colspan);
+            }
+        }
+        return out;
+    }
+
+    /** Control negativo fijo, por el mismo motivo que el de alineación. */
+    @Test
+    @DisplayName("el detector de colspan realmente detecta")
+    void theColspanDetectorActuallyDetects() {
+        String broken = """
+                <table><thead><tr>
+                  <th th:replace="~{fragments/table :: thLeft('A')}"></th>
+                  <th th:replace="~{fragments/table :: thLeft('B')}"></th>
+                  <th th:replace="~{fragments/table :: thRight('C')}"></th>
+                </tr></thead><tbody>
+                  <tr th:replace="~{fragments/table :: emptyRow(${x}, 2, 'tag',
+                          'T', 'S', null, null, null)}"></tr>
+                </tbody></table>
+                """;
+
+        assertThat(emptyRowMismatches("sintetico.html", broken)).hasSize(1);
+    }
+
+    // ---------- 11. Ningún fragment comparte nombre con una etiqueta vecina ----------
+
+    /**
+     * {@code ~{archivo :: nombre}} es un <b>markup selector</b>: un nombre
+     * suelto matchea un {@code th:fragment} <i>o</i> cualquier elemento con ese
+     * nombre de etiqueta. Si el archivo tiene las dos cosas, el selector
+     * devuelve varios elementos y se dibujan <b>todos</b>.
+     *
+     * <p>Fue el bug del encabezado. {@code table.html} declaraba
+     * {@code th:fragment="th(label)"} sobre un {@code <th>}, y tenía otros dos
+     * {@code <th>} hermanos —{@code thCenter} y {@code thRight}—. Cada
+     * {@code :: th('X')} los seleccionaba a los tres: una tabla de 5 columnas
+     * servía 13 celdas de encabezado, en los 12 listados, durante toda la vida
+     * del fragment. Nada fallaba: la página se servía completa y con 200.
+     *
+     * <p>Lo que hace peligroso al patrón no es el nombre en sí. Hoy también hay
+     * fragments llamados {@code select} y {@code textarea}, y no se rompen
+     * porque sus elementos homónimos están <b>adentro</b> del propio fragment:
+     * el selector devuelve el ancestro y el descendiente viaja dentro, no como
+     * un segundo resultado. El bug aparece cuando el homónimo es un
+     * <b>hermano</b>, fuera del subárbol del fragment.
+     *
+     * <p>Por eso el test comprueba la posición y no el nombre: prohibir todo
+     * nombre que coincida con una etiqueta obligaría a renombrar {@code select},
+     * {@code textarea} y {@code link} sin que ninguno esté roto.
+     */
+    @Test
+    @DisplayName("ningún fragment comparte nombre con una etiqueta fuera de su propio subárbol")
+    void noFragmentIsShadowedByASiblingTag() {
+        List<String> problems = new ArrayList<>();
+        for (Path p : templates()) {
+            if (!p.getParent().getFileName().toString().equals("fragments")) {
+                continue;
+            }
+            problems.addAll(shadowedFragments(rel(p), withoutComments(read(p))));
+        }
+
+        assertThat(problems)
+                .as("""
+                        Un fragment tiene el nombre de una etiqueta que también aparece fuera de él.
+
+                        El selector va a devolver los dos y la plantilla va a dibujar de más, sin
+                        fallar. Renombrá el fragment a algo que no sea un nombre de etiqueta
+                        —fue el caso de `th`, que pasó a llamarse `thLeft`—.
+                        """)
+                .isEmpty();
+    }
+
+    private static final Pattern FRAGMENT_DECL = Pattern.compile("th:fragment=\"(\\w+)");
+
+    /** Paquete-privado para que el control negativo lo alimente con un caso sintético. */
+    static List<String> shadowedFragments(String where, String html) {
+        List<String> out = new ArrayList<>();
+
+        // Los fragments de estos archivos son hermanos de primer nivel, así que
+        // el subárbol de cada uno va desde su declaración hasta la siguiente.
+        List<MatchResult> decls = FRAGMENT_DECL.matcher(html).results().toList();
+
+        for (int i = 0; i < decls.size(); i++) {
+            MatchResult decl = decls.get(i);
+            String name = decl.group(1);
+            int from = decl.start();
+            int to = (i + 1 < decls.size()) ? decls.get(i + 1).start() : html.length();
+
+            Matcher tag = Pattern.compile("<" + Pattern.quote(name) + "[\\s>]").matcher(html);
+            while (tag.find()) {
+                if (tag.start() < from || tag.start() >= to) {
+                    out.add(where + ": el fragment '" + name + "' comparte nombre con un <"
+                            + name + "> que está fuera de su subárbol; el selector devuelve los dos");
+                }
+            }
+        }
+        return out;
+    }
+
+    /** Control negativo fijo: el archivo de encabezados como estaba cuando fallaba. */
+    @Test
+    @DisplayName("el detector de nombres ensombrecidos realmente detecta")
+    void theShadowDetectorActuallyDetects() {
+        String broken = """
+                <th th:fragment="th(label)" scope="col" th:text="${label}" class="text-left">Columna</th>
+                <th th:fragment="thCenter(label)" scope="col" th:text="${label}" class="text-center">Columna</th>
+                <th th:fragment="thRight(label)" scope="col" th:text="${label}" class="text-right">Columna</th>
+                """;
+
+        // El fragment `th` queda ensombrecido por los <th> de thCenter y thRight.
+        assertThat(shadowedFragments("table.html", broken)).hasSize(2);
     }
 }

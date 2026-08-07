@@ -195,7 +195,7 @@ plantillas.
 
 | Archivo | Fragments | Resuelve |
 |---|---|---|
-| `table.html` | `th`, `thCenter`, `thRight`, `emptyRow`, `emptyBody`, `muted` | Encabezados alineados y estados vacios de los listados |
+| `table.html` | `thLeft`, `thCenter`, `thRight`, `emptyRow`, `emptyBody`, `muted` | Encabezados alineados y estados vacios de los listados |
 | `form.html` | `text`, `number`, `textarea`, `select`, `checkbox`, `actions`, `searchField`, `filterField` | Campos con label, error de validacion y filtros |
 | `buttons.html` | `link`, `submit`, `iconLink`, `iconSubmit`, `iconDelete`, `action`, `pill` | Acciones de fila y de formulario |
 | `alerts.html` | `flash`, `successBox`, `errorBox`, `formErrors` | Mensajes flash y bloques de error |

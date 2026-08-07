@@ -59,6 +59,13 @@ public class CategoryController {
         }
 
         model.addAttribute("categories", categories);
+
+        // La columna "Productos" del listado muestra el contador, igual que en
+        // tags y secciones. Un solo GROUP BY para toda la página: preguntarlo
+        // por fila convierte 50 filas en 51 consultas.
+        model.addAttribute("productCounts", categoryService.countProductsByCategories(
+                categories.getContent().stream().map(Category::getId).toList()));
+
         model.addAttribute("pageTitle", "Categorías");
         return "categories/list";
     }

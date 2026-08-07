@@ -55,6 +55,12 @@ public class StorefrontSectionController {
         }
 
         model.addAttribute("sections", sections);
+
+        // Ver CategoryController.list: el contador de la columna "Productos"
+        // sale de una sola consulta agrupada, no de una por fila.
+        model.addAttribute("productCounts", sectionService.countProductsBySections(
+                sections.getContent().stream().map(StorefrontSection::getId).toList()));
+
         model.addAttribute("pageTitle", "Secciones");
         return "sections/list";
     }

@@ -28,29 +28,33 @@
                     <caption class="sr-only">Categorías en la papelera</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th th:replace="~{fragments/table :: th('Nombre')}"></th>
-                            <th th:replace="~{fragments/table :: th('Descripción')}"></th>
-                            <th th:replace="~{fragments/table :: th('Eliminada')}"></th>
-                            <th th:replace="~{fragments/table :: th('Eliminada por')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Nombre')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Descripción')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Eliminada')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Eliminada por')}"></th>
                             <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
                         <tr th:each="category : ${categories.content}" class="hover:bg-gray-50">
                             <td class="whitespace-nowrap px-6 py-4">
-                                <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
-                                    <svg th:replace="~{fragments/icons :: icon('folder', 'w-4 h-4')}"></svg>
-                                    <span th:text="${category.name}"></span>
-                                </span>
+                                <div class="font-medium text-gray-600" th:text="${category.name}"></div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="max-w-xs truncate text-sm text-gray-500"
-                                     th:text="${category.description} ?: '—'"></div>
+                                <div class="max-w-xs truncate">
+                                    <span th:if="${category.description != null}" class="text-sm text-gray-500"
+                                          th:text="${category.description}"></span>
+                                    <!--/* El th:unless va en un envoltorio y NO junto al
+                                           th:replace: juntos, la condicion no se evalua. */-->
+                                    <th:block th:unless="${category.description != null}">
+                                        <span th:replace="~{fragments/table :: muted(#{empty.description})}"></span>
+                                    </th:block>
+                                </div>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
                                 th:text="${@dates.format(category.deletedAt)}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
-                                th:text="${category.deletedBy?.fullName} ?: 'Desconocido'"></td>
+                                th:text="${category.deletedBy?.fullName} ?: #{empty.user}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <form th:replace="~{fragments/buttons :: pill(

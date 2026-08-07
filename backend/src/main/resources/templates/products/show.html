@@ -66,7 +66,7 @@
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Creado por</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${product.createdBy?.fullName} ?: 'Desconocido'"></dd>
+                            th:text="${product.createdBy?.fullName} ?: #{empty.user}"></dd>
                     </div>
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>

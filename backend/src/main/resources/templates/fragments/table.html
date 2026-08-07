@@ -10,11 +10,24 @@
   fragmenta es todo lo repetitivo y propenso a divergir.
 
   Uso:
-    <th th:replace="~{fragments/table :: th('Nombre')}"></th>
+    <th th:replace="~{fragments/table :: thLeft('Nombre')}"></th>
     <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
-    <tr th:replace="~{fragments/table :: emptyRow(4, 'tag', 'No hay tags registrados',
+
+  El encabezado por defecto se llama thLeft y NO th, y el nombre no es
+  cosmético: `::  th(...)` no seleccionaba el fragment, seleccionaba **la
+  etiqueta <th>**. El selector de Thymeleaf es un markup selector, y un nombre
+  suelto matchea tanto un th:fragment como un elemento con ese nombre de
+  etiqueta. Como este archivo tiene tres elementos <th> —los tres encabezados—,
+  cada llamada a th('X') dibujaba LOS TRES: uno a la izquierda, uno centrado y
+  uno a la derecha, los tres con la misma etiqueta.
+
+  O sea que una tabla de 5 columnas servía 13 celdas de encabezado y el título
+  de cada columna no caía sobre su columna. thCenter y thRight nunca lo
+  sufrieron porque no existe ninguna etiqueta HTML con esos nombres.
+    <tr th:replace="~{fragments/table :: emptyRow(${tags.content}, 4, 'tag',
+                       'No hay tags registrados',
                        'Creá el primero para empezar a clasificar productos.',
-                       '/tags/new', 'Crear tag')}"></tr>
+                       '/tags/new', 'Crear tag', null)}"></tr>
 
   scope="col" en los <th>: ninguna de las 12 tablas del proyecto lo tenía.
   Sin scope, un lector de pantalla no puede asociar celda ↔ encabezado.
@@ -22,7 +35,7 @@
 
 <body>
 
-<th th:fragment="th(label)" scope="col" th:text="${label}"
+<th th:fragment="thLeft(label)" scope="col" th:text="${label}"
     class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Columna</th>
 
 <th th:fragment="thCenter(label)" scope="col" th:text="${label}"
@@ -97,8 +110,6 @@
   'Sin categoria' y texto en itálica gris según el archivo. Esos textos ahora
   viven en messages.properties como empty.*; este fragment es el envoltorio.
 -->
-<!-- SIN USO TODAVÍA: preparado para la migración pendiente, no lo cubre
-     FragmentRenderingTest. Verificalo al migrar el primer template que lo use. -->
 <span th:fragment="muted(text)" class="text-sm italic text-gray-400" th:text="${text} ?: '—'">—</span>
 
 </body>

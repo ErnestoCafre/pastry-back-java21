@@ -31,7 +31,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -124,7 +123,7 @@ class FragmentRenderingTest {
                 PageRequest.of(0, 50), 2);
 
         when(tagService.findAllActive(any(Pageable.class))).thenReturn(page);
-        when(productService.countProductsByTag(anyLong())).thenReturn(7L);
+        when(productService.countProductsByTags(any())).thenReturn(java.util.Map.of(1L, 7L));
 
         String html = render("/tags");
 
@@ -144,9 +143,14 @@ class FragmentRenderingTest {
         // filas
         assertThat(html).contains("Vegano");
         assertThat(html).contains("Sin TACC");
-        // description null -> guion largo del fragment, no "null"
-        assertThat(html).contains("—");
+        // description null -> el texto de ausencia de messages.properties, que
+        // es el mismo que muestra la ficha. Antes la tabla decía "—" y la
+        // ficha "Sin descripción" para el mismo campo vacío.
+        assertThat(html).contains("Sin descripción");
         assertThat(html).doesNotContain(">null<");
+        // El contador sale de una sola consulta agrupada; un tag que no está
+        // en el mapa (el 2) no tiene productos y la celda dice 0.
+        assertThat(html).contains(">7<").contains(">0<");
 
         // buttons :: iconLink / iconDelete
         assertThat(html).contains("Ver tag");
@@ -184,7 +188,7 @@ class FragmentRenderingTest {
                 PageRequest.of(0, 50), 120);
 
         when(tagService.search(any(String.class), any(Pageable.class))).thenReturn(page);
-        when(productService.countProductsByTag(anyLong())).thenReturn(0L);
+        when(productService.countProductsByTags(any())).thenReturn(java.util.Map.of());
 
         // Valor crudo con espacio y &: es lo que llega al modelo tras decodificar
         // la petición real. Se pasa como parámetro y no dentro de la URL porque
@@ -215,7 +219,7 @@ class FragmentRenderingTest {
                 PageRequest.of(50, 1), 100);
 
         when(tagService.findAllActive(any(Pageable.class))).thenReturn(page);
-        when(productService.countProductsByTag(anyLong())).thenReturn(0L);
+        when(productService.countProductsByTags(any())).thenReturn(java.util.Map.of());
 
         String html = render("/tags");
 

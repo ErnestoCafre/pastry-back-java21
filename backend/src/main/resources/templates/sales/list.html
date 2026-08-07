@@ -73,13 +73,13 @@
                     <caption class="sr-only">Listado de ventas registradas</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th th:replace="~{fragments/table :: th('ID')}"></th>
-                            <th th:replace="~{fragments/table :: th('Fecha')}"></th>
-                            <th th:replace="~{fragments/table :: th('Producto')}"></th>
-                            <th th:replace="~{fragments/table :: th('Cliente')}"></th>
-                            <th th:replace="~{fragments/table :: thCenter('Cantidad')}"></th>
-                            <th th:replace="~{fragments/table :: th('Precio Unit.')}"></th>
-                            <th th:replace="~{fragments/table :: th('Total')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('ID')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Fecha')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Producto')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Cliente')}"></th>
+                            <th th:replace="~{fragments/table :: thRight('Cantidad')}"></th>
+                            <th th:replace="~{fragments/table :: thRight('Precio Unit.')}"></th>
+                            <th th:replace="~{fragments/table :: thRight('Total')}"></th>
                             <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
                     </thead>
@@ -100,13 +100,13 @@
                             <td class="whitespace-nowrap px-6 py-4">
                                 <div class="text-sm text-gray-900" th:text="${sale.customerName} ?: '—'"></div>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-center">
+                            <td class="whitespace-nowrap px-6 py-4 text-right">
                                 <div class="text-sm text-gray-900" th:text="${sale.quantity}"></div>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4">
+                            <td class="whitespace-nowrap px-6 py-4 text-right">
                                 <div class="text-sm text-gray-900" th:text="${@money.format(sale.unitPrice)}"></div>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4">
+                            <td class="whitespace-nowrap px-6 py-4 text-right">
                                 <div class="text-sm font-semibold text-green-600"
                                      th:text="${@money.format(sale.totalAmount)}"></div>
                             </td>

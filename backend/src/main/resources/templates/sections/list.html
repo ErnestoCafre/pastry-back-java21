@@ -6,6 +6,9 @@
   Acciones de fila: Ver, Editar y Borrar. Antes eran "Ver" y "Ver productos"
   mezcladas en la misma celda; el sub-recurso vuelve a su columna de datos.
 
+  La columna "Productos" muestra el contador, como en tags y categorías. Acá
+  decía "Ver" a secas. Ver el comentario de categories/list.
+
   Acentos: el encabezado decía "Descripcion" y la insignia de visible decía
   "Si" sin tilde.
 */-->
@@ -29,9 +32,9 @@
                     <caption class="sr-only">Listado de secciones de la vitrina</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th th:replace="~{fragments/table :: th('Nombre')}"></th>
-                            <th th:replace="~{fragments/table :: th('Descripción')}"></th>
-                            <th th:replace="~{fragments/table :: thCenter('Orden')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Nombre')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Descripción')}"></th>
+                            <th th:replace="~{fragments/table :: thRight('Orden')}"></th>
                             <th th:replace="~{fragments/table :: thCenter('Visible')}"></th>
                             <th th:replace="~{fragments/table :: thCenter('Productos')}"></th>
                             <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
@@ -40,19 +43,27 @@
                     <tbody class="divide-y divide-gray-200 bg-white">
                         <tr th:each="section : ${sections.content}" class="hover:bg-gray-50">
                             <td class="whitespace-nowrap px-6 py-4">
-                                <a th:href="@{/sections/{id}(id=${section.id})}" class="group inline-flex">
-                                    <span class="inline-flex items-center gap-2 rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-800 transition-colors group-hover:bg-primary-200">
-                                        <svg th:replace="~{fragments/icons :: icon('list', 'w-4 h-4')}"></svg>
-                                        <span th:text="${section.name}"></span>
-                                    </span>
-                                </a>
+                                <a th:href="@{/sections/{id}(id=${section.id})}"
+                                   class="font-medium text-gray-900 transition-colors hover:text-primary-600"
+                                   th:text="${section.name}"></a>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="max-w-xs truncate text-sm text-gray-500"
-                                     th:text="${section.description} ?: '—'"></div>
+                                <div class="max-w-xs truncate">
+                                    <span th:if="${section.description != null}" class="text-sm text-gray-500"
+                                          th:text="${section.description}"></span>
+                                    <!--/* El th:unless va en un envoltorio y NO junto al
+                                           th:replace: juntos, la condicion no se evalua. */-->
+                                    <th:block th:unless="${section.description != null}">
+                                        <span th:replace="~{fragments/table :: muted(#{empty.description})}"></span>
+                                    </th:block>
+                                </div>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4 text-center">
-                                <span class="text-sm text-gray-700" th:text="${section.displayOrder} ?: '—'"></span>
+                            <td class="whitespace-nowrap px-6 py-4 text-right">
+                                <span th:if="${section.displayOrder != null}" class="text-sm text-gray-700"
+                                      th:text="${section.displayOrder}"></span>
+                                <th:block th:unless="${section.displayOrder != null}">
+                                    <span th:replace="~{fragments/table :: muted(#{empty.order})}"></span>
+                                </th:block>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-center">
                                 <span th:if="${section.visible}"
@@ -65,7 +76,8 @@
                                    th:title="'Ver productos de ' + ${section.name}"
                                    class="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1">
                                     <svg th:replace="~{fragments/icons :: icon('box', 'w-4 h-4')}"></svg>
-                                    <span>Ver</span>
+                                    <span th:text="${productCounts[section.id]} ?: 0">0</span>
+                                    <span class="sr-only" th:text="'productos en ' + ${section.name}"></span>
                                 </a>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-right text-sm">

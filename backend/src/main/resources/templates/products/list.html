@@ -87,10 +87,10 @@
                     <caption class="sr-only">Listado de productos</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th th:replace="~{fragments/table :: th('Producto')}"></th>
-                            <th th:replace="~{fragments/table :: th('Categoría')}"></th>
-                            <th th:replace="~{fragments/table :: th('Precio')}"></th>
-                            <th th:replace="~{fragments/table :: th('Actualización')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Producto')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Categoría')}"></th>
+                            <th th:replace="~{fragments/table :: thRight('Precio')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Actualización')}"></th>
                             <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
                     </thead>
@@ -125,7 +125,7 @@
                                     <span th:replace="~{fragments/table :: muted(#{empty.category})}"></span>
                                 </th:block>
                             </td>
-                            <td class="whitespace-nowrap px-6 py-4">
+                            <td class="whitespace-nowrap px-6 py-4 text-right">
                                 <span th:if="${product.basePrice != null}" class="text-sm font-semibold text-gray-900"
                                       th:text="${@money.format(product.basePrice)}"></span>
                                 <th:block th:if="${product.basePrice == null}">
