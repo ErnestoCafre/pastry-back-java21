@@ -54,7 +54,7 @@
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Orden de visualización</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900"
-                            th:text="${section.displayOrder} ?: 'Sin orden'"></dd>
+                            th:text="${section.displayOrder} ?: #{empty.order}"></dd>
                     </div>
                     <div class="rounded-lg bg-gray-50 p-4">
                         <dt class="text-sm font-medium text-gray-500">Fecha de creación</dt>

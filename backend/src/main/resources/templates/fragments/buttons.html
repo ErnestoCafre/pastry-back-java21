@@ -29,8 +29,8 @@
       - habilita servir una CSP sin 'unsafe-inline'. Ya no queda JavaScript
         embebido en ninguna plantilla: todo el comportamiento vive en
         archivos de static/js/ enganchados por atributos data-*, y
-        TemplateInvariantsTest falla si vuelve a aparecer uno. Falta el
-        último paso, configurar la cabecera: hoy el panel no envía ninguna.
+        TemplateInvariantsTest falla si vuelve a aparecer uno. La cabecera
+        ya se sirve: ADMIN_CSP en SecurityConfig.
 
   Accesibilidad:
     - Los botones de solo icono llevan title Y <span class="sr-only">.

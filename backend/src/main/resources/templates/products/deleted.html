@@ -21,10 +21,10 @@
                     <caption class="sr-only">Productos en la papelera</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th th:replace="~{fragments/table :: th('Nombre')}"></th>
-                            <th th:replace="~{fragments/table :: th('Categoría')}"></th>
-                            <th th:replace="~{fragments/table :: th('Eliminado')}"></th>
-                            <th th:replace="~{fragments/table :: th('Eliminado por')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Producto')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Categoría')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Eliminado')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Eliminado por')}"></th>
                             <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
                     </thead>
@@ -44,7 +44,7 @@
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
                                 th:text="${@dates.format(product.deletedAt)}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
-                                th:text="${product.deletedBy?.fullName} ?: 'Desconocido'"></td>
+                                th:text="${product.deletedBy?.fullName} ?: #{empty.user}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <form th:replace="~{fragments/buttons :: pill(

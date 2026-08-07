@@ -39,6 +39,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -114,6 +116,25 @@ class ListRenderingTest {
         return new PageImpl<>(List.of(item), PageRequest.of(0, 50), 1);
     }
 
+    /**
+     * Los títulos de columna, en orden. Los dibuja fragments/table :: th, así
+     * que el markup renderizado es siempre {@code <th scope="col" class="…">Título</th>}.
+     */
+    private static List<String> headers(String html) {
+        return Pattern.compile("<th [^>]*>([^<]*)</th>").matcher(html).results()
+                .map(m -> m.group(1))
+                .toList();
+    }
+
+    /** Las celdas de la primera fila de datos, en orden. */
+    private static int bodyCellCount(String html) {
+        int body = html.indexOf("<tbody");
+        int end = html.indexOf("</tr>", body);
+        return (int) Pattern.compile("<td[\\s>]")
+                .matcher(html.substring(body, end < 0 ? html.length() : end))
+                .results().count();
+    }
+
     /** Las tres acciones que ahora ofrece toda fila del panel. */
     private void assertRowActions(String html, String base, long id) {
         assertThat(html).contains("href=\"" + base + "/" + id + "\"");
@@ -121,6 +142,62 @@ class ListRenderingTest {
         assertThat(html).contains("action=\"" + base + "/" + id + "/delete\"");
         // El borrado confirma por el listener delegado, no por onsubmit inline.
         assertThat(html).contains("data-confirm=");
+    }
+
+    /**
+     * El encabezado tiene tantas celdas como la fila de datos.
+     *
+     * <p>Suena tautológico y no lo era. El fragment del encabezado por defecto
+     * se llamaba {@code th}, y el selector de Thymeleaf —{@code ~{archivo :: nombre}}—
+     * es un <b>markup selector</b>: un nombre suelto matchea un
+     * {@code th:fragment} <i>o</i> un elemento con ese nombre de etiqueta.
+     * {@code fragments/table.html} define sus tres encabezados sobre elementos
+     * {@code <th>}, así que {@code :: th('Nombre')} seleccionaba los tres y
+     * dibujaba tres celdas —izquierda, centro y derecha— con la misma etiqueta.
+     *
+     * <p>Medido sobre {@code /ingredients}: 13 celdas de encabezado para una
+     * tabla de 5 columnas. Los títulos no caían sobre su columna en ninguno de
+     * los 12 listados del panel.
+     *
+     * <p>Nada lo detectaba. Los invariantes estáticos leen el archivo, donde
+     * hay exactamente un {@code <th>} por columna; el defecto aparece recién al
+     * resolver el fragment, o sea al renderizar. De ahí que este test viva acá
+     * y no en {@code TemplateInvariantsTest}.
+     */
+    @Nested
+    @DisplayName("Encabezados")
+    class Headers {
+        @Test
+        @DisplayName("cada listado dibuja tantos encabezados como celdas por fila")
+        void headerCountMatchesBodyCellCount() throws Exception {
+            Category category = new Category();
+            category.setId(3L);
+            category.setName("Tortas");
+            when(categoryService.findAllActive(any(Pageable.class))).thenReturn(onePage(category));
+
+            Ingredient ingredient = new Ingredient();
+            ingredient.setId(5L);
+            ingredient.setName("Harina 000");
+            ingredient.setUnitCost(new BigDecimal("13132.00"));
+            ingredient.setUnitOfMeasure(UnitOfMeasure.KILOGRAMO);
+            when(ingredientService.findAllActive(any(Pageable.class))).thenReturn(onePage(ingredient));
+
+            StorefrontSection section = new StorefrontSection();
+            section.setId(2L);
+            section.setName("Más vendidos");
+            section.setDisplayOrder(1);
+            section.setVisible(true);
+            when(sectionService.findAllActive(any(Pageable.class))).thenReturn(onePage(section));
+
+            when(userService.findAll(any(Pageable.class))).thenReturn(onePage(admin));
+
+            for (String url : List.of("/categories", "/ingredients", "/sections", "/users")) {
+                String html = render(url);
+                assertThat(headers(html))
+                        .as("encabezados de " + url)
+                        .hasSize(bodyCellCount(html));
+            }
+        }
     }
 
     @Nested
@@ -138,6 +215,7 @@ class ListRenderingTest {
         @DisplayName("fila con Ver, Editar y Borrar, y enlace al sub-recurso")
         void listRenders() throws Exception {
             when(categoryService.findAllActive(any(Pageable.class))).thenReturn(onePage(category()));
+            when(categoryService.countProductsByCategories(any())).thenReturn(Map.of(3L, 7L));
 
             String html = render("/categories");
 
@@ -146,6 +224,28 @@ class ListRenderingTest {
             // El sub-recurso es una columna de datos, no una acción de fila.
             assertThat(html).contains("href=\"/categories/3/products\"");
             assertThat(html).contains("scope=\"col\"");
+
+            // La columna "Productos" muestra el contador, no la etiqueta "Ver
+            // productos": las tres vistas que la tienen decían cosas distintas.
+            // Se afirma sobre el texto visible y no sobre "Ver productos" a
+            // secas, porque el title del enlace sigue diciéndolo —y debe—.
+            assertThat(html).contains(">7<").doesNotContain("<span>Ver productos</span>");
+            // Y el enlace se anuncia con algo más que el número.
+            assertThat(html).contains("productos en Tortas");
+        }
+
+        /**
+         * Una categoría sin productos no aparece en el resultado del GROUP BY,
+         * así que el mapa no la trae. La celda tiene que decir 0, no quedar
+         * vacía ni romper.
+         */
+        @Test
+        @DisplayName("una categoría sin productos muestra 0, no una celda vacía")
+        void countMissingFromTheMapRendersZero() throws Exception {
+            when(categoryService.findAllActive(any(Pageable.class))).thenReturn(onePage(category()));
+            when(categoryService.countProductsByCategories(any())).thenReturn(Map.of());
+
+            assertThat(render("/categories")).contains(">0<");
         }
 
         @Test
@@ -181,6 +281,78 @@ class ListRenderingTest {
             // El importe sigue pasando por el formateador tras la migración.
             assertThat(html).contains("$13.132,00");
         }
+
+        /**
+         * La unidad se leía distinto según la vista: el listado pedía
+         * {@code displayName} ("Kilogramo") y la papelera {@code toString()},
+         * que le agrega la abreviatura ("Kilogramo (kg)"). Misma insignia azul,
+         * misma columna, dos textos.
+         *
+         * <p>Nada podía detectarlo: las dos expresiones son válidas y las dos
+         * páginas abrían. Por eso el test renderiza las dos y las compara, en
+         * vez de afirmar un literal en cada una por separado.
+         */
+        @Test
+        @DisplayName("la unidad se lee igual en el listado y en la papelera")
+        void unitReadsTheSameInListAndTrash() throws Exception {
+            Ingredient harina = new Ingredient();
+            harina.setId(5L);
+            harina.setName("Harina 000");
+            harina.setUnitCost(new BigDecimal("13132.00"));
+            harina.setUnitOfMeasure(UnitOfMeasure.KILOGRAMO);
+            when(ingredientService.findAllActive(any(Pageable.class))).thenReturn(onePage(harina));
+
+            assertThat(render("/ingredients"))
+                    .contains(UnitOfMeasure.KILOGRAMO.getDisplayName())
+                    .doesNotContain(UnitOfMeasure.KILOGRAMO.toString());
+
+            harina.setDeletedAt(LocalDateTime.of(2026, 3, 14, 10, 30));
+            when(ingredientService.findDeleted(any(Pageable.class))).thenReturn(onePage(harina));
+
+            assertThat(render("/ingredients/deleted"))
+                    .contains(UnitOfMeasure.KILOGRAMO.getDisplayName())
+                    .doesNotContain(UnitOfMeasure.KILOGRAMO.toString());
+        }
+
+        /**
+         * La papelera conserva el prefijo de columnas del listado activo —mismo
+         * orden y mismos títulos— y recién después agrega los metadatos del
+         * borrado. Es la regla que cumplían cuatro de las cinco papeleras sin
+         * estar escrita en ningún lado.
+         *
+         * <p>Esta arrancaba Nombre, Unidad, Costo, con la descripción metida
+         * debajo del nombre: las mismas columnas en otro lugar según desde qué
+         * pantalla llegaras. Nada podía detectarlo, porque las dos tablas son
+         * HTML válido y las dos abren.
+         */
+        @Test
+        @DisplayName("la papelera conserva el orden de columnas del listado")
+        void trashKeepsTheColumnOrderOfTheList() throws Exception {
+            Ingredient harina = new Ingredient();
+            harina.setId(5L);
+            harina.setName("Harina 000");
+            harina.setUnitCost(new BigDecimal("13132.00"));
+            harina.setUnitOfMeasure(UnitOfMeasure.KILOGRAMO);
+            when(ingredientService.findAllActive(any(Pageable.class))).thenReturn(onePage(harina));
+
+            List<String> list = headers(render("/ingredients"));
+
+            harina.setDeletedAt(LocalDateTime.of(2026, 3, 14, 10, 30));
+            when(ingredientService.findDeleted(any(Pageable.class))).thenReturn(onePage(harina));
+
+            List<String> trash = headers(render("/ingredients/deleted"));
+
+            assertThat(list).containsExactly(
+                    "Nombre", "Descripción", "Costo Unitario", "Unidad", "Acciones");
+            assertThat(trash).containsExactly(
+                    "Nombre", "Descripción", "Costo Unitario", "Unidad",
+                    "Eliminado", "Eliminado por", "Acciones");
+
+            // La regla, dicha una vez: la papelera empieza donde empieza el listado.
+            assertThat(trash.subList(0, list.size() - 1))
+                    .as("el prefijo de identidad tiene que ser el mismo en las dos vistas")
+                    .isEqualTo(list.subList(0, list.size() - 1));
+        }
     }
 
     @Nested
@@ -195,12 +367,16 @@ class ListRenderingTest {
             section.setDisplayOrder(1);
             section.setVisible(true);
             when(sectionService.findAllActive(any(Pageable.class))).thenReturn(onePage(section));
+            when(sectionService.countProductsBySections(any())).thenReturn(Map.of(2L, 4L));
 
             String html = render("/sections");
 
             assertThat(html).contains("Más vendidos");
             assertRowActions(html, "/sections", 2L);
             assertThat(html).contains("href=\"/sections/2/products\"");
+            // Misma columna "Productos" que categorías y tags: el contador.
+            // Acá la etiqueta decía "Ver" a secas.
+            assertThat(html).contains(">4<").contains("productos en Más vendidos");
             // El encabezado decía "Descripcion" y la insignia "Si", sin tilde.
             assertThat(html).contains("Descripción").doesNotContain("Descripcion");
             assertThat(html).contains(">Sí<");
@@ -388,6 +564,11 @@ class ListRenderingTest {
             assertThat(html).contains("action=\"/products/8/hard-delete\"");
             // El producto no tiene categoría: antes salía un guion suelto.
             assertThat(html).contains("Sin categoría");
+            // La columna del nombre se titulaba "Nombre" acá y "Producto" en el
+            // listado activo: la misma columna con dos nombres según la vista.
+            // Se afirma sobre la celda cerrada porque "Producto" suelto aparece
+            // igual en el sidebar y el test pasaría sin el arreglo.
+            assertThat(html).contains(">Producto</th>").doesNotContain(">Nombre</th>");
         }
 
         @Test
@@ -403,6 +584,58 @@ class ListRenderingTest {
             assertThat(html).doesNotContain("Crear sección");
             assertThat(html).doesNotContain("Limpiar filtros");
             assertThat(html).contains("Descripción").doesNotContain("Descripcion");
+        }
+
+        /**
+         * "Desconocido" estaba escrito como literal en las cinco papeleras, que
+         * es justo lo que el bloque de ausencias de messages.properties existe
+         * para evitar: cinco literales son cinco redacciones que se separan.
+         *
+         * <p>El {@code doesNotContain("??")} no es decorativo. Una clave que no
+         * existe <b>no falla</b>: Thymeleaf dibuja {@code ??empty.user_es_AR??}
+         * y la página se sirve con un 200. Sin esa aserción, este test seguiría
+         * verde con la clave mal escrita.
+         */
+        @Test
+        @DisplayName("quién borró sale de messages.properties, no de un literal")
+        void whoDeletedComesFromMessages() throws Exception {
+            LocalDateTime deletedOn = LocalDateTime.of(2026, 3, 14, 10, 30);
+
+            Category category = new Category();
+            category.setId(4L);
+            category.setName("Descontinuadas");
+            category.setDeletedAt(deletedOn);
+            when(categoryService.findDeleted(any(Pageable.class))).thenReturn(onePage(category));
+
+            Ingredient ingredient = new Ingredient();
+            ingredient.setId(5L);
+            ingredient.setName("Harina 000");
+            ingredient.setUnitCost(new BigDecimal("13132.00"));
+            ingredient.setUnitOfMeasure(UnitOfMeasure.KILOGRAMO);
+            ingredient.setDeletedAt(deletedOn);
+            when(ingredientService.findDeleted(any(Pageable.class))).thenReturn(onePage(ingredient));
+
+            StorefrontSection section = new StorefrontSection();
+            section.setId(2L);
+            section.setName("Más vendidos");
+            section.setDeletedAt(deletedOn);
+            when(sectionService.findDeleted(any(Pageable.class))).thenReturn(onePage(section));
+
+            com.malva_pastry_shop.backend.domain.inventory.Product product =
+                    new com.malva_pastry_shop.backend.domain.inventory.Product();
+            product.setId(8L);
+            product.setName("Torta descontinuada");
+            product.setDeletedAt(deletedOn);
+            when(productService.findDeleted(any(Pageable.class))).thenReturn(onePage(product));
+
+            // tags/deleted usa la misma clave y lo cubre FragmentRenderingTest:
+            // TagController no entra en el slice de este test.
+            for (String url : List.of("/categories/deleted", "/ingredients/deleted",
+                    "/sections/deleted", "/products/deleted")) {
+                assertThat(render(url)).as(url)
+                        .contains("Desconocido")
+                        .doesNotContain("??");
+            }
         }
     }
 }
