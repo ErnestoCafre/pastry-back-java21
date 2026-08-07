@@ -1,7 +1,9 @@
 package com.malva_pastry_shop.backend.service.inventory;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ import com.malva_pastry_shop.backend.domain.storefront.ProductTag;
 import com.malva_pastry_shop.backend.domain.storefront.Tag;
 import com.malva_pastry_shop.backend.dto.request.ProductRequest;
 import com.malva_pastry_shop.backend.repository.CategoryRepository;
+import com.malva_pastry_shop.backend.repository.IdCount;
 import com.malva_pastry_shop.backend.repository.IngredientRepository;
 import com.malva_pastry_shop.backend.repository.ProductIngredientRepository;
 import com.malva_pastry_shop.backend.repository.ProductRepository;
@@ -336,6 +339,28 @@ public class ProductService {
                 .map(ProductTag::getProduct)
                 .filter(product -> !product.isDeleted())
                 .count();
+    }
+
+    /**
+     * Lo mismo para varios tags a la vez, en una sola consulta.
+     *
+     * <p>Existe porque el listado de tags llamaba a {@link #countProductsByTag}
+     * dentro del bucle que arma el modelo: 50 filas eran 50 consultas, y cada
+     * una traía los {@code ProductTag} del tag con {@code product} y
+     * {@code product.category} en el EntityGraph solo para contarlos en
+     * memoria. Acá el conteo lo hace la base.
+     *
+     * <p>Un tag sin productos <b>no aparece</b> en el mapa: un {@code GROUP BY}
+     * no devuelve filas para los grupos vacíos. La plantilla lo resuelve con
+     * {@code ?: 0}, que es lo que ya hacía.
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countProductsByTags(Collection<Long> tagIds) {
+        if (tagIds.isEmpty()) {
+            return Map.of();
+        }
+        return productTagRepository.countActiveProductsByTagIds(tagIds).stream()
+                .collect(Collectors.toMap(IdCount::getId, IdCount::getTotal));
     }
 
     /**

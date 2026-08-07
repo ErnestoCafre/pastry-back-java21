@@ -1,7 +1,9 @@
 package com.malva_pastry_shop.backend.service.storefront;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ import com.malva_pastry_shop.backend.domain.storefront.StorefrontSectionProduct;
 import com.malva_pastry_shop.backend.dto.request.StorefrontSectionRequest;
 import com.malva_pastry_shop.backend.dto.response.api.ProductApiDTO;
 import com.malva_pastry_shop.backend.dto.response.api.StorefrontSectionApiDTO;
+import com.malva_pastry_shop.backend.repository.IdCount;
 import com.malva_pastry_shop.backend.repository.ProductRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionProductRepository;
 import com.malva_pastry_shop.backend.repository.StorefrontSectionRepository;
@@ -282,6 +285,22 @@ public class StorefrontSectionService {
 
     public long countProducts(Long sectionId) {
         return sectionProductRepository.countByStorefrontSectionIdAndProductDeletedAtIsNull(sectionId);
+    }
+
+    /**
+     * Lo mismo para varias secciones a la vez, en una sola consulta.
+     *
+     * <p>Una sección sin productos <b>no aparece</b> en el mapa: un
+     * {@code GROUP BY} no devuelve filas para los grupos vacíos. La plantilla
+     * trata la ausencia como cero.
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countProductsBySections(Collection<Long> sectionIds) {
+        if (sectionIds.isEmpty()) {
+            return Map.of();
+        }
+        return sectionProductRepository.countActiveProductsBySectionIds(sectionIds).stream()
+                .collect(Collectors.toMap(IdCount::getId, IdCount::getTotal));
     }
 
     // ========== API pública ==========

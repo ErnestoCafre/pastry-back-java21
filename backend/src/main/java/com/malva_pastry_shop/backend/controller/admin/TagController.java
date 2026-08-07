@@ -1,8 +1,5 @@
 package com.malva_pastry_shop.backend.controller.admin;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,11 +59,12 @@ public class TagController {
 
         model.addAttribute("tags", tags);
 
-        Map<Long, Long> productCounts = new HashMap<>();
-        for (Tag tag : tags.getContent()) {
-            productCounts.put(tag.getId(), productService.countProductsByTag(tag.getId()));
-        }
-        model.addAttribute("productCounts", productCounts);
+        // Un solo GROUP BY para toda la página. Antes era un bucle que
+        // preguntaba por cada tag —51 consultas con size=50—, y cada consulta
+        // traía los ProductTag con product y product.category en el EntityGraph
+        // para contarlos en memoria.
+        model.addAttribute("productCounts", productService.countProductsByTags(
+                tags.getContent().stream().map(Tag::getId).toList()));
 
         model.addAttribute("pageTitle", "Tags");
         return "tags/list";
