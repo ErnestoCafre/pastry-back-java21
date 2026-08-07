@@ -7,9 +7,13 @@
   fila ofrecía solo "Ver", así que editar una categoría obligaba a entrar al
   detalle aunque la ruta /categories/{id}/edit existiera desde siempre.
 
-  "Ver productos" NO es una acción de fila: es la columna de datos que lleva al
-  sub-recurso, igual que el contador de tags/list. Las acciones quedan para lo
-  que se le hace a la entidad.
+  "Productos" NO es una acción de fila: es la columna de datos que lleva al
+  sub-recurso. Las acciones quedan para lo que se le hace a la entidad.
+
+  La celda muestra el contador, no la etiqueta "Ver productos" que tenía antes.
+  Las tres vistas con esta columna decían cosas distintas —tags el número,
+  categorías "Ver productos", secciones "Ver"— con la misma píldora y el mismo
+  encabezado. El número es lo único de los tres que informa algo: cuántos hay.
 */-->
 
 <head>
@@ -31,8 +35,8 @@
                     <caption class="sr-only">Listado de categorías</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th th:replace="~{fragments/table :: th('Nombre')}"></th>
-                            <th th:replace="~{fragments/table :: th('Descripción')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Nombre')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Descripción')}"></th>
                             <th th:replace="~{fragments/table :: thCenter('Productos')}"></th>
                             <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
@@ -45,15 +49,23 @@
                                    th:text="${category.name}"></a>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="max-w-xs truncate text-sm text-gray-500"
-                                     th:text="${category.description} ?: '—'"></div>
+                                <div class="max-w-xs truncate">
+                                    <span th:if="${category.description != null}" class="text-sm text-gray-500"
+                                          th:text="${category.description}"></span>
+                                    <!--/* El th:unless va en un envoltorio y NO junto al
+                                           th:replace: juntos, la condicion no se evalua. */-->
+                                    <th:block th:unless="${category.description != null}">
+                                        <span th:replace="~{fragments/table :: muted(#{empty.description})}"></span>
+                                    </th:block>
+                                </div>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-center">
                                 <a th:href="@{/categories/{id}/products(id=${category.id})}"
                                    th:title="'Ver productos de ' + ${category.name}"
                                    class="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1">
                                     <svg th:replace="~{fragments/icons :: icon('box', 'w-4 h-4')}"></svg>
-                                    <span>Ver productos</span>
+                                    <span th:text="${productCounts[category.id]} ?: 0">0</span>
+                                    <span class="sr-only" th:text="'productos en ' + ${category.name}"></span>
                                 </a>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-right text-sm">

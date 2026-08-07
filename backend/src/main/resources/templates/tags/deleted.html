@@ -19,29 +19,33 @@
                     <caption class="sr-only">Tags en la papelera</caption>
                     <thead class="bg-gray-50">
                         <tr>
-                            <th th:replace="~{fragments/table :: th('Nombre')}"></th>
-                            <th th:replace="~{fragments/table :: th('Descripción')}"></th>
-                            <th th:replace="~{fragments/table :: th('Eliminado')}"></th>
-                            <th th:replace="~{fragments/table :: th('Eliminado por')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Nombre')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Descripción')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Eliminado')}"></th>
+                            <th th:replace="~{fragments/table :: thLeft('Eliminado por')}"></th>
                             <th th:replace="~{fragments/table :: thRight('Acciones')}"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
                         <tr th:each="tag : ${tags.content}" class="hover:bg-gray-50">
                             <td class="whitespace-nowrap px-6 py-4">
-                                <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
-                                    <svg th:replace="~{fragments/icons :: icon('tag', 'w-4 h-4')}"></svg>
-                                    <span th:text="${tag.name}"></span>
-                                </span>
+                                <div class="font-medium text-gray-600" th:text="${tag.name}"></div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="max-w-xs truncate text-sm text-gray-500"
-                                     th:text="${tag.description} ?: '—'"></div>
+                                <div class="max-w-xs truncate">
+                                    <span th:if="${tag.description != null}" class="text-sm text-gray-500"
+                                          th:text="${tag.description}"></span>
+                                    <!--/* El th:unless va en un envoltorio y NO junto al
+                                           th:replace: juntos, la condicion no se evalua. */-->
+                                    <th:block th:unless="${tag.description != null}">
+                                        <span th:replace="~{fragments/table :: muted(#{empty.description})}"></span>
+                                    </th:block>
+                                </div>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
                                 th:text="${@dates.format(tag.deletedAt)}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500"
-                                th:text="${tag.deletedBy?.fullName} ?: 'Desconocido'"></td>
+                                th:text="${tag.deletedBy?.fullName} ?: #{empty.user}"></td>
                             <td class="whitespace-nowrap px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <!-- Restaurar no confirma: es reversible. -->
