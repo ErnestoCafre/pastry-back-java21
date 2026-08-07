@@ -616,7 +616,7 @@ class ListRenderingTest {
     }
 
     /**
-     * Las cuatro papeleras comparten patrón: volver, restaurar, eliminar
+     * Las cinco papeleras comparten patrón: volver, restaurar, eliminar
      * definitivo y estado vacío sin CTA. Antes cada una redactaba su propio
      * texto de confirmación —había cinco variantes del mismo aviso, algunas
      * sin tildes—, y ninguna asociaba el aviso al hecho de ser irreversible.
