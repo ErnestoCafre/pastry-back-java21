@@ -61,10 +61,12 @@ function Invoke-Ping {
             return $true
         } catch {
             $sw.Stop()
-            # Un 3xx o incluso un 4xx significa que el servicio esta despierto: eso alcanza.
+            # Mismo criterio que keep-alive.sh: 2xx y 3xx cuentan como despierto.
+            # Un 4xx en /login significa que la ruta se rompio, no que el ping
+            # sirvio: se reporta como fallo para que se note.
             $code = $null
             if ($_.Exception.Response) { $code = [int]$_.Exception.Response.StatusCode }
-            if ($code -and $code -lt 500) {
+            if ($code -and $code -lt 400) {
                 Write-Log ("OK  HTTP {0} en {1:N1}s  (servicio despierto)" -f $code, $sw.Elapsed.TotalSeconds)
                 return $true
             }

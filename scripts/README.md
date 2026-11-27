@@ -10,17 +10,19 @@ visitante con el proyecto.
 
 ## Las restricciones que condicionan la solucion
 
+Verificadas contra [render.com/docs/free](https://render.com/docs/free) el 27/11/2026.
+
 | Limite del plan Free | Valor | Por que importa aca |
 |---|---|---|
 | Spin-down por inactividad | 15 min | El ping debe ser mas frecuente que eso (usamos 10 min) |
 | Instance-hours | **750/mes por workspace** | 24/7 = **744 h** en un mes de 31 dias. Solo 6 h de margen, y el cupo es **compartido con todos los servicios Free del workspace**. Agotarlo suspende todo hasta el 1ro del mes siguiente |
-| Postgres Free | **expira 30 dias despues de crearse** | El backend no arranca sin base. Ningun keep-alive salva esto |
+| Postgres Free | **expira 30 dias despues de crearse**, con 14 dias de gracia para pasarlo a pago; despues Render borra la base | El backend no arranca sin base. Ningun keep-alive salva esto |
 | Trafico anomalo | Render puede suspender un servicio Free que genere "un volumen de trafico inusualmente alto" | Un ping cada 10 min es volumen trivial; no hace falta ir mas agresivo |
 
 **La consecuencia de diseno:** pinguear 24/7 es tecnicamente posible pero deja el cupo al
-borde. Por eso los scripts usan una **ventana horaria** (por defecto 09:00-01:00 hora
-argentina, ~496 h/mes) en vez de correr todo el dia. El servicio duerme de madrugada,
-que es cuando nadie mira la demo.
+borde. Por eso el ping se limita a una **ventana horaria** (09:00-01:00 hora argentina,
+~496 h/mes) en vez de correr todo el dia. El servicio duerme de madrugada, que es cuando
+nadie mira la demo.
 
 ## Por que se pinguea `/login`
 
@@ -31,29 +33,44 @@ haria queries innecesarias cada 10 minutos.
 
 ## Los tres componentes
 
-### 1. `.github/workflows/keep-alive.yml` — la solucion real (24/7, sin tu PC)
+### 1. Monitor externo (cron-job.org) — el keep-alive real
 
-Cron cada 10 min dentro de la ventana. Ya esta listo; solo hay que commitearlo y pushearlo.
+Es lo unico que corre solo y a horario. Vive fuera del repo, asi que hay que crearlo a mano
+en [cron-job.org](https://cron-job.org) (gratis, intervalo minimo de 1 minuto):
 
-Dos advertencias sobre el cron de GitHub Actions:
-- **No es puntual.** Bajo carga, GitHub retrasa los schedules varios minutos. Con intervalo
-  de 10 min y corte de 15, un retraso ocasional puede dejar dormir el servicio. No es grave
-  (solo significa un cold start suelto), pero si quieres puntualidad real usa un monitor
-  externo como cron-job.org o UptimeRobot apuntando a la misma URL cada 5-10 min.
-- **GitHub desactiva los workflows programados tras 60 dias sin commits en el repo.** Si el
-  repo queda quieto, hay que reactivarlo a mano desde la pestaña Actions.
+| Campo | Valor |
+|---|---|
+| URL | `https://malva-pastry-backend.onrender.com/login` |
+| Schedule | Custom: minutos `0,10,20,30,40,50`; horas `9-23` y `0` |
+| Time zone | `America/Argentina/Buenos_Aires` |
+| Notificaciones | Email al fallar y al recuperarse |
 
-Consumo de runner: **GitHub factura cada job redondeando hacia arriba al minuto**, asi que
-un ping de 30s cuenta como 1 minuto. Son ~96 runs/dia = ~96 min/dia ≈ **2976 min/mes**.
+Las horas `9-23` y `0` cubren 09:00-00:59, la misma ventana que `KEEPALIVE_START=9` /
+`KEEPALIVE_END=1` de los scripts. **No lo dejes en "cada 10 minutos" a secas**: eso
+pinguea 24/7 y consume las 744 h.
 
-- **Repo publico:** gratis e ilimitado. Esta es la opcion correcta.
-- **Repo privado:** 2976 min **supera los 2000 min/mes** del plan free de Actions. No uses
-  este workflow: usa el monitor externo de la opcion 3.
+cron-job.org corta cada request a los **30 segundos**. Un cold start tarda ~60s, asi que el
+primer ping del dia (09:00) puede figurar como fallido aunque haya despertado el servicio.
+El de las 09:10 ya lo encuentra arriba. Un fallo aislado a las 09:00 es esperable; varios
+seguidos significan que el servicio no levanta.
 
-La ventana del cron esta en **UTC** y la del script en **hora argentina**. Si cambias una,
-cambia la otra: `09:00-01:00 ART == 12:00-04:00 UTC`.
+### 2. `.github/workflows/keep-alive.yml` — despertar manual
 
-### 2. `keep-alive.sh` / `keep-alive.ps1` — uso local o en cualquier host
+Solo `workflow_dispatch`: Actions → *Wake Render (manual)* → *Run workflow* antes de una
+demo. Usa `keep-alive.sh --force`, que espera hasta 90s por intento, a diferencia de
+los 30s del monitor.
+
+Antes este workflow corria por cron cada 10 min. Se saco porque no funcionaba. Medido
+sobre los 934 runs del 17/07/2026 al 10/10/2026:
+
+- **GitHub demora los schedules bajo carga**, sobre todo al comienzo de cada hora (lo dice
+  su propia documentacion). Mediana de 63 min entre runs y p90 de 6 h, contra los 10 min
+  configurados. Solo 10 de 933 intervalos quedaron por debajo de los 15 min: casi cada
+  ping encontraba el servicio dormido.
+- **En un repo publico, GitHub desactiva los schedules tras 60 dias sin actividad.** Paso el
+  10/10/2026, a 60 dias del ultimo commit en `main`, y nada aviso.
+
+### 3. `keep-alive.sh` / `keep-alive.ps1` — uso local o en cualquier host
 
 ```bash
 ./keep-alive.sh              # un ping, respeta la ventana
@@ -67,21 +84,18 @@ cambia la otra: `09:00-01:00 ART == 12:00-04:00 UTC`.
 .\keep-alive.ps1 -Loop       # util mientras estas mostrando el proyecto a alguien
 ```
 
-Todo es configurable por variables de entorno (`KEEPALIVE_URL`, `KEEPALIVE_START`,
-`KEEPALIVE_END`, `KEEPALIVE_TZ`, `KEEPALIVE_INTERVAL`) o por parametros en PowerShell.
+Los dos scripts cuentan 2xx y 3xx como servicio despierto y cualquier otra cosa como
+fallo. Un 4xx en `/login` significa que la ruta se rompio, no que el ping sirvio.
 
-### 3. Alternativa sin dependencias: monitor externo
-
-cron-job.org (gratis, intervalo de 1 min, puntual) o UptimeRobot (5 min) apuntando a
-`https://malva-pastry-backend.onrender.com/login`. Es la opcion mas confiable de las tres,
-pero vive fuera del repo. Ojo: estos monitores pinguean 24/7 por defecto — hay que
-configurarles la ventana horaria o te comes las 744 h.
+Todo es configurable por variables de entorno en bash (`KEEPALIVE_URL`, `KEEPALIVE_START`,
+`KEEPALIVE_END`, `KEEPALIVE_TZ`, `KEEPALIVE_INTERVAL`) y por parametros en PowerShell
+(solo `KEEPALIVE_URL` se lee tambien del entorno).
 
 ## Lo que un keep-alive NO resuelve
 
-Al momento de escribir esto (16/07/2026) el servicio desplegado **no responde**: los
-requests cuelgan varios minutos y terminan en `HTTP 503`, muy lejos del cold start normal
-de ~60s. Eso no es spin-down, es un servicio que no levanta. El sospechoso principal es la
-**expiracion de los 30 dias del Postgres Free** (sin base, Flyway falla, el health check de
-`/login` nunca pasa y Render devuelve 503). Hay que revisarlo en el dashboard de Render
-antes de que el keep-alive tenga algo que mantener despierto.
+Si el servicio no levanta, ningun ping lo arregla. Entre el 03/09/2026 y el 18/09/2026
+fallaron todos los runs del cron: el servicio estuvo caido dos semanas. Ese patron (requests
+que cuelgan minutos y terminan en `HTTP 503`, muy lejos del cold start de ~60s) no es
+spin-down. El sospechoso principal es la **expiracion de los 30 dias del Postgres Free**: sin
+base, Flyway falla, el health check de `/login` nunca pasa y Render devuelve 503. Se confirma
+en el dashboard de Render, y hay 14 dias para actuar antes de que borre la base.
